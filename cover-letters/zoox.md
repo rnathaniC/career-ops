@@ -20,4 +20,3 @@ Thank you for your consideration. Looking to hear from you soon.
 
 Sincerely,
 Rahil Nathani, PMP & A-CSM
-214-662-0758

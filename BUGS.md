@@ -22,6 +22,9 @@ this file tracks **open** work.
 | B8 | P1 | New | 2026-06-08 | Kanban HTML missing 7 functions lost to r7 truncation (`getGoldBadge`, `calcGoldScore`, `isHappyPath`, `isReferralPath`, `cardSortTier`, `buildReferralMessage`, `autoApplyCard`) — reconstructed in K2 PR but need audit |
 | B3 | P3 | New | 2026-06-04 | `dedup-tracker.mjs` role-match overlap floor (`Math.min(2, smaller)`) still misses single-word roles with different suffixes (e.g. "Engineer" vs "Engineering") |
 | r10 | P4 | New | 2026-06-04 | `batch/tracker-additions/*.tsv` files accumulate without cleanup — no archival or max-age policy |
+| B9 | P1 | New | 2026-06-10 | `semi-auto` runs report `outcome:"unknown"` with no post-fill verification — 2 consecutive days of test fills against REAL Anthropic Greenhouse postings unconfirmed |
+| B10 | P2 | New | 2026-06-10 | `kanban-import-{date}.json` schema diverged between 2026-06-09 (object-keyed, no `columnId`) and 2026-06-10 (array, `columnId`/`createdAt`) — single Kanban Import path may not handle both |
+| r11 | P4 | New | 2026-06-10 | `data/test-*.json`, `*-smoke.json`, `data/screenshots/*` accumulate from SpeedyApply dev/test cycles — no archival policy (mirrors r10) |
 
 ---
 
@@ -130,6 +133,22 @@ this file tracks **open** work.
 **Concern:** The reconstructed logic is best-effort (especially `calcGoldScore` weights and `isHappyPath` column set). Rahil should review these functions against the original intent when convenient.
 **Next action:** When a full kanban source is available (Cowork session with the original), diff against the reconstructed versions. Add unit tests for `calcGoldScore` and `isHappyPath`.
 **Owner:** Rahil
+
+---
+
+### B9 — semi-auto outcomes left "unknown" on real Anthropic postings, 2 days running
+**Repro:** `data/semi-auto-2026-06-09.json` (ran 05:43 UTC) and `data/semi-auto-2026-06-10.json` (ran 06:32 UTC) both record a `company:"anthropic"`, `role:"Test Role"` form-fill against REAL live Greenhouse job IDs (5125083008 on 06-09, 5238460008 on 06-10), with `cl_path: null` and `outcome: "unknown"`. The 06-09 run uploaded Rahil's real `Resume.pdf` and filled 5/10 fields via the selector path (`missing_fields`: phone, city, work_auth, sponsorship, cl_upload). The 06-10 run deferred to the SpeedyApply extension and waited 5s with no result captured (per K-2026-06-09-22's new extension-autofill default).
+**Impact:** With K-2026-06-10-28's live-submission cutover now active, an unverified `outcome` on a real ATS form is exactly the failure mode that could leave a half-filled "Test Role" application sitting in a real company's pipeline under Rahil's name — or could be a false negative (form never actually reached Submit). Two days in a row with no resolution means this isn't self-healing.
+**Next action:** (1) Add a post-fill verification step to `auto-submit.mjs`/the SpeedyApply bridge — check for a confirmation URL/banner/DOM change and write a real `outcome` (`submitted` / `not-submitted` / `error`), not `"unknown"`. (2) Rahil: spot-check email + Anthropic's careers portal for any application tied to job IDs 5125083008 or 5238460008 to confirm nothing went out under "Test Role".
+**Owner:** Rahil (verification) + next implementation session (B9 fix)
+
+---
+
+### B10 — kanban-import-{date}.json schema diverged 06-09 vs 06-10
+**Repro:** `data/kanban-import-2026-06-09.json` is `{version, cards: {<id>: {state, posted_at, source, ...}}, ...}` (object-keyed, no `columnId`/`createdAt`). `data/kanban-import-2026-06-10.json` is `{seedVersion, cards: [{id, columnId:"new-hot", createdAt, ...}], ...}` (array-of-objects). Both are still pending import into `dashboard/job-pulse-kanban.html` (4 cards from 06-09 + 9 from 06-10 = 13 in the backlog).
+**Impact:** If the Kanban's `importJson()`/`mergeJobs()` only handles one shape, the 06-09 batch (3 Stripe + 1 Deepgram, all Grade A/B) will either fail to import, import without `columnId` (won't render in any lane), or break the staleness/freshness calc that depends on `createdAt`.
+**Next action:** Before Rahil clicks Import on either file, verify `importJson()` normalizes both shapes to the array-of-objects-with-columnId form (or write a tiny `normalize-kanban-import.mjs` that converts 06-09's object-keyed shape to match 06-10's before import). Low effort, prevents a confusing "cards didn't show up" support loop.
+**Owner:** next implementation session
 
 ---
 
@@ -249,6 +268,22 @@ this file tracks **open** work.
 
 ---
 
+### K-2026-06-10-30 — Personal info (phone, address) injected at runtime, not committed to CL files
+
+**What happened:** Initial CL drafts included `214-662-0758` hard-coded in the sign-off block. This is redundant (phone is in `personal-info.yml` and gets injected into form fields at runtime) and adds PII surface to git history.
+**Rule:** CL files committed to the repo must contain only name and credentials in the sign-off. Phone, email, and address come exclusively from `config/personal-info.yml` at form-fill time.
+**How to apply:** When drafting any new CL, the sign-off block is: `Sincerely,\nRahil Nathani, PMP & A-CSM`. Nothing else. The `personal-info.yml` contact fields cover the rest.
+
+---
+
+### K-2026-06-10-29 — Cleanpaste as a script, not a website round-trip
+
+**What happened:** Rahil's original workflow was to run AI-generated text through cleanpaste.site manually before pasting into ATSes. This introduces a human step that can be forgotten and requires copy-pasting through a third-party website. Added `scripts/cleanpaste.mjs` to normalize Unicode in place (curly quotes, zero-width chars, em-dash, en-dash, non-breaking space, ellipsis) as a CLI step that can be run on any file before submission.
+**Rule:** Any AI-generated text destined for an ATS form should pass through `node scripts/cleanpaste.mjs <file>` before it is considered submission-ready. Add this as a pre-submission check in any batch workflow.
+**How to apply:** `node scripts/cleanpaste.mjs cover-letters/*.md` can be run as a pre-flight before any live submission run. 9 tests in `test/cleanpaste.test.mjs` verify each transform.
+
+---
+
 ### K-2026-06-10-28 — Live submission cutover: first real-money click (Palantir + Zoox)
 
 **What happened:** First live submission run approved 2026-06-10. Palantir and Zoox selected as initial targets (both Greenhouse ATS). Three options were considered: (A) stockpile CL fallback only — rejected because no existing CL matched these companies by slug or role family; (B) premium CL from AIP with no hand-crafted backup — rejected because it skips human review; (C) hybrid — hand-crafted CLs committed to repo, lower-tier YAML enabled, two-terminal CDP workflow running. Option C chosen.
@@ -301,3 +336,11 @@ this file tracks **open** work.
 **What happened:** The K1 implementation session hit a 1M context credit wall, requiring a manual restart. The session had accumulated context from multiple PRs, investigations, and dead ends that weren't relevant to the current task.
 **Rule:** When a task is multi-PR (K1-dry-run, K1-semi-auto+live, K2-kanban, K5-slug-audit are all independent), spawn a fresh session per PR rather than continuing the same session across unrelated work. Cowork context should be scoped to the active PR, not the entire sprint.
 **Applies to:** Any implementation session that spans more than 2-3 logically independent changes.
+
+---
+
+### K-2026-06-10-29 — Submit-rate stagnation: 22 days at 0 real "Applied" entries with 9 fresh A/B cards sitting ready
+**What happened:** `applications.md` shows the last real `Applied` status on 2026-05-19 — 22 days ago — driving System Uptime to 0/100, the single largest drag on today's 57/100 score. Meanwhile today's refresh produced 9 fresh Grade A/B cards (6A + 3B) with all 9 cover letters generated, and the dry-run already classified 2 of them (DailyPay Sr TPM, TechTorch Delivery Mgr — both Ashby) as "fillable — Ashby form supported." These are the lowest-friction path to a real submission today.
+**Why it's stuck:** The 7 remaining cards need manual review (Stripe×2/Toast/Samsara URL-detector gaps, 3 Anthropic essay apps), and B9 (unverified "Test Role" outcomes on real Anthropic postings, 2 days running) is now blocking confidence in the auto-submit path generally.
+**Recommendation:** Treat the 2 Ashby cards (live-2026-06-10-05 DailyPay, live-2026-06-10-09 TechTorch) as today's priority — they're pre-validated as fillable and don't depend on B9's resolution (different ATS, ungraded outcome risk). If the 6:10am Bat run is confirmed not to have fired (see risk section), Rahil running these 2 manually via SpeedyApply this morning is the fastest path to Submit Rate > 0% and would meaningfully move next cycle's score.
+**Owner:** Rahil (execute) — flagging for approval per "defects don't need approval, kaizens do."
