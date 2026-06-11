@@ -268,6 +268,16 @@ this file tracks **open** work.
 
 ---
 
+### K-2026-06-11-33 — lower-tier YAML parse error silently reported as "not found"
+
+**What happened:** `config/lower-tier-test-companies.yml` was manually edited to add samsara with incorrect indentation (bare `- slug: samsara` at document root instead of inside the `companies:` list). `js-yaml` throws on parse; `loadLowerTierConfig()` catches and returns `null`; `validateLiveSafety` maps `null` to the "not found" error message, masking the real cause. Live run blocked.
+**Rule:** When adding a company to the YAML, every `- slug:` entry must be indented under `companies:` at exactly 2 spaces. A bare `- slug:` at the top level is valid YAML (it would create a second top-level key) but breaks the expected schema. The catch-all `return null` in `loadLowerTierConfig` hides parse errors from the user.
+**How to apply:** After editing `lower-tier-test-companies.yml`, always verify with `node -e "import('js-yaml').then(m=>{const cfg=m.default.load(require('fs').readFileSync('config/lower-tier-test-companies.yml','utf8'));console.log(cfg.companies.map(c=>c.slug));})"`
+
+Also: the `validateLiveSafety` error message "not found" is misleading when the file exists but fails to parse. Consider a separate check with a descriptive error. Tracked as future improvement.
+
+---
+
 ### K-2026-06-10-30 — Personal info (phone, address) injected at runtime, not committed to CL files
 
 **What happened:** Initial CL drafts included `214-662-0758` hard-coded in the sign-off block. This is redundant (phone is in `personal-info.yml` and gets injected into form fields at runtime) and adds PII surface to git history.

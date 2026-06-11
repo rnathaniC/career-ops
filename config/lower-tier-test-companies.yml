@@ -13,18 +13,20 @@
 #
 # How to add a company:
 #   1. Find its kanban card's `company` field value (e.g. "Acme Corp")
-#   2. Compute slug: lowercase, non-alphanumeric → hyphens (e.g. "acme-corp")
+#   2. Compute slug: lowercase, non-alphanumeric -> hyphens (e.g. "acme-corp")
 #   3. Add an entry below with slug + reason
 #   4. Set enabled: true
 #
 # Hard cap: 5 live submissions per day (tracked in data/live-daily-count-{date}.json)
 # --limit flag cannot override the daily cap.
+#
+# NOTE: auto-submit reads cfg.companies (flat list). Do NOT nest under tiers: -- it
+# will silently fail (companies: [] fallback) and block every live submission.
 
 # Note: "lower-tier" is a misnomer here. These are the FIRST live targets
-# Rahil approved for validation. Both are Greenhouse ATS. Hand-crafted CLs
-# committed 2026-06-10. Update this list before any subsequent live runs.
+# Rahil approved for validation. Update this list before subsequent live runs.
 
-enabled: true  # Approved 2026-06-10 for Palantir + Zoox first-run validation
+enabled: true
 
 companies:
   - slug: palantir
@@ -32,4 +34,7 @@ companies:
     max_per_day: 1
   - slug: zoox
     reason: First live submission target, CL hand-crafted 2026-06-10
+    max_per_day: 1
+  - slug: samsara
+    reason: Greenhouse live test, stockpile CL exists
     max_per_day: 1
