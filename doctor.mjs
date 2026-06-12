@@ -5,7 +5,7 @@
  * Checks all prerequisites and prints a pass/fail checklist.
  */
 
-import { existsSync, mkdirSync, readdirSync } from 'fs';
+import { existsSync, mkdirSync, readdirSync, readFileSync, statSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 
@@ -132,6 +132,54 @@ function checkFonts() {
   return { pass: true, label: 'Fonts directory ready' };
 }
 
+
+function checkNoNullBytes() {
+  // r7 / K-2026-06-04-1 — OneDrive sync occasionally pads .mjs files with trailing NUL bytes,
+  // causing "Unexpected end of input" syntax errors that mask the true cause. Sweep proactively.
+  const exts = ['.mjs', '.js', '.json'];
+  const dirs = ['.', 'scripts'];
+  const offenders = [];
+  for (const d of dirs) {
+    try {
+      for (const f of readdirSync(join(projectRoot, d))) {
+        if (!exts.some(e => f.endsWith(e))) continue;
+        const fp = join(projectRoot, d, f);
+        try {
+          if (!statSync(fp).isFile()) continue;
+          const buf = readFileSync(fp);
+          if (buf.includes(0)) offenders.push(d === '.' ? f : `${d}/${f}`);
+        } catch {}
+      }
+    } catch {}
+  }
+  if (offenders.length === 0) return { pass: true, label: 'No NUL-byte corruption in .mjs/.js/.json' };
+  return {
+    pass: false,
+    label: `NUL bytes found in ${offenders.length} file(s): ${offenders.slice(0, 3).join(', ')}${offenders.length > 3 ? '...' : ''}`,
+    fix: 'Run: node scripts/fix-nul-bytes.mjs (then re-run doctor)',
+  };
+}
+
+function checkGenStatesFresh() {
+  // r8 / K-2026-05-29-5 — codegen/states drift detection. If states.yml is newer than gen/states.json,
+  // codegen needs to re-run.
+  if (!existsSync(join(projectRoot, 'gen', 'states.json'))) {
+    return { pass: true, label: dim('gen/states.json not yet generated (run: npm run codegen:states)') };
+  }
+  try {
+    const yml = statSync(join(projectRoot, 'templates', 'states.yml')).mtimeMs;
+    const gen = statSync(join(projectRoot, 'gen', 'states.json')).mtimeMs;
+    if (yml > gen) {
+      return {
+        pass: false,
+        label: 'gen/states.json is stale (states.yml is newer)',
+        fix: 'Run: npm run codegen:states',
+      };
+    }
+  } catch {}
+  return { pass: true, label: 'gen/states.* is fresh' };
+}
+
 function checkAutoDir(name) {
   const dirPath = join(projectRoot, name);
   if (existsSync(dirPath)) {
@@ -157,6 +205,8 @@ async function main() {
     checkNodeVersion(),
     checkDependencies(),
     await checkPlaywright(),
+    checkNoNullBytes(),
+    checkGenStatesFresh(),
     checkCv(),
     checkProfile(),
     checkPortals(),

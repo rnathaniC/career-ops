@@ -1,0 +1,55 @@
+#!/usr/bin/env bash
+# pre-commit hook — runs node --check on every staged .mjs/.js file.
+# Catches the truncation failure mode (risk r7) before it lands on main.
+#
+# INSTALL (in career-ops repo):
+#   cp scripts/pre-commit.sh .git/hooks/pre-commit
+#   chmod +x .git/hooks/pre-commit
+#
+# Or, repo-wide (recommended) — point core.hooksPath at a tracked directory:
+#   mkdir -p .githooks && cp scripts/pre-commit.sh .githooks/pre-commit
+#   chmod +x .githooks/pre-commit
+#   git config core.hooksPath .githooks
+
+set -e
+
+# Collect staged JS/MJS files
+files=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(mjs|js|cjs)$' || true)
+
+if [ -z "$files" ]; then
+  exit 0
+fi
+
+fail=0
+for f in $files; do
+  # Only check files that still exist (not deletes)
+  [ -f "$f" ] || continue
+
+  if ! node --check "$f" 2>/tmp/safe-edit-precommit.err; then
+    echo ""
+    echo "✗ Syntax check FAILED for: $f"
+    cat /tmp/safe-edit-precommit.err
+    fail=1
+  fi
+
+  # Heuristic truncation guard: file ended mid-string/mid-block?
+  # If last non-blank line doesn't end in } ) ] ; , */ // or a closing quote, warn.
+  last=$(grep -v '^[[:space:]]*$' "$f" | tail -1 | sed 's/[[:space:]]*$//')
+  case "$last" in
+    *\} | *\) | *\] | *\; | *, | *\*/ | *//* | *\" | *\' | *\` ) ;;
+    "" ) ;;
+    * )
+      echo "⚠  $f: last line looks truncated — manual check recommended:"
+      echo "    $last"
+      ;;
+  esac
+done
+
+if [ $fail -ne 0 ]; then
+  echo ""
+  echo "Commit aborted. Fix syntax errors above or run:"
+  echo "  node scripts/safe-edit.mjs <file> --check-only"
+  exit 1
+fi
+
+exit 0

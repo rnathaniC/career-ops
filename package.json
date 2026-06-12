@@ -27,7 +27,10 @@
     "test:k1-live": "node --test test/auto-submit-live.test.mjs",
     "test:k1-all": "node --test test/auto-submit.test.mjs test/auto-submit-live.test.mjs",
     "test:kanban": "node --test test/kanban.test.mjs",
-    "test:kanban-smoke": "node --test test/kanban-smoke.test.mjs"
+    "test:kanban-smoke": "node --test test/kanban-smoke.test.mjs",
+    "safe-edit": "node scripts/safe-edit.mjs",
+    "codegen:states": "node scripts/codegen-states.mjs",
+    "fix-nul": "node scripts/fix-nul-bytes.mjs"
   },
   "keywords": [
     "ai",
@@ -36,7 +39,7 @@
     "career",
     "automation"
   ],
-  "author": "Santiago Fernández de Valderrama <hi@santifer.io> (https://santifer.io)",
+  "author": "Santiago Fern\u00e1ndez de Valderrama <hi@santifer.io> (https://santifer.io)",
   "homepage": "https://santifer.io",
   "repository": {
     "type": "git",
