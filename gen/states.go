@@ -2,7 +2,7 @@
 // Source: templates/states.yml
 package data
 
-var CanonicalStates = []string{"evaluated", "applied", "responded", "interview", "offer", "rejected", "discarded", "skip"}
+var CanonicalStates = []string{"evaluated", "applied", "responded", "interview", "offer", "blocked", "rejected", "discarded", "skip"}
 
 var StateAliases = map[string]string{
 	"evaluada": "evaluated",
@@ -10,9 +10,12 @@ var StateAliases = map[string]string{
 	"enviada": "applied",
 	"aplicada": "applied",
 	"sent": "applied",
+	"submitted": "applied",
 	"respondido": "responded",
 	"entrevista": "interview",
 	"oferta": "offer",
+	"bloqueado": "blocked",
+	"bloqueada": "blocked",
 	"rechazado": "rejected",
 	"rechazada": "rejected",
 	"descartado": "discarded",
@@ -31,6 +34,7 @@ var DashboardGroups = map[string][]string{
 	"responded": []string{"responded"},
 	"interview": []string{"interview"},
 	"offer": []string{"offer"},
+	"blocked": []string{"blocked"},
 	"rejected": []string{"rejected"},
 	"discarded": []string{"discarded"},
 	"skip": []string{"skip"},

@@ -35,12 +35,13 @@ mkdirSync(REPORTS_DIR, { recursive: true });
 
 const CANONICAL_STATUSES = [
   'evaluated', 'applied', 'responded', 'interview',
-  'offer', 'rejected', 'discarded', 'skip',
+  'offer', 'rejected', 'discarded', 'skip', 'blocked',
 ];
 
 const ALIASES = {
   'evaluada': 'evaluated', 'condicional': 'evaluated', 'hold': 'evaluated', 'evaluar': 'evaluated', 'verificar': 'evaluated',
-  'aplicado': 'applied', 'enviada': 'applied', 'aplicada': 'applied', 'applied': 'applied', 'sent': 'applied',
+  'aplicado': 'applied', 'enviada': 'applied', 'aplicada': 'applied', 'applied': 'applied', 'sent': 'applied', 'submitted': 'applied',
+  'bloqueado': 'blocked', 'bloqueada': 'blocked',
   'respondido': 'responded',
   'entrevista': 'interview',
   'oferta': 'offer',
@@ -141,7 +142,10 @@ if (brokenReports === 0) ok('All report links valid');
 let badScores = 0;
 for (const e of entries) {
   const s = e.score.replace(/\*\*/g, '').trim();
-  if (!/^\d+\.?\d*\/5$/.test(s) && s !== 'N/A' && s !== 'DUP') {
+  const isNumeric = /^\d+\.?\d*\/5$/.test(s);
+  const isLetter = /^[A-F][+-]?$/.test(s);
+  const isPlaceholder = s === 'N/A' || s === 'DUP' || s === '\u2014' || s === '-';
+  if (!isNumeric && !isLetter && !isPlaceholder) {
     error(`#${e.num}: Invalid score format: "${e.score}"`);
     badScores++;
   }

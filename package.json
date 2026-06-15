@@ -30,7 +30,11 @@
     "test:kanban-smoke": "node --test test/kanban-smoke.test.mjs",
     "safe-edit": "node scripts/safe-edit.mjs",
     "codegen:states": "node scripts/codegen-states.mjs",
-    "fix-nul": "node scripts/fix-nul-bytes.mjs"
+    "fix-nul": "node scripts/fix-nul-bytes.mjs",
+    "ingest": "node scripts/ingest-runner.mjs",
+    "ingest:dry": "node scripts/ingest-runner.mjs --dry-run",
+    "ingest:a-only": "node scripts/ingest-runner.mjs --grade A",
+    "workday": "node scripts/workday-stub.mjs"
   },
   "keywords": [
     "ai",
