@@ -20,6 +20,12 @@
  *   --kanban-json <path>     K2 exportState() JSON path (mutually exclusive with --kanban)
  *   --limit N                Max cards per run (default: 5; live hard cap 5/day overrides)
  *   --card <id>              Single-card mode for targeted testing
+ *   --card-ids <id,id,...>   Comma-separated allowlist of card IDs to process (e.g. the
+ *                            New-Fresh subset from `npm run referral-queue`). Filters the
+ *                            already-eligible set further — never expands it, so warm-
+ *                            referral cards stay excluded even if their ID is passed by
+ *                            mistake. IDs not present in the eligible set are skipped with
+ *                            a log line, not a fatal error (unlike --card).
  *   --dry-run                Explicit dry-run (default if no mode flag)
  *   --report                 With --dry-run: pretty-print results as markdown table to stdout
  *   --semi-auto              Visible Chromium, form prepped, human clicks submit
@@ -58,6 +64,7 @@ import { loadPersonalInfo, PersonalInfoError } from './load-personal-info.mjs';
 import { loadBrowserConfig, BrowserConfigError } from './load-browser-config.mjs';
 import { fillForm, formatUploadDetails } from './form-fill.mjs';
 import { VALID_IDS as CANONICAL_STATE_IDS } from '../gen/states.js';
+import { scoreCard, saveReadinessScore } from './readiness-scorer.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname  = path.dirname(__filename);
@@ -76,11 +83,22 @@ function argVal(flag) {
 }
 
 const KANBAN_PATH       = argVal('--kanban') || path.join(ROOT, 'dashboard', 'job-pulse-kanban.html');
-const KANBAN_JSON       = argVal('--kanban-json') || null;
+// Default source: the live K2 board export (data/board-state.json). The HTML
+// kanban on disk is an empty shell — real cards live in browser localStorage —
+// so reading it always yields "0 eligible". board-state.json is the bridge:
+// the morning refresh exports the live board to it. Explicit --kanban-json or
+// --kanban still win. Falls back to HTML only if the export is missing.
+const DEFAULT_BOARD_JSON = path.join(ROOT, 'data', 'board-state.json');
+const KANBAN_JSON       = argVal('--kanban-json')
+  || (!argVal('--kanban') && fs.existsSync(DEFAULT_BOARD_JSON) ? DEFAULT_BOARD_JSON : null);
 const CL_DIR_ARG        = argVal('--cl-dir')   || path.join(ROOT, 'cover-letters');
 const CL_INDEX_ARG      = argVal('--cl-index') || path.join(CL_DIR_ARG, 'index.yml');
 const READY_STATES_ARG  = argVal('--ready-states') || null;
 const CARD_ID           = argVal('--card');
+const CARD_IDS_ARG      = argVal('--card-ids');
+const CARD_IDS          = CARD_IDS_ARG
+  ? new Set(CARD_IDS_ARG.split(',').map((s) => s.trim()).filter(Boolean))
+  : null;
 const SEMI_AUTO         = process.argv.includes('--semi-auto');
 const LIVE              = process.argv.includes('--live') && !SEMI_AUTO;
 const DRY_RUN           = !LIVE && !SEMI_AUTO;
@@ -573,6 +591,21 @@ export function incrementDailyCap(capPath, currentCount) {
   fs.renameSync(tmp, capPath);
 }
 
+// ── Readiness helpers ─────────────────────────────────────────────────────────
+
+function readClFileText(relPath) {
+  if (!relPath) return null;
+  const full = path.join(ROOT, relPath);
+  if (!fs.existsSync(full)) return null;
+  try { return fs.readFileSync(full, 'utf8'); } catch { return null; }
+}
+
+function loadCvTextForScoring() {
+  const p = path.join(ROOT, 'cv.md');
+  if (fs.existsSync(p)) return fs.readFileSync(p, 'utf8');
+  return null;
+}
+
 // ── Atomic JSON writer ────────────────────────────────────────────────────────
 
 function writeJSON(filePath, data) {
@@ -746,6 +779,7 @@ export async function launchBrowserForMode(pw, browserCfg, { headless = false, b
 
 async function runSemiAuto(cards, pw, personal, browserCfg, useExtension, browserMode, debugPort, clIndex = null) {
   const results = [];
+  const cvText  = loadCvTextForScoring();
 
   for (const card of cards) {
     let ats = detectATS(card.url);
@@ -764,6 +798,23 @@ async function runSemiAuto(cards, pw, personal, browserCfg, useExtension, browse
       continue;
     }
     console.log('OK');
+
+    // Readiness check
+    process.stdout.write('  Readiness check... ');
+    const clText       = readClFileText(cl);
+    const readiness    = await scoreCard(card, { resumeText: cvText, clText });
+    if (readiness.score_skipped) {
+      console.log(`SKIPPED (${readiness.reason}) — proceeding anyway`);
+    } else {
+      saveReadinessScore(card.id, readiness.total, readiness.grade);
+      if (!readiness.passed) {
+        console.log(`FAIL ${readiness.total}/100 (${readiness.grade}) — skipping card`);
+        for (const flag of readiness.flags.slice(0, 3)) console.log(`    • ${flag}`);
+        results.push({ id: card.id, status: 'readiness-fail', readiness, url: card.url });
+        continue;
+      }
+      console.log(`OK ${readiness.total}/100 (${readiness.grade})`);
+    }
 
     let browser              = null;
     let context              = null;
@@ -941,6 +992,7 @@ async function runLive(cards, pw, allowTier, personal, browserCfg, useExtension,
   let confirmed      = 0;
   let unconfirmed    = 0;
   const results      = [];
+  const cvText       = loadCvTextForScoring();
 
   let { count: dailyCount, capPath } = checkDailyCap();
 
@@ -974,6 +1026,23 @@ async function runLive(cards, pw, allowTier, personal, browserCfg, useExtension,
       continue;
     }
     console.log('OK');
+
+    // Readiness check — gate before launching browser
+    process.stdout.write('  Readiness check... ');
+    const liveClText  = readClFileText(cl);
+    const readiness   = await scoreCard(card, { resumeText: cvText, clText: liveClText });
+    if (readiness.score_skipped) {
+      console.log(`SKIPPED (${readiness.reason}) — proceeding anyway`);
+    } else {
+      saveReadinessScore(card.id, readiness.total, readiness.grade);
+      if (!readiness.passed) {
+        console.log(`FAIL ${readiness.total}/100 (${readiness.grade}) — skipping card`);
+        for (const flag of readiness.flags.slice(0, 3)) console.log(`    • ${flag}`);
+        results.push({ id: card.id, status: 'readiness-fail', readiness, url: card.url });
+        continue;
+      }
+      console.log(`OK ${readiness.total}/100 (${readiness.grade})`);
+    }
 
     let browser              = null;
     let context              = null;
@@ -1148,6 +1217,21 @@ async function main() {
     }
   }
 
+  if (CARD_IDS) {
+    const before = eligible.length;
+    eligible = eligible.filter((c) => CARD_IDS.has(c.id));
+    const matchedIds = new Set(eligible.map((c) => c.id));
+    const missing = [...CARD_IDS].filter((id) => !matchedIds.has(id));
+    console.log(`[auto-submit] --card-ids filter: ${before} eligible → ${eligible.length} (requested ${CARD_IDS.size})`);
+    if (missing.length) {
+      console.log(`[auto-submit] --card-ids not in eligible set (already submitted, wrong state, or not yet injected): ${missing.join(', ')}`);
+    }
+    if (eligible.length === 0) {
+      console.log('[auto-submit] Nothing to process after --card-ids filter — exiting cleanly.');
+      process.exit(0);
+    }
+  }
+
   // Fail-fast checks for --live before launching any browser
   if (LIVE) {
     if (!ALLOW_TIER) {
@@ -1182,7 +1266,18 @@ async function main() {
 
   // ── Dry-run ─────────────────────────────────────────────────────────────────
   if (DRY_RUN) {
-    const results     = toProcess.map((card) => dryRunCard(card, clIdx));
+    const cvText  = loadCvTextForScoring();
+    const results = [];
+    for (const card of toProcess) {
+      const dry      = dryRunCard(card, clIdx);
+      const clText   = readClFileText(dry.cl_path);
+      dry.readiness  = await scoreCard(card, { resumeText: cvText, clText });
+      if (!dry.readiness.score_skipped) {
+        saveReadinessScore(card.id, dry.readiness.total, dry.readiness.grade);
+      }
+      results.push(dry);
+    }
+
     const wouldSubmit = results.filter((r) => r.would_submit).length;
     const partial     = results.filter((r) => r.fillable === 'partial').length;
     const blocked     = results.filter((r) => r.fillable === false).length;
@@ -1190,8 +1285,13 @@ async function main() {
     console.log('\n[auto-submit] DRY-RUN RESULTS:');
     results.forEach((r) => {
       const icon = r.would_submit ? '✓' : r.fillable === 'partial' ? '~' : '✗';
+      const rs   = r.readiness;
+      const rsTag = rs?.score_skipped ? 'skip' : `${rs?.total}/${rs?.grade}`;
       console.log(`  ${icon} [${r.grade}] ${r.company} — ${r.role?.slice(0, 50)}`);
-      console.log(`      ATS: ${r.ats} | CL: ${r.has_cl ? r.cl_path : 'none'} | ${r.notes}`);
+      console.log(`      ATS: ${r.ats} | CL: ${r.has_cl ? r.cl_path : 'none'} | readiness: ${rsTag} | ${r.notes}`);
+      if (rs && !rs.score_skipped && !rs.passed) {
+        console.log(`      ⚠ Readiness FAIL (${rs.total}/100): ${rs.flags.slice(0, 2).join(' · ')}`);
+      }
     });
     console.log(`\n[auto-submit] Summary: ${wouldSubmit} would submit, ${partial} partial, ${blocked} blocked`);
 
@@ -1258,7 +1358,7 @@ async function main() {
         console.error(`[auto-submit] FATAL: ${e.message}`);
         process.exit(1);
       }
-      console.log('[auto-submit] personal-info.yml not found — SpeedyApply will handle form fill');
+           console.log('[auto-submit] personal-info.yml not found — SpeedyApply will handle form fill');
     } else {
       throw e;
     }
