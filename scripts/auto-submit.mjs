@@ -420,29 +420,57 @@ export function loadClIndex(indexPath) {
  * @returns {string|null} Relative file path or null
  */
 export function findCoverLetterForCard(card, index) {
-  if (!index || !Array.isArray(index.templates)) return null;
-
   const companySlug = slugifyCompany(card.company || '');
 
-  // 1. Exact company match
-  const exact = index.templates.find((t) => t.company === companySlug);
-  if (exact) return path.join('cover-letters', exact.file);
-
-  // 2. Role family match
-  const roleFamilies = extractRoleFamily(card.role || '');
-  if (roleFamilies.length > 0) {
-    const roleMatch = index.templates.find((t) =>
-      Array.isArray(t.roles) &&
-      t.roles.some((r) => roleFamilies.some((f) => r.toLowerCase().includes(f))),
-    );
-    if (roleMatch) return path.join('cover-letters', roleMatch.file);
+  // 1. Exact company match in the index (cover-letters/*.md)
+  if (index && Array.isArray(index.templates)) {
+    const exact = index.templates.find((t) => t.company === companySlug);
+    if (exact) return path.join('cover-letters', exact.file);
   }
 
-  // 3. Tier fallback (card.tier must be set — kanban can inject it when available)
-  const cardTier = card.tier || null;
-  if (cardTier) {
-    const tierMatch = index.templates.find((t) => t.tier === cardTier);
-    if (tierMatch) return path.join('cover-letters', tierMatch.file);
+  // 2. Company-specific generated letter on disk (cl_{slug}_*.txt in output/ or cover-letters/).
+  //    Generated CLs land in output/ as .txt and may not be in index.yml yet, so an exact-index
+  //    miss does NOT mean we have no letter. Find the company's OWN most-recent letter by slug
+  //    before any fallback — this is what stops e.g. Figma from borrowing Samsara's letter.
+  if (companySlug) {
+    const prefix = 'cl_' + companySlug + '_';
+    const roleTokens = new Set(slugifyCompany(card.role || '').split('-').filter(Boolean));
+    for (const dir of ['output', 'cover-letters']) {
+      const abs = path.join(ROOT, dir);
+      if (!fs.existsSync(abs)) continue;
+      const ranked = fs.readdirSync(abs)
+        .filter((f) => f.startsWith(prefix) && f.endsWith('.txt'))
+        .map((f) => {
+          const date = (f.match(/(\d{4}-\d{2}-\d{2})\.txt$/) || [, '0000-00-00'])[1];
+          const mid  = f.slice(prefix.length).replace(/_\d{4}-\d{2}-\d{2}\.txt$/, '');
+          const overlap = mid.split('-').filter((t) => roleTokens.has(t)).length;
+          return { f, date, overlap };
+        })
+        // best role-slug match first, then most recent letter
+        .sort((a, b) => (b.overlap - a.overlap) || b.date.localeCompare(a.date));
+      if (ranked.length > 0) return path.join(dir, ranked[0].f);
+    }
+  }
+
+  // 3. GENERIC fallback only. Never hand back another company's tailored letter: a role-family
+  //    or tier match from a company-specific template mis-presents (e.g. Samsara's letter for
+  //    Figma) and fails the company-name readiness check. Returning null flags the card for
+  //    cover-letter generation instead, which is the correct outcome.
+  if (index && Array.isArray(index.templates)) {
+    const isGeneric = (t) => !t.company || t.company === 'generic';
+    const roleFamilies = extractRoleFamily(card.role || '');
+    if (roleFamilies.length > 0) {
+      const roleMatch = index.templates.find((t) =>
+        isGeneric(t) && Array.isArray(t.roles) &&
+        t.roles.some((r) => roleFamilies.some((f) => r.toLowerCase().includes(f))),
+      );
+      if (roleMatch) return path.join('cover-letters', roleMatch.file);
+    }
+    const cardTier = card.tier || null;
+    if (cardTier) {
+      const tierMatch = index.templates.find((t) => isGeneric(t) && t.tier === cardTier);
+      if (tierMatch) return path.join('cover-letters', tierMatch.file);
+    }
   }
 
   return null;

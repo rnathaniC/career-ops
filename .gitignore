@@ -50,3 +50,14 @@ bun.lock
 .claude/memory/
 career-dashboard
 package-lock.json
+
+# Pipeline run logs
+logs/
+# Truncation backups + probes (see docs/RUNBOOK-large-file-edits.md)
+*.bak
+*.bak-*
+*.bak-trunc
+*.bak-trunc-*
+*.pre-*
+*.pretrunc-bak
+_*probe*
