@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "cards": {
+    "real-1": {
+      "source": "greenhouse",
+      "external_id": "real-1",
+      "title": "Senior Scrum Master",
+      "company": "twilio",
+      "location": "Remote",
+      "url": "https://stripe.com/jobs/listing/people-project-manager/7953899",
+      "posted_at": "2026-06-08T00:00:00Z",
+      "ingested_at": "2026-06-08T12:00:00Z",
+      "state": "new",
+      "grade": "A",
+      "has_connection": false
+    }
+  }
+}

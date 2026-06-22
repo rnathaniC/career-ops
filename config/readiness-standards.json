@@ -1,0 +1,69 @@
+{
+  "source": "Harvard MCS Resumes & Cover Letters Guide (2023)",
+  "resume": {
+    "language": {
+      "no_personal_pronouns": ["I", "me", "my", "mine", "myself", "we", "our"],
+      "must_start_bullets_with_action_verb": true,
+      "no_narrative_style": true,
+      "quantification_required": true,
+      "no_abbreviations_informal": true
+    },
+    "structure": {
+      "required_sections": ["Education", "Experience"],
+      "reverse_chronological": true,
+      "consistent_format": true,
+      "no_lines_starting_with_date": true,
+      "must_have_email": true,
+      "must_have_phone": true,
+      "max_pages": 2
+    },
+    "top_mistakes_to_flag": [
+      "missing_email_or_phone",
+      "passive_language",
+      "no_quantification",
+      "too_long"
+    ],
+    "ats": {
+      "keyword_overlap_min_pct": 30,
+      "no_tables": true,
+      "standard_section_headers": true
+    }
+  },
+  "cover_letter": {
+    "structure": {
+      "has_date": true,
+      "has_addressee": true,
+      "has_company_name": true,
+      "colon_after_salutation": true,
+      "three_paragraph_minimum": true,
+      "max_pages": 1,
+      "opening_states_position": true,
+      "closing_thanks_reader": true
+    },
+    "language": {
+      "no_overuse_of_I": true,
+      "i_frequency_max_pct": 12,
+      "uses_action_verbs": true,
+      "references_company_specifically": true,
+      "references_jd_keywords": true
+    },
+    "cleanpaste_required": true
+  },
+  "action_verbs": [
+    "Accomplished","Achieved","Administered","Analyzed","Assigned","Attained","Chaired","Consolidated","Contracted","Coordinated","Delegated","Developed","Directed","Earned","Evaluated","Executed","Handled","Headed","Impacted","Improved","Increased","Led","Mastered","Orchestrated","Organized","Oversaw","Planned","Predicted","Prioritized","Produced","Proved","Recommended","Regulated","Reorganized","Reviewed","Scheduled","Spearheaded","Strengthened","Supervised","Surpassed",
+    "Addressed","Arbitrated","Arranged","Authored","Collaborated","Convinced","Corresponded","Delivered","Documented","Drafted","Edited","Energized","Enlisted","Formulated","Influenced","Interpreted","Lectured","Liaised","Mediated","Moderated","Negotiated","Persuaded","Presented","Promoted","Publicized","Reconciled","Recruited","Reported","Rewrote","Spoke","Suggested","Synthesized","Translated","Verbalized","Wrote",
+    "Clarified","Collected","Concluded","Conducted","Constructed","Critiqued","Derived","Determined","Diagnosed","Discovered","Examined","Extracted","Formed","Identified","Inspected","Investigated","Modeled","Resolved","Summarized","Surveyed","Systematized","Tested",
+    "Assembled","Built","Calculated","Computed","Designed","Devised","Engineered","Fabricated","Installed","Maintained","Operated","Optimized","Overhauled","Programmed","Remodeled","Repaired","Solved","Standardized","Streamlined","Upgraded",
+    "Adapted","Advised","Coached","Communicated","Demystified","Enabled","Encouraged","Explained","Facilitated","Guided","Informed","Instructed","Set Goals","Stimulated","Studied","Taught","Trained",
+    "Allocated","Appraised","Audited","Balanced","Budgeted","Forecasted","Managed","Marketed","Maximized","Minimized","Projected","Researched",
+    "Acted","Composed","Conceived","Conceptualized","Created","Customized","Established","Fashioned","Founded","Illustrated","Initiated","Instituted","Integrated","Introduced","Invented","Originated","Performed","Published","Redesigned","Revised","Revitalized","Shaped","Visualized",
+    "Assisted","Demonstrated","Enhanced","Expedited","Familiarized","Motivated","Participated","Proposed","Provided","Referred","Rehabilitated","Represented","Served","Supported",
+    "Accelerated","Added","Approved","Broadened","Cataloged","Centralized","Changed","Classified","Compiled","Completed","Controlled","Defined","Dispatched","Expanded","Gained","Generated","Gathered","Implemented","Launched","Monitored","Prepared","Processed","Purchased","Recorded","Reduced","Reinforced","Retrieved","Screened","Selected","Simplified","Sold","Specified","Steered","Structured","Tabulated","Unified","Updated","Utilized","Validated","Verified"
+  ],
+  "scoring": {
+    "resume_weight": 60,
+    "cover_letter_weight": 40,
+    "pass_threshold": 70,
+    "grade_thresholds": { "A": 90, "B": 80, "C": 70, "D": 0 }
+  }
+}

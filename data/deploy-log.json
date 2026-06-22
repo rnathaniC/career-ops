@@ -1,0 +1,5 @@
+{
+  "version": 1,
+  "note": "Append-only deploy audit trail. Written by dispatch-relay.mjs on each --dispatch.",
+  "entries": []
+}

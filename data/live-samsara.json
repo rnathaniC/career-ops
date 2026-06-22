@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "cards": {
+    "samsara-1": {
+      "source": "greenhouse", "external_id": "samsara-1", "title": "Senior Scrum Master",
+      "company": "samsara", "location": "Remote", "url": "https://job-boards.greenhouse.io/samsara/jobs/7742662",
+      "posted_at": "2026-06-11T00:00:00Z", "ingested_at": "2026-06-11T12:00:00Z",
+      "state": "evaluated", "grade": "A", "has_connection": false
+    }
+  }
+}

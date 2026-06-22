@@ -1,0 +1,191 @@
+[
+ {
+  "url": "https://job-boards.greenhouse.io/hudl/jobs/6648242",
+  "reason": "gh-api-404",
+  "detected": "2026-06-09T11:08:07.325Z",
+  "run": "job-pulse-1am-refresh"
+ },
+ {
+  "url": "https://job-boards.greenhouse.io/hudl/jobs/7687372",
+  "reason": "gh-api-404",
+  "detected": "2026-06-09T11:08:07.325Z",
+  "run": "job-pulse-1am-refresh"
+ },
+ {
+  "url": "https://job-boards.greenhouse.io/capitalrx/jobs/5200456008",
+  "reason": "gh-api-404",
+  "detected": "2026-06-09T11:08:07.325Z",
+  "run": "job-pulse-1am-refresh"
+ },
+ {
+  "url": "https://job-boards.greenhouse.io/industrialelectricmanufacturing/jobs/4238661009",
+  "reason": "gh-api-404",
+  "detected": "2026-06-09T11:08:07.325Z",
+  "run": "job-pulse-1am-refresh"
+ },
+ {
+  "url": "https://job-boards.greenhouse.io/arlosolutionsllc/jobs/5031911007",
+  "reason": "gh-api-404",
+  "detected": "2026-06-09T11:08:07.325Z",
+  "run": "job-pulse-1am-refresh"
+ },
+ {
+  "url": "https://job-boards.greenhouse.io/bpcs/jobs/7402294",
+  "reason": "gh-api-404",
+  "detected": "2026-06-09T11:08:07.325Z",
+  "run": "job-pulse-1am-refresh"
+ },
+ {
+  "url": "https://job-boards.greenhouse.io/raft/jobs/5251157004",
+  "reason": "gh-api-404",
+  "detected": "2026-06-10T11:10:14.260049+00:00",
+  "run": "job-pulse-1am-refresh-2026-06-10"
+ },
+ {
+  "url": "https://job-boards.greenhouse.io/hudl/jobs/7066370",
+  "reason": "gh-api-404",
+  "detected": "2026-06-10T11:10:14.260049+00:00",
+  "run": "job-pulse-1am-refresh-2026-06-10"
+ },
+ {
+  "url": "https://job-boards.greenhouse.io/rapidosolutionsgroup/jobs/4669323006",
+  "reason": "gh-api-404",
+  "detected": "2026-06-10T11:10:14.260049+00:00",
+  "run": "job-pulse-1am-refresh-2026-06-10"
+ },
+ {
+  "url": "https://job-boards.greenhouse.io/selffinancial/jobs/5396863004",
+  "reason": "gh-api-404",
+  "detected": "2026-06-10T11:10:14.260049+00:00",
+  "run": "job-pulse-1am-refresh-2026-06-10"
+ },
+ {
+  "url": "https://boards.greenhouse.io/grafanalabs/jobs/5386941004",
+  "reason": "gh-api-404",
+  "detected": "2026-06-10T11:10:14.260049+00:00",
+  "run": "job-pulse-1am-refresh-2026-06-10"
+ },
+ {
+  "url": "https://himalayas.app/companies/icf/jobs/release-train-engineer-remote-us",
+  "company": "ICF",
+  "role": "Release Train Engineer",
+  "status": "HTTP 403 cloudflare-block",
+  "outcome": "unconfirmed-keep-for-human-review",
+  "detected_at": "2026-06-11T11:09:24.977596+00:00",
+  "source": "secondary-websearch-2026-06-11"
+ },
+ {
+  "url": "https://jobs.lever.co/jobgether/7a3e0d46-12f8-4356-b1c6-77d87c32a96b",
+  "reason": "lever-api-404",
+  "detected": "2026-06-12T04:26:52.718Z",
+  "run": "job-pulse-1am-refresh"
+ },
+ {
+  "url": "https://jobs.lever.co/theathletic/07dde37b-39e3-4786-993e-7499e7b8bd6e",
+  "reason": "lever-api-404",
+  "detected": "2026-06-12T04:26:52.718Z",
+  "run": "job-pulse-1am-refresh"
+ },
+ {
+  "url": "https://jobs.lever.co/outreach/b5c40cc2-7070-4c1a-a140-f4bd2f6e25aa",
+  "reason": "lever-api-404",
+  "detected": "2026-06-12T04:26:52.718Z",
+  "run": "job-pulse-1am-refresh"
+ },
+ {
+  "date": "2026-06-12",
+  "source": "secondary-websearch",
+  "ref": "gh/hudl/6648242 404"
+ },
+ {
+  "date": "2026-06-12",
+  "source": "secondary-websearch",
+  "ref": "gh/chainguard/4612299006 404"
+ },
+ {
+  "date": "2026-06-12",
+  "source": "secondary-websearch",
+  "ref": "gh/capitalrx/5200511008 404"
+ },
+ {
+  "date": "2026-06-12",
+  "source": "secondary-websearch",
+  "ref": "ashby/rula/07a3f685-d606-47bc-81ce-5ee04c2874aa not-in-list"
+ },
+ {
+  "date": "2026-06-12",
+  "source": "secondary-websearch",
+  "ref": "ashby/The%20Zebra/85448eea-3ee3-4c52-80d0-fa6071e7dcad not-in-list"
+ },
+ {
+  "date": "2026-06-12",
+  "source": "secondary-websearch",
+  "ref": "ashby/go-nimbly/8ce13dac-a503-4eca-a3db-ffb5d00cc12e not-in-list"
+ },
+ {
+  "date": "2026-06-12",
+  "source": "secondary-websearch",
+  "ref": "ashby/acorns/8cc539a8-8b2e-41f2-9ca5-599aedbae14c not-in-list"
+ },
+ {
+  "date": "2026-06-12",
+  "source": "secondary-websearch",
+  "ref": "lever/protective/dd8d07e3-98a5-4cd7-a3b6-c19a985e1e0e 404"
+ },
+ {
+  "date": "2026-06-12",
+  "company": "Hudl",
+  "role": "Senior Scrum Master - North American Sports",
+  "url": "https://job-boards.greenhouse.io/hudl/jobs/7066370",
+  "reason": "gh 404 — board live, role closed"
+ },
+ {
+  "date": "2026-06-12",
+  "company": "Hudl",
+  "role": "Senior Scrum Master - Competitive",
+  "url": "https://job-boards.greenhouse.io/hudl/jobs/7687372",
+  "reason": "gh 404"
+ },
+ {
+  "date": "2026-06-12",
+  "company": "Hudl",
+  "role": "Senior Scrum Master Manager",
+  "url": "https://job-boards.greenhouse.io/hudl/jobs/6648242",
+  "reason": "gh 404"
+ },
+ {
+  "date": "2026-06-12",
+  "company": "Insider",
+  "role": "Scrum Master (Remote)",
+  "url": "https://jobs.lever.co/useinsider/02c7af40-a326-4d2f-97e4-89cb2ebc4edb",
+  "reason": "lever 404"
+ },
+ {
+  "date": "2026-06-12",
+  "company": "NT Concepts",
+  "role": "Scrum Master",
+  "url": "https://job-boards.greenhouse.io/ntconcepts/jobs/5981527004",
+  "reason": "gh 404"
+ },
+ {
+  "date": "2026-06-12",
+  "company": "Industrial Electric Mfg",
+  "role": "Senior Scrum Master",
+  "url": "https://job-boards.greenhouse.io/industrialelectricmanufacturing/jobs/4238661009",
+  "reason": "gh 404"
+ },
+ {
+  "date": "2026-06-12",
+  "company": "ezCater",
+  "role": "Principal TPM, Nova Program",
+  "url": "https://job-boards.greenhouse.io/ezcaterinc/jobs/5147620007",
+  "reason": "gh 404"
+ },
+ {
+  "date": "2026-06-12",
+  "company": "Chronosphere",
+  "role": "Technical Program Manager",
+  "url": "https://jobs.ashbyhq.com/chronospherejobs/a2af86f2-5248-410a-96d5-4578c21ac621",
+  "reason": "not in ashby board payload"
+ }
+]

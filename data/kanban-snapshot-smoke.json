@@ -1,0 +1,50 @@
+{
+  "cards": {
+    "greenhouse-stripe-001": {
+      "id": "greenhouse-stripe-001",
+      "state": "new",
+      "source": "greenhouse",
+      "external_id": "stripe-001",
+      "title": "Senior Scrum Master",
+      "company": "Stripe",
+      "location": "Remote, US",
+      "url": "https://job-boards.greenhouse.io/stripe/jobs/12345",
+      "posted_at": "2026-06-01T00:00:00.000Z",
+      "ingested_at": "2026-06-08T09:00:00.000Z",
+      "remote": true,
+      "verified": true,
+      "has_connection": false,
+      "grade": "A"
+    },
+    "lever-figma-002": {
+      "id": "lever-figma-002",
+      "state": "evaluated",
+      "source": "lever",
+      "external_id": "figma-002",
+      "title": "Technical Program Manager",
+      "company": "Figma",
+      "location": "San Francisco, CA",
+      "url": "https://jobs.lever.co/figma/abc-tpm",
+      "posted_at": "2026-06-02T00:00:00.000Z",
+      "ingested_at": "2026-06-08T09:00:00.000Z",
+      "remote": false,
+      "verified": true,
+      "has_connection": false,
+      "grade": "B"
+    },
+    "greenhouse-notion-003": {
+      "id": "greenhouse-notion-003",
+      "state": "applied",
+      "source": "greenhouse",
+      "external_id": "notion-003",
+      "title": "Program Manager",
+      "company": "Notion",
+      "location": "Remote",
+      "url": "https://job-boards.greenhouse.io/notion/jobs/999",
+      "grade": "A",
+      "verified": true,
+      "has_connection": false
+    }
+  },
+  "version": 1
+}

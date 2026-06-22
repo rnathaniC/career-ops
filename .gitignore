@@ -62,3 +62,39 @@ logs/
 *.pretrunc-bak
 _*probe*
 .envrc
+
+# ── Commit-hygiene hardening (K-2026-06-21-COMMIT) ───────────────────────────
+# Rationale: a blind `git add -A` was sweeping in PII, a binary, junk, and
+# dozens of ephemeral run artifacts. These rules make `add -A` safe so the
+# pipeline SOURCE can be committed without dragging in noise. See the daily
+# report's commit-hygiene note for the why.
+
+# Dated/ephemeral run artifacts — regenerated every refresh, never source-of-truth
+data/airtable-payload-*.json
+data/graded-jobs-*.json
+data/kanban-import-*.json
+data/readiness-results-*.json
+data/inject-run-*.json
+data/archive-run-*.json
+data/referral-queue-*.json
+data/workday-jobs.json
+data/board-state.json
+data/board-state.json.tmp
+data/cadence-status.json
+data/last-refresh.json
+data/airtable-sync-state.json
+
+# PII — personal contact / network data (note: the .yml rule above missed the
+# .txt variant; this catches every form)
+config/personal-info.yml*
+config/linkedin-connections.json
+
+# Compiled binaries — build outputs, never commit
+*.exe
+*.dll
+*.so
+
+# Stray junk / temp
+New Text Document*.txt
+_cleared-update-lock.*
+*.tmp

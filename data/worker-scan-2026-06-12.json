@@ -1,0 +1,393 @@
+{
+  "health": "{\"status\":\"ok\",\"version\":\"1.0.0\",\"timestamp\":\"2026-06-12T13:45:46.969Z\"}",
+  "greenhouse_raw": 1832,
+  "ashby_raw": 175,
+  "lever_raw": 0,
+  "errors": [],
+  "jobs": [
+    {
+      "company": "stripe",
+      "role": "Commercial Solutions Program Manager",
+      "platform": "greenhouse",
+      "location": ""
+    },
+    {
+      "company": "stripe",
+      "role": "Design Program Manager, AI",
+      "platform": "greenhouse",
+      "location": ""
+    },
+    {
+      "company": "stripe",
+      "role": "FinOps Program Manager,  AI Enablement",
+      "platform": "greenhouse",
+      "location": ""
+    },
+    {
+      "company": "stripe",
+      "role": "Immigration Program Manager",
+      "platform": "greenhouse",
+      "location": ""
+    },
+    {
+      "company": "stripe",
+      "role": "Marketing Operations Program Manager, Sold Funnel",
+      "platform": "greenhouse",
+      "location": ""
+    },
+    {
+      "company": "stripe",
+      "role": "Operations Program Manager, Capital Collections",
+      "platform": "greenhouse",
+      "location": ""
+    },
+    {
+      "company": "stripe",
+      "role": "Operations Program Manager, Managed Operations",
+      "platform": "greenhouse",
+      "location": ""
+    },
+    {
+      "company": "stripe",
+      "role": "Procurement Transformation Program Manager, Operations and AI",
+      "platform": "greenhouse",
+      "location": ""
+    },
+    {
+      "company": "stripe",
+      "role": "Program Manager",
+      "platform": "greenhouse",
+      "location": ""
+    },
+    {
+      "company": "stripe",
+      "role": "Program Manager, Business Practices",
+      "platform": "greenhouse",
+      "location": ""
+    },
+    {
+      "company": "stripe",
+      "role": "Program Manager, Business Practices - Deal Operations",
+      "platform": "greenhouse",
+      "location": ""
+    },
+    {
+      "company": "stripe",
+      "role": "Program Manager, Commercial Solutions",
+      "platform": "greenhouse",
+      "location": ""
+    },
+    {
+      "company": "stripe",
+      "role": "Program Manager, Engineering - Technology GRC",
+      "platform": "greenhouse",
+      "location": ""
+    },
+    {
+      "company": "stripe",
+      "role": "Program Manager, Enterprise Servicing",
+      "platform": "greenhouse",
+      "location": ""
+    },
+    {
+      "company": "stripe",
+      "role": "Program Manager, Go To Market",
+      "platform": "greenhouse",
+      "location": ""
+    },
+    {
+      "company": "stripe",
+      "role": "Program Manager, GTM Planning",
+      "platform": "greenhouse",
+      "location": ""
+    },
+    {
+      "company": "stripe",
+      "role": "Program Manager, Risk Ops Enablement",
+      "platform": "greenhouse",
+      "location": ""
+    },
+    {
+      "company": "stripe",
+      "role": "Program Manager, Security Business Enablement",
+      "platform": "greenhouse",
+      "location": ""
+    },
+    {
+      "company": "stripe",
+      "role": "Program Manager, Security Business Enablement",
+      "platform": "greenhouse",
+      "location": ""
+    },
+    {
+      "company": "stripe",
+      "role": "Program Manager, Solutions Architecture (GTM Transformation)",
+      "platform": "greenhouse",
+      "location": ""
+    },
+    {
+      "company": "stripe",
+      "role": "Program Manager, Third Party Risk",
+      "platform": "greenhouse",
+      "location": ""
+    },
+    {
+      "company": "stripe",
+      "role": "Regulatory Reporting Program Manager, Stablecoin",
+      "platform": "greenhouse",
+      "location": ""
+    },
+    {
+      "company": "stripe",
+      "role": "Support Process Program Manager",
+      "platform": "greenhouse",
+      "location": ""
+    },
+    {
+      "company": "stripe",
+      "role": "Technical Program Manager",
+      "platform": "greenhouse",
+      "location": ""
+    },
+    {
+      "company": "stripe",
+      "role": "Technical Program Manager, Core Infrastructure",
+      "platform": "greenhouse",
+      "location": ""
+    },
+    {
+      "company": "stripe",
+      "role": "Technical Program Manager,  Extensibility Programs",
+      "platform": "greenhouse",
+      "location": ""
+    },
+    {
+      "company": "stripe",
+      "role": "Technical Program Manager, Extensibility Programs",
+      "platform": "greenhouse",
+      "location": ""
+    },
+    {
+      "company": "stripe",
+      "role": "Technical Program Manager,  Identity and Access Management Programs",
+      "platform": "greenhouse",
+      "location": ""
+    },
+    {
+      "company": "stripe",
+      "role": "Technical Program Manager, Risk",
+      "platform": "greenhouse",
+      "location": ""
+    },
+    {
+      "company": "stripe",
+      "role": "Technical Program Manager, Service Infrastructure",
+      "platform": "greenhouse",
+      "location": ""
+    },
+    {
+      "company": "anthropic",
+      "role": "Customer Program Manager, Executive Briefing Center",
+      "platform": "greenhouse",
+      "location": ""
+    },
+    {
+      "company": "anthropic",
+      "role": "Global Senior Equity Program Manager",
+      "platform": "greenhouse",
+      "location": ""
+    },
+    {
+      "company": "anthropic",
+      "role": "Program Manager, Communications",
+      "platform": "greenhouse",
+      "location": ""
+    },
+    {
+      "company": "anthropic",
+      "role": "Senior Data Center Capacity Delivery Manager, AUS",
+      "platform": "greenhouse",
+      "location": ""
+    },
+    {
+      "company": "anthropic",
+      "role": "Technical Program Management, Alignment",
+      "platform": "greenhouse",
+      "location": ""
+    },
+    {
+      "company": "anthropic",
+      "role": "Technical Program Manager, Apps Platform",
+      "platform": "greenhouse",
+      "location": ""
+    },
+    {
+      "company": "anthropic",
+      "role": "Technical Program Manager, Cloud Inference",
+      "platform": "greenhouse",
+      "location": ""
+    },
+    {
+      "company": "anthropic",
+      "role": "Technical Program Manager, Compute",
+      "platform": "greenhouse",
+      "location": ""
+    },
+    {
+      "company": "anthropic",
+      "role": "Technical Program Manager, Databases",
+      "platform": "greenhouse",
+      "location": ""
+    },
+    {
+      "company": "anthropic",
+      "role": "Technical Program Manager, Data Center Infrastructure",
+      "platform": "greenhouse",
+      "location": ""
+    },
+    {
+      "company": "anthropic",
+      "role": "Technical Program Manager, Inference Performance",
+      "platform": "greenhouse",
+      "location": ""
+    },
+    {
+      "company": "anthropic",
+      "role": "Technical Program Manager, Infrastructure",
+      "platform": "greenhouse",
+      "location": ""
+    },
+    {
+      "company": "anthropic",
+      "role": "Technical Program Manager, Launches",
+      "platform": "greenhouse",
+      "location": ""
+    },
+    {
+      "company": "anthropic",
+      "role": "Technical Program Manager, Marketing Technology",
+      "platform": "greenhouse",
+      "location": ""
+    },
+    {
+      "company": "anthropic",
+      "role": "Technical Program Manager, Research",
+      "platform": "greenhouse",
+      "location": ""
+    },
+    {
+      "company": "anthropic",
+      "role": "Technical Program Manager, Safeguards (Infrastructure & Evals)",
+      "platform": "greenhouse",
+      "location": ""
+    },
+    {
+      "company": "anthropic",
+      "role": "Technical Program Manager, Security",
+      "platform": "greenhouse",
+      "location": ""
+    },
+    {
+      "company": "databricks",
+      "role": "Field Technical Program Manager, Forward Deployed Engineering - LATAM",
+      "platform": "greenhouse",
+      "location": ""
+    },
+    {
+      "company": "databricks",
+      "role": "Sr. Partner Delivery Manager",
+      "platform": "greenhouse",
+      "location": ""
+    },
+    {
+      "company": "databricks",
+      "role": "Sr. Program Manager, Data for Good",
+      "platform": "greenhouse",
+      "location": ""
+    },
+    {
+      "company": "databricks",
+      "role": "Sr. Program Manager, Data for Good",
+      "platform": "greenhouse",
+      "location": ""
+    },
+    {
+      "company": "databricks",
+      "role": "Sr. Staff Technical Program Manager - Reliability",
+      "platform": "greenhouse",
+      "location": ""
+    },
+    {
+      "company": "databricks",
+      "role": "Sr. Staff Technical Program Manager - Reliability",
+      "platform": "greenhouse",
+      "location": ""
+    },
+    {
+      "company": "databricks",
+      "role": "Staff Technical Program Manager- Platform Features",
+      "platform": "greenhouse",
+      "location": ""
+    },
+    {
+      "company": "databricks",
+      "role": "Technical Program Manager",
+      "platform": "greenhouse",
+      "location": ""
+    },
+    {
+      "company": "figma",
+      "role": "Program Manager, Voice of the Customer",
+      "platform": "greenhouse",
+      "location": ""
+    },
+    {
+      "company": "figma",
+      "role": "Strategic Program Manager, Marketing",
+      "platform": "greenhouse",
+      "location": ""
+    },
+    {
+      "company": "figma",
+      "role": "Technical Program Manager, AI Performance",
+      "platform": "greenhouse",
+      "location": ""
+    },
+    {
+      "company": "figma",
+      "role": "Technical Program Manager, Data Science",
+      "platform": "greenhouse",
+      "location": ""
+    },
+    {
+      "company": "figma",
+      "role": "Technical Program Manager, Security",
+      "platform": "greenhouse",
+      "location": ""
+    },
+    {
+      "company": "notion",
+      "role": "Customer Success Enablement Program Manager",
+      "url": "https://jobs.ashbyhq.com/notion/a69a78e9-89d2-4a41-8938-6c07ca8a06da",
+      "platform": "ashby",
+      "location": "San Francisco, California",
+      "remote": null
+    },
+    {
+      "company": "notion",
+      "role": "Digital Customer Success Program Manager",
+      "url": "https://jobs.ashbyhq.com/notion/1c58623e-73f8-43c7-a342-1475c2eab7af",
+      "platform": "ashby",
+      "location": "San Francisco, California",
+      "remote": true
+    },
+    {
+      "company": "notion",
+      "role": "Employee Experience Program Manager (Onboarding + Adoption)",
+      "url": "https://jobs.ashbyhq.com/notion/c2299d80-c3a5-45fa-bf49-29372a4d9aec",
+      "platform": "ashby",
+      "location": "San Francisco, California",
+      "remote": true
+    }
+  ]
+}

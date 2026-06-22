@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "cards": {
+    "zoox-1": {
+      "source": "lever", "external_id": "zoox-1", "title": "Senior Scrum Master",
+      "company": "zoox", "location": "Foster City, CA", "url": "https://jobs.lever.co/zoox/1f94a0cd-8f15-443c-9e20-0ba355ed30d0",
+      "posted_at": "2026-06-11T00:00:00Z", "ingested_at": "2026-06-11T12:00:00Z",
+      "state": "evaluated", "grade": "A", "has_connection": false
+    }
+  }
+}

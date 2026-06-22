@@ -1,0 +1,18 @@
+[
+  {
+    "company": "anthropic",
+    "url": "",
+    "status": 0,
+    "reason": "invalid-url",
+    "redirect": null,
+    "checked_at": "2026-06-10T05:46:49.913Z"
+  },
+  {
+    "company": "anthropic",
+    "url": "",
+    "status": 0,
+    "reason": "invalid-url",
+    "redirect": null,
+    "checked_at": "2026-06-10T05:47:00.073Z"
+  }
+]

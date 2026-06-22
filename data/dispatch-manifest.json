@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "last_dispatch": null,
+  "note": "Dispatch subsystem restored 2026-06-15 (TD1). 'pending' = validated, awaiting commit+dispatch.",
+  "pending": [
+    "package.json",
+    "scripts/export-board-state.mjs",
+    "scripts/pulse-refresh.mjs",
+    "check-syntax.mjs",
+    "dispatch-relay.mjs",
+    "data/dispatch-manifest.json",
+    "data/deploy-log.json",
+    "portals.yml"
+  ],
+  "dispatched": []
+}

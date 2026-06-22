@@ -1,0 +1,57 @@
+[
+  {
+    "company": "Twilio",
+    "role": "Staff Product Manager",
+    "url": "https://job-boards.greenhouse.io/twilio/jobs/7904293",
+    "ats": "greenhouse",
+    "grade": "B",
+    "status": "queued",
+    "queued_at": "2026-06-15T05:18:18.603Z",
+    "source_id": "live-2026-06-15-03",
+    "keywords": [
+      "Scrum",
+      "Agile",
+      "Program",
+      "Delivery",
+      "PMP",
+      "SAFe",
+      "Stakeholders"
+    ]
+  },
+  {
+    "company": "Figma",
+    "role": "Technical Program Manager, Infrastructure",
+    "url": "https://boards.greenhouse.io/figma/jobs/6020719004?gh_jid=6020719004",
+    "ats": "greenhouse",
+    "grade": "B",
+    "status": "queued",
+    "queued_at": "2026-06-15T05:18:18.604Z",
+    "source_id": "live-2026-06-15-04",
+    "keywords": [
+      "Scrum",
+      "Agile",
+      "Program",
+      "Delivery",
+      "PMP",
+      "SAFe",
+      "Stakeholders"
+    ]
+  },
+  {
+    "company": "CI&T",
+    "role": "[Job - 29592] Technical Program Manager (Short Assignment - 6 months), Plano, Texas (USA)",
+    "url": "https://jobs.lever.co/ciandt/3c67c2c0-db64-4dde-9a39-476bbdbd78c3",
+    "ats": "lever",
+    "grade": "B",
+    "status": "queued",
+    "queued_at": "2026-06-18T05:15:32.055Z",
+    "source_id": "live-2026-06-18-002",
+    "keywords": [
+      "Program Manager",
+      "Technical Program Manager"
+    ],
+    "hasConnection": false,
+    "isWarmReferral": false,
+    "connectionName": ""
+  }
+]
