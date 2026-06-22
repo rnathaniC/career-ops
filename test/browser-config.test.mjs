@@ -188,18 +188,6 @@ describe('firefox config — valid paths', () => {
 
 describe('chromium config — path validation', () => {
 
-  test('throws BrowserConfigError when chromium executable_path does not exist on disk', async () => {
-    const p = writeTmp('ch-bad-exe.yml', [
-      'preferred: chromium',
-      'chromium:',
-      "  executable_path: 'C:\\nonexistent\\msedge.exe'",
-    ].join('\n') + '\n');
-    await assert.rejects(
-      () => loadBrowserConfig(p),
-      (e) => e instanceof BrowserConfigError && /executable_path/.test(e.message),
-    );
-  });
-
   test('throws BrowserConfigError when chromium profile_path does not exist on disk', async () => {
     const p = writeTmp('ch-bad-profile.yml', [
       'preferred: chromium',
@@ -233,6 +221,74 @@ describe('chromium config — path validation', () => {
       "  profile_path: ''",
     ].join('\n') + '\n');
     await assert.doesNotReject(() => loadBrowserConfig(p));
+  });
+
+});
+
+// ── Chromium config — BROWSER_PATH env override ───────────────────────────────
+
+describe('chromium config — BROWSER_PATH env override', () => {
+
+  function withEnv(key, value, fn) {
+    const old = Object.prototype.hasOwnProperty.call(process.env, key)
+      ? process.env[key]
+      : undefined;
+    if (value === undefined) delete process.env[key];
+    else process.env[key] = value;
+    const restore = () => {
+      if (old === undefined) delete process.env[key];
+      else process.env[key] = old;
+    };
+    return fn().finally(restore);
+  }
+
+  test('BROWSER_PATH overrides executable_path in config when set to a valid path', async () => {
+    await withEnv('BROWSER_PATH', REAL_EXE, async () => {
+      const p = writeTmp('ch-env-override.yml', [
+        'preferred: chromium',
+        'chromium:',
+        "  executable_path: 'C:\\nonexistent\\msedge.exe'",
+      ].join('\n') + '\n');
+      const cfg = await loadBrowserConfig(p);
+      assert.equal(cfg.chromium.executable_path, REAL_EXE);
+    });
+  });
+
+  test('BROWSER_PATH takes priority even when configured exe path also exists', async () => {
+    await withEnv('BROWSER_PATH', REAL_EXE, async () => {
+      const p = writeTmp('ch-env-priority.yml', [
+        'preferred: chromium',
+        'chromium:',
+        `  executable_path: '${exeYaml}'`,
+      ].join('\n') + '\n');
+      const cfg = await loadBrowserConfig(p);
+      assert.equal(cfg.chromium.executable_path, REAL_EXE);
+    });
+  });
+
+  test('throws BrowserConfigError when BROWSER_PATH points to a non-existent file', async () => {
+    await withEnv('BROWSER_PATH', 'C:\\nonexistent\\browser.exe', async () => {
+      const p = writeTmp('ch-env-bad.yml', 'preferred: chromium\n');
+      await assert.rejects(
+        () => loadBrowserConfig(p),
+        (e) => e instanceof BrowserConfigError && /BROWSER_PATH/.test(e.message),
+      );
+    });
+  });
+
+  test('BROWSER_PATH is ignored for non-chromium preferred', async () => {
+    await withEnv('BROWSER_PATH', REAL_EXE, async () => {
+      const p = writeTmp('ch-env-ff-ignored.yml', [
+        'preferred: firefox',
+        'firefox:',
+        `  executable_path: '${exeYaml}'`,
+        `  profile_path: '${profileYaml}'`,
+      ].join('\n') + '\n');
+      const cfg = await loadBrowserConfig(p);
+      // BROWSER_PATH applies to chromium only; firefox uses its own paths
+      assert.equal(cfg.preferred, 'firefox');
+      assert.equal(cfg.firefox.executable_path, REAL_EXE);
+    });
   });
 
 });

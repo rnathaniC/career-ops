@@ -8,13 +8,22 @@
 //   node scripts/ingest-runner.mjs --grade ABC --limit 10
 //   node scripts/ingest-runner.mjs --dry-run             # show plan, write nothing
 //   node scripts/ingest-runner.mjs --input data/kanban-import-2026-06-12.json
+//   node scripts/ingest-runner.mjs --include-referrals   # also queue New-Hot/warm-referral cards (default: held back)
+//   node scripts/ingest-runner.mjs --queue <path> --status <path>  # override output paths (mainly for tests)
 //
 // FLOW:
 //   1. Pick newest data/kanban-import-*.json (or --input override).
 //   2. Filter by grade (default AB).
-//   3. Dedupe against data/submit-queue.json by URL.
-//   4. Append new entries with { status: "queued", queued_at: now, ... }.
-//   5. Write back submit-queue.json. Stamp data/ingest-status.json.
+//   3. Lane-Branch (2026-06-15): warm-referral / New-Hot cards (isWarmReferral:true) are held
+//      back from the queue by default — they go through human-in-the-loop review via
+//      `npm run referral-queue`, not the automated submit-queue. Pass --include-referrals
+//      to restore the old behavior (not recommended; breaks the New-Hot human gate).
+//   4. Dedupe remaining (New-Fresh) candidates against data/submit-queue.json by URL.
+//   5. Append new entries with { status: "queued", queued_at: now, hasConnection,
+//      isWarmReferral, connectionName, ... }. These fields are propagated so any
+//      downstream consumer (e.g. Speedy Apply) can re-check the lane itself rather than
+//      trusting that ingest already screened correctly.
+//   6. Write back submit-queue.json. Stamp data/ingest-status.json.
 //
 // After this runs, `npm run auto-submit:semi` picks up the new queued items.
 
@@ -25,8 +34,6 @@ import { fileURLToPath } from "node:url";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(__dirname, "..");
 const DATA = join(ROOT, "data");
-const QUEUE = join(DATA, "submit-queue.json");
-const STATUS = join(DATA, "ingest-status.json");
 
 // ---- args -----------------------------------------------------------------
 function arg(name, dflt = null) {
@@ -35,12 +42,18 @@ function arg(name, dflt = null) {
   const v = process.argv[i + 1];
   return v && !v.startsWith("--") ? v : true;
 }
+
+// --queue / --status overrides exist mainly for tests — production always uses
+// the real data/submit-queue.json + data/ingest-status.json (the defaults below).
+const QUEUE = typeof arg("--queue") === "string" ? resolve(ROOT, arg("--queue")) : join(DATA, "submit-queue.json");
+const STATUS = typeof arg("--status") === "string" ? resolve(ROOT, arg("--status")) : join(DATA, "ingest-status.json");
 const GRADES = String(arg("--grade", "AB")).toUpperCase().split("").filter((c) => /[A-F]/.test(c));
 const LIMIT = parseInt(arg("--limit", "9999"), 10);
 const DRY = arg("--dry-run", false) === true;
 const INPUT_OVERRIDE = typeof arg("--input") === "string" ? arg("--input") : null;
+const INCLUDE_REFERRALS = arg("--include-referrals", false) === true;
 
-console.log(`ingest-runner: grades=[${GRADES.join(",")}] limit=${LIMIT} dry=${DRY}`);
+console.log(`ingest-runner: grades=[${GRADES.join(",")}] limit=${LIMIT} dry=${DRY} include_referrals=${INCLUDE_REFERRALS}`);
 
 // ---- helpers --------------------------------------------------------------
 function newestKanbanImport() {
@@ -83,12 +96,23 @@ const graded = candidates.filter((c) => {
 });
 console.log(`after grade filter (${GRADES.join("/")}): ${graded.length}`);
 
-// ---- 3. Dedupe against queue ---------------------------------------------
+// ---- 2.5. Lane-Branch — hold back New-Hot / warm-referral cards -----------
+// Standing rule (2026-06-15): New-Hot cards (isWarmReferral:true) are human-in-the-loop
+// only. They must never reach the automated submit-queue. Run `npm run referral-queue`
+// separately to surface them for Rahil to review/send. --include-referrals overrides
+// this for one-off manual use; it is NOT used by the orchestrator.
+const referralHeld = INCLUDE_REFERRALS ? [] : graded.filter((c) => c && c.isWarmReferral);
+const fresh = INCLUDE_REFERRALS ? graded : graded.filter((c) => !c || !c.isWarmReferral);
+if (referralHeld.length) {
+  console.log(`held back (New-Hot / warm-referral, see "npm run referral-queue"): ${referralHeld.length}`);
+}
+
+// ---- 3. Dedupe against queue (New-Fresh only) ----------------------------
 const queue = readJson(QUEUE, []);
 const seen = new Set((Array.isArray(queue) ? queue : []).map((q) => q && q.url).filter(Boolean));
 
 const toAdd = [];
-for (const c of graded) {
+for (const c of fresh) {
   if (toAdd.length >= LIMIT) break;
   if (seen.has(c.url)) continue;
   seen.add(c.url);
@@ -102,17 +126,23 @@ for (const c of graded) {
     queued_at: new Date().toISOString(),
     source_id: c.id || null,
     keywords: c.keywords || [],
+    // Lane fields propagated so downstream consumers can re-check the lane
+    // themselves rather than trusting that ingest already screened correctly.
+    hasConnection: c.hasConnection ?? false,
+    isWarmReferral: c.isWarmReferral ?? false,
+    connectionName: c.connectionName ?? null,
   });
 }
 
 console.log(`new (after dedupe): ${toAdd.length}`);
-console.log(`skipped (already in queue): ${graded.length - toAdd.length}`);
+console.log(`skipped (already in queue): ${fresh.length - toAdd.length}`);
 
 if (toAdd.length === 0) {
   console.log("Nothing to add.");
   writeFileSync(STATUS, JSON.stringify({
     ran_at_utc: new Date().toISOString(), source, grades: GRADES,
-    considered: candidates.length, graded: graded.length, added: 0, dry_run: DRY,
+    considered: candidates.length, graded: graded.length,
+    fresh: fresh.length, referral_held: referralHeld.length, added: 0, dry_run: DRY,
   }, null, 2) + "\n");
   process.exit(0);
 }
@@ -131,7 +161,8 @@ const newQueue = [...(Array.isArray(queue) ? queue : []), ...toAdd];
 writeFileSync(QUEUE, JSON.stringify(newQueue, null, 2) + "\n");
 writeFileSync(STATUS, JSON.stringify({
   ran_at_utc: new Date().toISOString(), source, grades: GRADES,
-  considered: candidates.length, graded: graded.length, added: toAdd.length,
+  considered: candidates.length, graded: graded.length,
+  fresh: fresh.length, referral_held: referralHeld.length, added: toAdd.length,
   queue_size_after: newQueue.length, backup: bak.replace(ROOT + "/", ""),
 }, null, 2) + "\n");
 

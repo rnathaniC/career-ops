@@ -4,11 +4,14 @@
  *
  * Returns a safe default (chromium, extension autofill off) when the file is absent.
  * Validates that required paths exist on disk when preferred = firefox.
+ * When chromium.executable_path is missing from disk, auto-detects Edge/Chrome.
+ * BROWSER_PATH env var overrides the configured executable_path entirely.
  */
 
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { spawnSync } from 'node:child_process';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 export const ROOT = path.resolve(__dirname, '..');
@@ -27,6 +30,33 @@ const DEFAULT_CONFIG = {
   chromium: {},
   extension_autofill: false,
 };
+
+const CHROMIUM_CANDIDATES = [
+  'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe',
+  'C:\\Program Files\\Microsoft\\Edge\\Application\\msedge.exe',
+  'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
+  'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe',
+];
+
+/**
+ * Probe common install locations then `where` for a usable Chromium-based browser.
+ * @returns {string|null} Absolute path to the executable, or null if none found.
+ */
+export function detectChromiumExe() {
+  for (const p of CHROMIUM_CANDIDATES) {
+    if (fs.existsSync(p)) return p;
+  }
+  for (const cmd of ['msedge', 'chrome']) {
+    try {
+      const r = spawnSync('where', [cmd], { encoding: 'utf8', shell: false, timeout: 5000 });
+      if (r.status === 0 && r.stdout?.trim()) {
+        const line = r.stdout.trim().split('\n')[0].trim();
+        if (line && fs.existsSync(line)) return line;
+      }
+    } catch { /* cmd not on PATH */ }
+  }
+  return null;
+}
 
 /**
  * Load and validate config/browser.yml.
@@ -75,13 +105,31 @@ export async function loadBrowserConfig(configPath = DEFAULT_CONFIG_PATH) {
   };
 
   if (cfg.preferred === 'chromium') {
-    const exePath = cfg.chromium?.executable_path;
-    if (exePath && !fs.existsSync(exePath)) {
-      throw new BrowserConfigError(
-        `browser.yml: chromium.executable_path not found on disk: ${exePath}\n` +
-        '  Run: node scripts/detect-chromium.mjs   to auto-detect the correct path',
-      );
+    const envBrowserPath = (process.env.BROWSER_PATH || '').trim() || null;
+
+    if (envBrowserPath) {
+      // BROWSER_PATH env var takes absolute priority over config
+      if (!fs.existsSync(envBrowserPath)) {
+        throw new BrowserConfigError(`BROWSER_PATH not found on disk: ${envBrowserPath}`);
+      }
+      cfg.chromium.executable_path = envBrowserPath;
+    } else {
+      const exePath = cfg.chromium?.executable_path;
+      if (exePath && !fs.existsSync(exePath)) {
+        // Configured path missing — probe common locations before failing
+        const detected = detectChromiumExe();
+        if (detected) {
+          console.warn(`[browser-config] ${exePath} not found — auto-detected: ${detected}`);
+          cfg.chromium.executable_path = detected;
+        } else {
+          throw new BrowserConfigError(
+            `browser.yml: chromium.executable_path not found on disk: ${exePath}\n` +
+            '  No browser found. Install Edge or Chrome, or set BROWSER_PATH in .env',
+          );
+        }
+      }
     }
+
     const profilePath = cfg.chromium?.profile_path;
     if (profilePath && !fs.existsSync(profilePath)) {
       throw new BrowserConfigError(

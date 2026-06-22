@@ -61,3 +61,4 @@ logs/
 *.pre-*
 *.pretrunc-bak
 _*probe*
+.envrc

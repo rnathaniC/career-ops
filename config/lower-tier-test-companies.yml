@@ -1,40 +1,14 @@
-# lower-tier-test-companies.yml
+# ── Live auto-submit master switch ────────────────────────────────────────────
+# As of 2026-06-18 the per-company allowlist was RETIRED. Live mode now trusts the
+# per-card gates that apply to every submission:
+#   grade A/B eligibility  ->  readiness band (>=60)  ->  5 submissions/day cap
+# Readiness bands:  <60 skip · 60-88 submit WITHOUT cover letter · 89+ submit WITH CL.
 #
-# Safety config for --live submission mode.
-# ALL THREE locks must be active before auto-submit will click Submit:
-#   (a) --allow-tier lower          CLI flag on every invocation
-#   (b) enabled: true               this file, set by you
-#   (c) Company slug in this list   per-card whitelist
-#
-# How to identify a "lower-tier" company:
-#   - Fortune 1000 but NOT Fortune 100 (lower stakes if a submission goes wrong)
-#   - You'd be fine if a recruiter sees an automated application there
-#   - You have a genuine interest in the role (still quality > speed)
-#
-# How to add a company:
-#   1. Find its kanban card's `company` field value (e.g. "Acme Corp")
-#   2. Compute slug: lowercase, non-alphanumeric -> hyphens (e.g. "acme-corp")
-#   3. Add an entry below with slug + reason
-#   4. Set enabled: true
-#
-# Hard cap: 5 live submissions per day (tracked in data/live-daily-count-{date}.json)
-# --limit flag cannot override the daily cap.
-#
-# NOTE: auto-submit reads cfg.companies (flat list). Do NOT nest under tiers: -- it
-# will silently fail (companies: [] fallback) and block every live submission.
-
-# Note: "lower-tier" is a misnomer here. These are the FIRST live targets
-# Rahil approved for validation. Update this list before subsequent live runs.
-
+# enabled: true   -> live auto-submit is ARMED (any qualifying A/B card may submit).
+# enabled: false  -> GLOBAL KILL-SWITCH: no live submissions at all. Flip this to
+#                    instantly stop everything without touching code or the scheduler.
 enabled: true
 
-companies:
-  - slug: palantir
-    reason: First live submission target, CL hand-crafted 2026-06-10
-    max_per_day: 1
-  - slug: zoox
-    reason: First live submission target, CL hand-crafted 2026-06-10
-    max_per_day: 1
-  - slug: samsara
-    reason: Greenhouse live test, stockpile CL exists
-    max_per_day: 1
+# (optional) companies: list is no longer enforced. Kept only as a place to jot
+# notes; it has no effect on what auto-submits.
+companies: []

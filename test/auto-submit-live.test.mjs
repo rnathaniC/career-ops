@@ -16,6 +16,7 @@ import assert from 'node:assert/strict';
 import fs     from 'node:fs';
 import path   from 'node:path';
 import http   from 'node:http';
+import { execSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { tmpdir } from 'node:os';
 
@@ -420,6 +421,52 @@ describe('dryRunCard', () => {
   });
 });
 
-// ── Cleanup ───────────────────────────────────────────────────────────────────
+// ── 11. --card-ids CLI flag (Lane-Branch defense-in-depth allowlist) ──────────
 
-after(cleanTmp);
+describe('--card-ids CLI flag', () => {
+  // Build a minimal K2 kanban JSON export ({ cards: { [id]: PulseJob } }) with
+  // two eligible cards (A grade, evaluated state, not warm-referral). We run the
+  // real CLI in DRY mode (no --live/--semi-auto) so no browser is required.
+  const CLI_JSON = path.join(TMP, 'card-ids-board.json');
+  const board = {
+    version: 1,
+    exported_at: new Date().toISOString(),
+    source: 'test',
+    cards: {
+      'keep-1':  { id: 'keep-1',  company: 'Stripe', title: 'Senior PM',
+        url: 'https://job-boards.greenhouse.io/stripe/jobs/1', grade: 'A', state: 'evaluated',
+        has_connection: false, is_warm_referral: false },
+      'other-2': { id: 'other-2', company: 'Figma', title: 'PM',
+        url: 'https://job-boards.greenhouse.io/figma/jobs/2', grade: 'A', state: 'evaluated',
+        has_connection: false, is_warm_referral: false },
+    },
+  };
+  fs.writeFileSync(CLI_JSON, JSON.stringify(board, null, 2), 'utf8');
+
+  const SCRIPT = path.join(ROOT, 'scripts', 'auto-submit.mjs');
+
+  function runCli(extraArgs) {
+    // DRY mode (no --live / --semi-auto). execSync throws on non-zero exit;
+    // DRY and the "nothing to process" path both exit 0, so callers get stdout.
+    return execSync(
+      `node ${JSON.stringify(SCRIPT)} --kanban-json ${JSON.stringify(CLI_JSON)} ${extraArgs}`,
+      { cwd: ROOT, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }
+    );
+  }
+
+  test('filters eligible set down to the requested card id', () => {
+    const out = runCli('--card-ids keep-1');
+    assert.match(out, /--card-ids filter: 2 eligible → 1 \(requested 1\)/);
+  });
+
+  test('reports requested ids that are not in the eligible set', () => {
+    const out = runCli('--card-ids keep-1,does-not-exist');
+    assert.match(out, /--card-ids filter: 2 eligible → 1 \(requested 2\)/);
+    assert.match(out, /not in eligible set[\s\S]*does-not-exist/);
+  });
+
+  test('exits cleanly when no requested id matches', () => {
+    const out = runCli('--card-ids none-a,none-b');
+    assert.match(out, /Nothing to process after --card-ids filter/);
+  });
+});

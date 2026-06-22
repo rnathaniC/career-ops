@@ -11,6 +11,7 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
+import { spawnSync } from 'node:child_process';
 
 const EXE_CANDIDATES = [
   { name: 'Edge',   path: 'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe' },
@@ -27,6 +28,16 @@ const PROFILE_SUBDIRS = {
 function findExe() {
   for (const c of EXE_CANDIDATES) {
     if (fs.existsSync(c.path)) return c;
+  }
+  // Fallback: ask the shell where msedge / chrome live
+  for (const [cmd, name] of [['msedge', 'Edge'], ['chrome', 'Chrome']]) {
+    try {
+      const r = spawnSync('where', [cmd], { encoding: 'utf8', shell: false, timeout: 5000 });
+      if (r.status === 0 && r.stdout?.trim()) {
+        const line = r.stdout.trim().split('\n')[0].trim();
+        if (line && fs.existsSync(line)) return { name, path: line };
+      }
+    } catch { /* cmd not on PATH */ }
   }
   return null;
 }

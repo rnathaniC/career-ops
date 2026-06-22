@@ -1,40 +1,31 @@
-# config/sources.yml — Canonical list of ATS company slugs for the Pulse Jobs Worker
-# Source of truth: replaces hardcoded lists in SKILL_UPDATE_PHASE1.md
-# Worker: https://pulse-jobs-proxy.rahilnathanipulse.workers.dev
-#
-# Verify slugs: node scripts/slug-audit.mjs
-# Status key: ok (has jobs) | empty (live but no current openings) | unverified | not_found
+# config/sources.yml — declarative scan sources (Kaizen K-2026-06-08-2, approved 2026-06-11)
+# Single source of truth for company slugs. The scheduled task + scan.mjs + Worker read THIS,
+# not SKILL.md. ats types: greenhouse | lever | ashby | workday
+defaults:
+  target_titles:
+    - Product Manager
+    - Program Manager
+    - Technical Program Manager
+    - Scrum Master
+    - Agile Coach
+    - Project Manager
+  target_locations: [Dallas, Remote, United States]
+  salary_floor_usd: 130000
 
-greenhouse:
-  # Verified via wrangler dev (2026-06-08)
-  - slug: stripe
-    status: ok
-    notes: returns real jobs; URL normalizer in scan.mjs handles stripe.com wrappers
-  # Unverified — run slug-audit.mjs to confirm
-  - slug: anthropic
-    status: unverified
-  - slug: databricks
-    status: unverified
-  - slug: openai
-    status: unverified
-  - slug: notion
-    status: unverified
-  - slug: figma
-    status: unverified
-  - slug: linear
-    status: unverified
+greenhouse:   # GET https://boards-api.greenhouse.io/v1/boards/{slug}/jobs  (keyless, free)
+  - { slug: stripe,     verified: 2026-06-08, last_count: 482 }
+  - { slug: anthropic,  verified: 2026-06-08, last_count: 371 }
+  - { slug: databricks, verified: 2026-06-08, last_count: 761 }
+  - { slug: figma,      verified: 2026-06-08, last_count: 167 }
 
-lever:
-  # Unverified — 404 seen in wrangler dev test; try figma-team or other variants
-  - slug: figma
-    status: unverified
-    notes: got 404 in dev test; check figma-team, figmainc
-  - slug: linear
-    status: unverified
-  - slug: notion-hq
-    status: unverified
-    notes: notion/notion-hq both common; try both
-  - slug: hex
-    status: unverified
-  - slug: retool
-    status: unverified
+ashby:        # GET https://api.ashbyhq.com/posting-api/job-board/{slug}  (keyless, free)
+  # Root cause of "Lever all returned 0" (REFRESH_2026-06-08): these companies are on Ashby.
+  - { slug: notion, verified: 2026-06-11 }   # live payload confirmed 2026-06-11
+  - { slug: linear, verified: 2026-06-12 }   # API-verified: 25 jobs live, 0 title matches today
+
+lever: []     # Re-add ONLY API-verified slugs. Prior 5 all returned 0 — wrong ATS, not typos.
+
+workday:      # Phase 2 (Rahil priority #2) — listener for select target companies.
+  enabled: false
+  # CXS endpoint shape: POST https://{tenant}.{wd}.myworkdayjobs.com/wday/cxs/{tenant}/{site}/jobs
+  sites: []   # e.g. { tenant: anthem, wd: wd1, site: External }

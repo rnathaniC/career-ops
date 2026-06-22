@@ -15,7 +15,7 @@ states:
 
   - id: applied
     label: Applied
-    aliases: [aplicado, enviada, aplicada, sent, submitted]
+    aliases: [aplicado, enviada, aplicada, sent]
     description: Application submitted
     dashboard_group: applied
 
@@ -36,12 +36,6 @@ states:
     aliases: [oferta]
     description: Offer received
     dashboard_group: offer
-
-  - id: blocked
-    label: Blocked
-    aliases: [bloqueado, bloqueada]
-    description: Auto-submit blocked (human-only field, dead listing, or form error)
-    dashboard_group: blocked
 
   - id: rejected
     label: Rejected

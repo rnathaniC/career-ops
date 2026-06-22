@@ -5,7 +5,6 @@ export const CANONICAL = [
   "responded",
   "interview",
   "offer",
-  "blocked",
   "rejected",
   "discarded",
   "skip"
@@ -17,12 +16,9 @@ export const ALIASES = {
   "enviada": "applied",
   "aplicada": "applied",
   "sent": "applied",
-  "submitted": "applied",
   "respondido": "responded",
   "entrevista": "interview",
   "oferta": "offer",
-  "bloqueado": "blocked",
-  "bloqueada": "blocked",
   "rechazado": "rejected",
   "rechazada": "rejected",
   "descartado": "discarded",
@@ -50,9 +46,6 @@ export const GROUPS = {
   "offer": [
     "offer"
   ],
-  "blocked": [
-    "blocked"
-  ],
   "rejected": [
     "rejected"
   ],
@@ -79,8 +72,7 @@ export const STATES = [
       "aplicado",
       "enviada",
       "aplicada",
-      "sent",
-      "submitted"
+      "sent"
     ],
     "label": "Applied",
     "description": "Application submitted",
@@ -112,16 +104,6 @@ export const STATES = [
     "label": "Offer",
     "description": "Offer received",
     "dashboard_group": "offer"
-  },
-  {
-    "id": "blocked",
-    "aliases": [
-      "bloqueado",
-      "bloqueada"
-    ],
-    "label": "Blocked",
-    "description": "Auto-submit blocked (human-only field, dead listing, or form error)",
-    "dashboard_group": "blocked"
   },
   {
     "id": "rejected",

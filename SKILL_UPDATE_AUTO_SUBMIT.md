@@ -15,7 +15,7 @@ Sandbox cannot write to OneDrive directly (see BUGS.md K-2026-06-05-3).
 ### Mode 1 — Dry-run (default, run first every time)
 
 ```bash
-cd C:/Users/rahil/career-ops
+cd <career-ops root>  # e.g. your local checkout
 node scripts/auto-submit.mjs \
   --kanban dashboard/job-pulse-kanban.html \
   --limit 10 \

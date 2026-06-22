@@ -5,7 +5,6 @@
     "responded",
     "interview",
     "offer",
-    "blocked",
     "rejected",
     "discarded",
     "skip"
@@ -16,12 +15,9 @@
     "enviada": "applied",
     "aplicada": "applied",
     "sent": "applied",
-    "submitted": "applied",
     "respondido": "responded",
     "entrevista": "interview",
     "oferta": "offer",
-    "bloqueado": "blocked",
-    "bloqueada": "blocked",
     "rechazado": "rejected",
     "rechazada": "rejected",
     "descartado": "discarded",
@@ -49,9 +45,6 @@
     "offer": [
       "offer"
     ],
-    "blocked": [
-      "blocked"
-    ],
     "rejected": [
       "rejected"
     ],
@@ -78,8 +71,7 @@
         "aplicado",
         "enviada",
         "aplicada",
-        "sent",
-        "submitted"
+        "sent"
       ],
       "label": "Applied",
       "description": "Application submitted",
@@ -111,16 +103,6 @@
       "label": "Offer",
       "description": "Offer received",
       "dashboard_group": "offer"
-    },
-    {
-      "id": "blocked",
-      "aliases": [
-        "bloqueado",
-        "bloqueada"
-      ],
-      "label": "Blocked",
-      "description": "Auto-submit blocked (human-only field, dead listing, or form error)",
-      "dashboard_group": "blocked"
     },
     {
       "id": "rejected",

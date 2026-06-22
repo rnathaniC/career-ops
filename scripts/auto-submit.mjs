@@ -7,10 +7,11 @@
  *   --semi-auto   Fills form in visible Chromium, stops before submit. YOU click.
  *   --live        Full automation. ALL THREE safety locks required.
  *
- * SAFETY LOCKS FOR --live (ALL THREE REQUIRED):
+ * SAFETY LOCKS FOR --live (BOTH REQUIRED to arm live mode):
  *   (a) --allow-tier <tier>                            CLI flag
- *   (b) config/lower-tier-test-companies.yml           enabled: true
- *   (c) Company slug in the YAML list for that tier    per-card check
+ *   (b) config/lower-tier-test-companies.yml           enabled: true  (global kill-switch)
+ * Per-card gates then apply to EVERY submission: grade A/B eligibility +
+ * readiness band (>=60) + 5/day cap. Per-company allowlist removed 2026-06-18.
  *
  * CLI:
  *   node scripts/auto-submit.mjs [--kanban <path>] [--limit N] [options]
@@ -185,6 +186,22 @@ export function isEligible(card) {
     (card.grade === 'A' || card.grade === 'B') &&
     !card.isWarmReferral
   );
+}
+
+/**
+ * Three-band readiness rule for eligible cards (already grade A/B):
+ *   total < 60        -> skip
+ *   60 <= total <= 88 -> submit WITHOUT cover letter
+ *   total >= 89       -> submit WITH cover letter (requires one; hold if missing)
+ * @param {number} total  readiness total (0-100)
+ * @param {boolean} hasCl whether a cover-letter file was matched
+ * @returns {{ action:'skip'|'submit', attachCl:boolean, band:string, reason:string }}
+ */
+export function readinessGate(total, hasCl) {
+  if (total < 60) return { action: 'skip',   attachCl: false, band: '<60',   reason: `below 60 (${total})` };
+  if (total < 89) return { action: 'submit', attachCl: false, band: '60-88', reason: `mid band (${total}) -- submit without CL` };
+  if (!hasCl)     return { action: 'skip',   attachCl: false, band: '89+',   reason: `89+ (${total}) requires a CL but none found` };
+  return            { action: 'submit', attachCl: true,  band: '89+',   reason: `high band (${total}) -- submit with CL` };
 }
 
 // ── ATS detection ─────────────────────────────────────────────────────────────
@@ -568,16 +585,18 @@ export function loadLowerTierConfig() {
 }
 
 /**
- * Validates all three safety locks for --live mode against a single card.
+ * Validates the live-mode arming locks. Per-company allowlist was removed
+ * 2026-06-18 — live now trusts the per-card gates (grade A/B + readiness band
+ * >=60 + 5/day cap) that apply to every submission.
  * @returns {{ ok: boolean, reason?: string }}
  */
 export function validateLiveSafety(card, allowTier) {
-  // Lock (a): --allow-tier flag
+  // Lock (a): --allow-tier flag — explicit intent to run live
   if (!allowTier) {
     return { ok: false, reason: 'Missing --allow-tier flag. Add: --allow-tier lower' };
   }
 
-  // Lock (b): YAML exists and enabled: true
+  // Lock (b): YAML exists and enabled: true — GLOBAL kill-switch for all live submits
   const cfg = loadLowerTierConfig();
   if (!cfg) {
     return { ok: false, reason: 'config/lower-tier-test-companies.yml not found. Create it from the template first.' };
@@ -586,16 +605,8 @@ export function validateLiveSafety(card, allowTier) {
     return { ok: false, reason: 'lower-tier-test-companies.yml has enabled: false. Set enabled: true to activate live mode.' };
   }
 
-  // Lock (c): company slug in list
-  const slug  = (card.company || '').toLowerCase().replace(/[^a-z0-9]+/g, '-');
-  const entry = (cfg.companies || []).find((c) => c.slug === slug);
-  if (!entry) {
-    return {
-      ok:     false,
-      reason: `Company "${card.company}" (slug: "${slug}") not in lower-tier list. Add it to config/lower-tier-test-companies.yml first.`,
-    };
-  }
-
+  // Per-company allowlist removed: any eligible A/B card that clears the readiness
+  // band (>=60) may submit, capped at 5/day. Set enabled: false to halt everything.
   return { ok: true };
 }
 
@@ -831,17 +842,20 @@ async function runSemiAuto(cards, pw, personal, browserCfg, useExtension, browse
     process.stdout.write('  Readiness check... ');
     const clText       = readClFileText(cl);
     const readiness    = await scoreCard(card, { resumeText: cvText, clText });
+    let clForSubmit = cl;
     if (readiness.score_skipped) {
       console.log(`SKIPPED (${readiness.reason}) — proceeding anyway`);
     } else {
       saveReadinessScore(card.id, readiness.total, readiness.grade);
-      if (!readiness.passed) {
-        console.log(`FAIL ${readiness.total}/100 (${readiness.grade}) — skipping card`);
+      const gate = readinessGate(readiness.total, Boolean(cl));
+      if (gate.action === 'skip') {
+        console.log(`SKIP ${readiness.total}/100 (${readiness.grade}) — ${gate.reason}`);
         for (const flag of readiness.flags.slice(0, 3)) console.log(`    • ${flag}`);
-        results.push({ id: card.id, status: 'readiness-fail', readiness, url: card.url });
+        results.push({ id: card.id, status: gate.band === '89+' ? 'cl-required' : 'readiness-fail', readiness, url: card.url });
         continue;
       }
-      console.log(`OK ${readiness.total}/100 (${readiness.grade})`);
+      clForSubmit = gate.attachCl ? cl : null;
+      console.log(`OK ${readiness.total}/100 (${readiness.grade}) — ${gate.reason}`);
     }
 
     let browser              = null;
@@ -890,7 +904,7 @@ async function runSemiAuto(cards, pw, personal, browserCfg, useExtension, browse
       } else if (personal) {
         process.stdout.write('  Filling form fields... ');
         try {
-          fillReport = await fillForm(ats, page, personal, cl);
+          fillReport = await fillForm(ats, page, personal, clForSubmit);
           console.log(`${fillReport.filled}/${fillReport.total} fields filled. Missing: [${fillReport.missing_fields.join(', ') || 'none'}]`);
           for (const line of formatUploadDetails(fillReport.upload_details || {})) console.log(line);
         } catch (e) {
@@ -1059,17 +1073,20 @@ async function runLive(cards, pw, allowTier, personal, browserCfg, useExtension,
     process.stdout.write('  Readiness check... ');
     const liveClText  = readClFileText(cl);
     const readiness   = await scoreCard(card, { resumeText: cvText, clText: liveClText });
+    let clForSubmit = cl;
     if (readiness.score_skipped) {
       console.log(`SKIPPED (${readiness.reason}) — proceeding anyway`);
     } else {
       saveReadinessScore(card.id, readiness.total, readiness.grade);
-      if (!readiness.passed) {
-        console.log(`FAIL ${readiness.total}/100 (${readiness.grade}) — skipping card`);
+      const gate = readinessGate(readiness.total, Boolean(cl));
+      if (gate.action === 'skip') {
+        console.log(`SKIP ${readiness.total}/100 (${readiness.grade}) — ${gate.reason}`);
         for (const flag of readiness.flags.slice(0, 3)) console.log(`    • ${flag}`);
-        results.push({ id: card.id, status: 'readiness-fail', readiness, url: card.url });
+        results.push({ id: card.id, status: gate.band === '89+' ? 'cl-required' : 'readiness-fail', readiness, url: card.url });
         continue;
       }
-      console.log(`OK ${readiness.total}/100 (${readiness.grade})`);
+      clForSubmit = gate.attachCl ? cl : null;
+      console.log(`OK ${readiness.total}/100 (${readiness.grade}) — ${gate.reason}`);
     }
 
     let browser              = null;
@@ -1141,7 +1158,7 @@ async function runLive(cards, pw, allowTier, personal, browserCfg, useExtension,
         fillReport = { extension: true, note: `deferred to SpeedyApply (${attachLabel}, 5s wait)` };
       } else if (personal) {
         try {
-          fillReport = await fillForm(ats, page, personal, cl);
+          fillReport = await fillForm(ats, page, personal, clForSubmit);
           console.log(`  Filled ${fillReport.filled}/${fillReport.total} fields. Missing: [${fillReport.missing_fields.join(', ') || 'none'}]`);
           for (const line of formatUploadDetails(fillReport.upload_details || {})) console.log(line);
         } catch (e) {
