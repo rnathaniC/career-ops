@@ -98,3 +98,29 @@ config/linkedin-connections.json
 New Text Document*.txt
 _cleared-update-lock.*
 *.tmp
+
+# ── Round 2 hardening (after 9adbc09 swept in scratch; tidy-repo.bat untracks) ─
+# Cloudflare worker local dev — secrets template + build cache (never commit)
+cloudflare-worker/.dev.vars
+cloudflare-worker/.wrangler/
+# This helper's own log
+commit-pulse.log
+# Root + data scratch / scan caches / state dumps — all regenerated
+tmp/
+data/tmp/
+data/tmp-*
+data/test-*
+data/live-*
+data/worker-raw/
+data/worker-raw-*/
+data/worker-candidates-*
+data/worker-new-us-*
+data/worker-scan-*
+data/kanban-snapshot-*
+data/kanban-k2-export-*
+data/secondary-verified-*
+data/dead-listings-*
+data/*.err
+# Trash/probe leftovers
+modes/_zztest/
+*.trash.*
