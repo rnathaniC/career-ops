@@ -76,7 +76,7 @@ echo   --- end staged list ---
 
 echo.
 echo [4] Committing...
-git commit -m "pulse: restore truncated package.json scripts + ship CL-Gen & cadence watchdog + commit-hygiene" -m "P0: rebuild 11 pipeline npm scripts lost to truncation. K-2026-06-21-1 CL-Gen (Step 4.55) + readiness reads output/. K-2026-06-21-3 cadence watchdog (Step -0.9). TD-01 honest attempted count. Harden .gitignore."
+git commit -m "pulse: weekly-retro 2026-06-26 fixes (auth + preflight + CV + 2 defects)" -m "B-3 add connections:sync npm script (pulls 1697 contacts). T-1 fix test-all VERSION semver marker strip (CI 68/0). K-0626-1 self-healing chromium+libXdamage preflight (pulse-refresh Step -1.1). B-1 launch-debug-browser splits Default profile so Edge stays logged in + run-autosubmit.bat now reads data/board-state.json. K-0626-3 cv.md skills/certs inline + action-verb bullets (resume 60/60). Add launch-debug-browser tests."
 if errorlevel 1 (
   echo   COMMIT returned non-zero ^(likely nothing staged, or an error above^).
   echo   --- current status ---

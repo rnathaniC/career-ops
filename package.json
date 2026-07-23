@@ -32,13 +32,20 @@
     "referral-queue": "node scripts/referral-queue.mjs",
     "score:dry-run": "node scripts/readiness-scorer.mjs --dry-run",
     "auto-submit:live": "node scripts/auto-submit.mjs --kanban-json data/board-state.json --live --allow-tier lower",
+    "export-auth": "node scripts/export-auth-state.mjs",
     "ingest:dry": "node scripts/ingest-runner.mjs --dry-run",
     "auto-submit": "node scripts/auto-submit.mjs --kanban dashboard/job-pulse-kanban.html",
     "check-liveness": "node scripts/check-job-liveness.mjs",
     "safe-edit": "node scripts/safe-edit.mjs",
     "codegen:states": "node scripts/codegen-states.mjs",
     "cl:all": "node scripts/generate-cl.mjs --all",
-    "cadence": "node scripts/cadence-watchdog.mjs"
+    "cadence": "node scripts/cadence-watchdog.mjs",
+    "connections:sync": "node scripts/sync-connections.mjs",
+    "pulse:refresh": "node scripts/pulse-refresh.mjs",
+    "cadence:mark": "node scripts/cadence-mark.mjs",
+    "workday:login": "node scripts/workday-login.mjs",
+    "workday:sessions": "node scripts/workday-login.mjs --list",
+    "linkedin:list": "node scripts/linkedin-dm.mjs --list"
   },
   "keywords": [
     "ai",

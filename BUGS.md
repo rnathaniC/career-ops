@@ -4,6 +4,8 @@ Single source of truth for open defects and tech debt in the career-ops + AutoSu
 The 8am report's 🔧 section reads from CLAUDE.md's Tech Debt Log for resolved items;
 this file tracks **open** work.
 
+**ID namespaces (resolved 2026-07-17):** rows here use their original IDs; pulse-report/session bugs use dated IDs `B-MMDD-#` (e.g. B-0717-1) so they can never collide with BUGS.md `B#`/`B-#` rows again. Legacy IDs are frozen — do not rename.
+
 **Severity:** P1 = data-loss / silent failure | P2 = blocks automation | P3 = degrades quality | P4 = hygiene
 **Status:** New | In-progress | Blocked | Closed
 
@@ -25,6 +27,11 @@ this file tracks **open** work.
 | B9 | P1 | New | 2026-06-10 | `semi-auto` runs report `outcome:"unknown"` with no post-fill verification — 2 consecutive days of test fills against REAL Anthropic Greenhouse postings unconfirmed |
 | B10 | P2 | New | 2026-06-10 | `kanban-import-{date}.json` schema diverged between 2026-06-09 (object-keyed, no `columnId`) and 2026-06-10 (array, `columnId`/`createdAt`) — single Kanban Import path may not handle both |
 | r11 | P4 | New | 2026-06-10 | `data/test-*.json`, `*-smoke.json`, `data/screenshots/*` accumulate from SpeedyApply dev/test cycles — no archival policy (mirrors r10) |
+| B-12 | P3 | New | 2026-07-05 | Airtable Archive table schema missing Active-Pipeline fields (Card ID, Lane, URL, …) — archived rows land blank; warning fires every archive-stale run |
+| B-13 | P2 | In-progress | 2026-07-06 | Hot-lane referral queue showed same-run-archived cards (B-9 filter was Fresh-only) — FIXED in referral-queue.mjs 7/06, verified live (hot 9→8), pending commit |
+| B-15 | P1 | In-progress | 2026-07-09 | Sandbox chromium runs with extension autofill unavailable — SpeedyApply never fills; built-in fill covers Greenhouse/Lever/Workday only, careerpuck (Lyft) fills 0/10 | 
+| B-16 | P1 | Fixed-uncommitted | 2026-07-10 | auto-submit clicked submit on a 0/10-filled form (Lyft careerpuck 7/10) — empty-form guard added pre-click in auto-submit.mjs: 0 fields + no resume upload → form-blocked, no click |
+| B-17 | P1 | Fixed-uncommitted | 2026-07-10 | worker-grader graded CI&T "living in Brazil + advanced German" as C on 1 keyword and it got a LIVE submit — title-level hard-requirement screen added (`titleDisqualifiers`): non-US residency / non-English language in title → grade D. Validated: CI 68/0 + regrade of 7/10 scan disqualifies CI&T. Residual: grader never reads JD text (`jd_snippet` always null) — JD-aware grading proposed as K-0710-1 |
 
 ---
 
@@ -40,6 +47,7 @@ this file tracks **open** work.
 | B1 | P2 | 2026-06-08 | exit-code contract not enforced at call-site | Ingestion pipeline (Phase 1+2) supersedes the single-script exit-code contract. Bat-level handling tracked separately. |
 | B5 | P1 | 2026-06-02 | Pre-auth Workday sessions not persisted — every run hits auth wall | `workday-login.mjs` implemented; cookie/localStorage saved per tenant |
 | r9 | P3 | 2026-06-04 | Uncommitted work on local main, no branch/PR | Closed by `chore/safe-edit-kit` PR |
+| r12 | P2 | 2026-07-06 | Airtable two-way sync last-write-wins on the "Last Refreshed" conflict clock | `airtable-sync.mjs` now snapshots every pushable field at pull time and diffs the full set on push (`snapshotFields`/`diffSnapshot`), instead of comparing only "Last Refreshed" — see Detail below |
 
 ---
 
@@ -56,6 +64,10 @@ this file tracks **open** work.
 **Repro:** Files saved via OneDrive sync on Windows can receive trailing `\0` bytes or be truncated mid-token, particularly during concurrent writes. Root cause is OneDrive cloud-sync racing with write completion. The safe-edit kit (this PR) adds the guardrail; moving the repo off OneDrive is the permanent fix.
 **Status 2026-06-08:** New incident — 5 scripts confirmed truncated overnight (`auto-submit.mjs`, `build-autosubmit-queue.mjs`, `merge-bat-results.mjs`, `dedup-tracker.mjs`, `linkedin-dm.mjs`) in Cowork session files. The Cowork session lives on OneDrive; guardrails are on career-ops but NOT on the Pulse Referral Engine / Cowork session folder. Additionally, the kanban HTML was missing 7 function definitions — likely a truncation event on the artifact during writing.
 **Next action:** (1) Deploy `scripts/safe-edit.mjs` + `scripts/pre-commit.sh` to the Cowork project folder (OneDrive write-blocked from sandbox — Rahil must copy manually). (2) Add `node scripts/safe-edit.mjs --selftest` to the 1am SKILL as a pre-flight check.
+
+**Status 2026-07-22 — .git relocation (permanent fix for the git-lock flavor of r7):** Used git's standard relocatable-gitdir mechanism to move `.git` out of OneDrive's sync scope while keeping the working tree at `C:\Users\rahil\career-ops` unchanged (no scheduled-task or tooling paths affected). `.git` contents copied to `C:\Users\Public\GitRepos\career-ops.git` (Public is never OneDrive-synced, for any user). Verified byte-identical: all 1938 files, matching SHA-256 across every file including HEAD/config/refs/packed-refs, and `git --git-dir=<new> --work-tree=career-ops status/branch/log` output matches the original exactly (branch `feat/palantir-zoox-cls-and-livetree`, same HEAD, same untracked/modified lists).
+**Blocked on:** Claude's file tools cannot delete files/directories on this host (by platform design — write/create only). Rahil needs to do the last two steps himself (see chat for exact commands): delete the old `C:\Users\rahil\career-ops\.git` folder, then drop in a one-line `.git` pointer file (`gitdir: C:/Users/Public/GitRepos/career-ops.git`). Until then the original `.git` is still authoritative and untouched — no data at risk either way.
+**Owner:** Rahil (final two steps only)
 **Owner:** Rahil
 
 ---
@@ -149,6 +161,14 @@ this file tracks **open** work.
 **Impact:** If the Kanban's `importJson()`/`mergeJobs()` only handles one shape, the 06-09 batch (3 Stripe + 1 Deepgram, all Grade A/B) will either fail to import, import without `columnId` (won't render in any lane), or break the staleness/freshness calc that depends on `createdAt`.
 **Next action:** Before Rahil clicks Import on either file, verify `importJson()` normalizes both shapes to the array-of-objects-with-columnId form (or write a tiny `normalize-kanban-import.mjs` that converts 06-09's object-keyed shape to match 06-10's before import). Low effort, prevents a confusing "cards didn't show up" support loop.
 **Owner:** next implementation session
+
+---
+
+### r12 — Airtable two-way sync last-write-wins on the "Last Refreshed" conflict clock — RESOLVED 2026-07-06
+**Repro:** `scripts/airtable-sync.mjs`'s `push()` decided whether a card was "in conflict" (Rahil edited it directly in Airtable since the last pull) by comparing ONLY the hand-maintained "Last Refreshed" field (`fld4hdyB6a8qjzeSZ`) between the pull baseline and the current Airtable record. That field is a plain text/date field that only our own pull/push code ever writes — Rahil editing a card directly in the Airtable UI (Notes, Company, Lane, anything) never bumps it. Same gap for any other direct-PATCH call site, e.g. `archive-stale.mjs`'s flow-tag write to Notes. Net effect: the conflict check saw `remote == baseline`, called the card "unchanged," and `push()` would PATCH stale local data straight over a real edit — a silent last-write-wins data loss with no error, no warning.
+**Fix:** `pull()` now snapshots every pushable field per card into `data/airtable-sync-state.json` (`fieldsSnapshot`, via new `snapshotFields()`), not just Last Refreshed. `push()` diffs the FULL snapshot against the live remote record (`diffSnapshot()`) to decide conflict, so drift on ANY field is caught — not just Last Refreshed. Backward-compatible: a baseline written before this fix (no `fieldsSnapshot`) falls back to the old Last-Refreshed-only check, so an old `airtable-sync-state.json` doesn't crash — it just self-heals to full-snapshot checking on the next `--pull`. Considered and rejected: switching to Airtable's native "Last Modified Time" field type (would require a live schema change to Rahil's base — more disruptive than a pure code fix for the same guarantee).
+**Tests:** `test/airtable-sync.test.mjs` — new regression test confirms a manual-edit-style field drift with an UNCHANGED Last Refreshed is now flagged as a conflict (would have silently passed before this fix); new legacy-baseline test confirms old-shape sync-state files still push cleanly via the fallback; new unit tests for `snapshotFields`/`diffSnapshot`. 24/25 suite passing — the 1 unrelated failure is a pre-existing environmental quirk (a real `.env` with a live `AIRTABLE_PAT` in this sandbox causes `dotenv.config()` to refill a deliberately-deleted env var in the "missing PAT" CLI test; unrelated to r12, present on `main` before this change too).
+**Owner:** Rahil
 
 ---
 
@@ -342,15 +362,4 @@ Also: the `validateLiveSafety` error message "not found" is misleading when the 
 
 ---
 
-### K-2026-06-08-6 — Long-running code sessions accrue context cost; spin fresh sessions per logical chunk
-**What happened:** The K1 implementation session hit a 1M context credit wall, requiring a manual restart. The session had accumulated context from multiple PRs, investigations, and dead ends that weren't relevant to the current task.
-**Rule:** When a task is multi-PR (K1-dry-run, K1-semi-auto+live, K2-kanban, K5-slug-audit are all independent), spawn a fresh session per PR rather than continuing the same session across unrelated work. Cowork context should be scoped to the active PR, not the entire sprint.
-**Applies to:** Any implementation session that spans more than 2-3 logically independent changes.
-
----
-
-### K-2026-06-10-29 — Submit-rate stagnation: 22 days at 0 real "Applied" entries with 9 fresh A/B cards sitting ready
-**What happened:** `applications.md` shows the last real `Applied` status on 2026-05-19 — 22 days ago — driving System Uptime to 0/100, the single largest drag on today's 57/100 score. Meanwhile today's refresh produced 9 fresh Grade A/B cards (6A + 3B) with all 9 cover letters generated, and the dry-run already classified 2 of them (DailyPay Sr TPM, TechTorch Delivery Mgr — both Ashby) as "fillable — Ashby form supported." These are the lowest-friction path to a real submission today.
-**Why it's stuck:** The 7 remaining cards need manual review (Stripe×2/Toast/Samsara URL-detector gaps, 3 Anthropic essay apps), and B9 (unverified "Test Role" outcomes on real Anthropic postings, 2 days running) is now blocking confidence in the auto-submit path generally.
-**Recommendation:** Treat the 2 Ashby cards (live-2026-06-10-05 DailyPay, live-2026-06-10-09 TechTorch) as today's priority — they're pre-validated as fillable and don't depend on B9's resolution (different ATS, ungraded outcome risk). If the 6:10am Bat run is confirmed not to have fired (see risk section), Rahil running these 2 manually via SpeedyApply this morning is the fastest path to Submit Rate > 0% and would meaningfully move next cycle's score.
-**Owner:** Rahil (execute) — flagging for approval per "defects don't need approval, kaizens do."
+### K-2026-06-08-6 — Long-running code sessions accrue context cost; spin fr

@@ -35,6 +35,20 @@ data/semi-auto-*.json
 # Secrets (never commit — use .env.example as template)
 .env
 
+# Live session/auth cookies — untracked but was NOT covered by any pattern above,
+# so a `git add -A` could have committed live credentials. Closing that gap.
+data/auth-state.json
+
+# workday-login.mjs / linkedin-dm.mjs rebuild (2026-07-06): per-tenant Workday
+# storageState (cookies/localStorage) and the LinkedIn persistent browser
+# profile are live session credentials — same class of risk as auth-state.json
+# above, closing the same gap for these two new session stores.
+data/workday-sessions/
+data/linkedin-session/
+# Outreach message log (names, LinkedIn URLs, sent message text) — personal
+# data, not a credential, but still shouldn't be committed.
+data/linkedin-dm-log.json
+
 # Generated
 .resolved-prompt-*
 node_modules/
@@ -124,3 +138,8 @@ data/*.err
 # Trash/probe leftovers
 modes/_zztest/
 *.trash.*
+
+# self-healing preflight lib cache (Kaizen K-0626-1)
+data/.preflight-libs/
+.agents/scratch/
+.fuse_hidden*

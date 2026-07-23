@@ -7,6 +7,7 @@
 // [num, date, company, role, grade, status, referral, cl_sent, notes]
 import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
+import { generateOutreachMessage } from './referral-queue.mjs';
 
 const dataDir = process.argv.includes('--data') ? process.argv[process.argv.indexOf('--data') + 1] : 'data';
 const LANE = { 'new-hot': 'New-Hot', 'new-fresh': 'New-Fresh', 'blocked': 'Blocked', 'applied': 'Applied' };
@@ -22,6 +23,9 @@ const ACTIVE_FIELD_IDS = {
   'Connection Name': 'fldEpnNHzAkWkGNhb', 'Connection LinkedIn': 'fldFk5zF7iOdDhNXW',
   'Has Connection': 'fld3E2xL0wG1yKxAq', 'Warm Referral': 'fldi1rAwieHmASoax',
   'Created At': 'fldMTpTyX9CzIhazo', 'Last Refreshed': 'fld4hdyB6a8qjzeSZ', 'Notes': 'fldGkJ4cqoLE3yFCa',
+  // Multi-connection referral picker. Create then update IDs (see airtable-sync.mjs for curl commands).
+  'Connection Count': 'flddqet5ZZSumFns4',    // TODO: set after Airtable field creation
+  'Connection Options': 'fldJu7vzBJaawmMDD',  // TODO: set after Airtable field creation
 };
 const ARCHIVE_FIELD_IDS = {
   'Tracker #': 'fldbPmGKrGn8N2AJZ', 'Date': 'fld3r0YvdclcJsWsg', 'Company': 'fldK8QeGdkj3giLtT',
@@ -63,7 +67,19 @@ try {
 const isPlaceholder = s => !s || /known connection/i.test(s);
 function resolveConnection(c) {
   if (!c.hasConnection) return c;
-  if (!isPlaceholder(c.connectionName) && c.connectionLinkedinUrl) return c;
+  // If raw connections[] already loaded (from kanban-inject), use them directly.
+  if (Array.isArray(c.connections) && c.connections.length) {
+    c.connectionCount = c.connectionCount ?? c.connections.length;
+    if (isPlaceholder(c.connectionName) && c.connections[0]) c.connectionName = c.connections[0].name || '';
+    if (!c.connectionLinkedinUrl && c.connections[0]) c.connectionLinkedinUrl = c.connections[0].url || '';
+    return c;
+  }
+  // Fall back to re-resolving from connections JSON (legacy scalar path).
+  if (!isPlaceholder(c.connectionName) && c.connectionLinkedinUrl) {
+    c.connectionCount = c.connectionCount ?? 1;
+    c.connections = [{ name: c.connectionName, position: '', url: c.connectionLinkedinUrl }];
+    return c;
+  }
   const matches = CONN_BY_COMPANY.get((c.company || '').trim().toLowerCase()) || [];
   if (!matches.length) {
     if (isPlaceholder(c.connectionName)) c.connectionName = '';
@@ -72,6 +88,8 @@ function resolveConnection(c) {
   const [first, ...rest] = matches;
   c.connectionName = first.name;
   c.connectionLinkedinUrl = first.url;
+  c.connectionCount = matches.length;
+  c.connections = matches.map((m) => ({ name: m.name || '', position: m.position || '', url: m.url || '' }));
   if (rest.length) c._connectionNote = 'Also known at ' + c.company + ': ' + rest.map(e => e.name).join(', ');
   return c;
 }
@@ -85,20 +103,32 @@ const pool = Array.isArray(raw) ? raw : Array.isArray(raw.cards) ? raw.cards
   : raw.cards && typeof raw.cards === 'object' ? Object.values(raw.cards) : Object.values(raw);
 const cards = pool.filter(v => v && typeof v === 'object' && v.id);
 
-const active = cards.map(resolveConnection).map(c => ({ fields: {
-  'Card ID': c.id, 'Company': c.company || '', 'Role': c.role || '',
-  'Grade': c.grade || 'C', 'Lane': LANE[c.columnId] || 'New-Fresh',
-  'Platform': c.platform || '', 'URL': c.url || '',
-  'Job Description': (c.jobDescText || '').slice(0, 2000),
-  'Keywords': Array.isArray(c.keywords) ? c.keywords.join(', ') : (c.keywords || ''),
-  'Connection Name': c.connectionName || '',
-  'Connection LinkedIn': c.connectionLinkedinUrl || '',
-  'Warm Referral': !!c.isWarmReferral,
-  'Has Connection': !!c.hasConnection,
-  'Created At': c.createdAt || '',
-  'Last Refreshed': c.lastRefreshed || c.createdAt || '',
-  'Notes': [READINESS_SCORES[c.id], c._connectionNote].filter(Boolean).join(' ') || '',
-} }));
+const active = cards.map(resolveConnection).map(c => {
+  const connections = Array.isArray(c.connections) ? c.connections : [];
+  const connectionOptions = connections.map((conn) => ({
+    name:     conn.name     || '',
+    position: conn.position || '',
+    url:      conn.url      || '',
+    message:  generateOutreachMessage(conn.name, c.company || '', c.role || '', conn.position || ''),
+  }));
+  const fields = {
+    'Card ID': c.id, 'Company': c.company || '', 'Role': c.role || '',
+    'Grade': c.grade || 'C', 'Lane': LANE[c.columnId] || 'New-Fresh',
+    'Platform': c.platform || '', 'URL': c.url || '',
+    'Job Description': (c.jobDescText || '').slice(0, 2000),
+    'Keywords': Array.isArray(c.keywords) ? c.keywords.join(', ') : (c.keywords || ''),
+    'Connection Name': c.connectionName || '',
+    'Connection LinkedIn': c.connectionLinkedinUrl || '',
+    'Warm Referral': !!c.isWarmReferral,
+    'Has Connection': !!c.hasConnection,
+    'Created At': c.createdAt || '',
+    'Last Refreshed': c.lastRefreshed || c.createdAt || '',
+    'Notes': [READINESS_SCORES[c.id], c._connectionNote].filter(Boolean).join(' ') || '',
+    'Connection Count': c.connectionCount ?? connectionOptions.length,
+    'Connection Options': connectionOptions.length ? JSON.stringify(connectionOptions) : '',
+  };
+  return { fields };
+});
 
 // --- Archive: applications.md rows (observed positions, see header-drift note above) ---
 let archive = [];

@@ -54,11 +54,51 @@ export function normalizePlatform(portal) {
  * Grade a job title by counting keyword matches (case-insensitive substring).
  * @param {string}   title     Job title to grade
  * @param {string[]} keywords  Keyword list to match against
- * @returns {{ grade: 'A'|'B'|'C'|'D', keywords_matched: string[] }}
+ * @returns {{ grade: 'A'|'B'|'C'|'D', keywords_matched: string[], disqualifiers?: string[] }}
  */
+
+// B-17 (2026-07-10): hard-requirement screen. A title that itself declares a
+// non-US residency or non-English language requirement can never be a fit for
+// the Dallas/Remote-US target — force grade D regardless of keyword matches.
+// Conservative on purpose: only fires on explicit title-level phrases.
+const US_LOCATION_OK = /\b(us|usa|u\.s|united states|dallas|texas|tx|remote)\b/i;
+// B-17b (2026-07-14): bare foreign locations in titles ('Senior PM, Brazil') bypassed
+// RESIDENCY_RE which requires 'based/located in' phrasing. Standalone foreign
+// country/city tokens in a title are a hard geographic disqualifier.
+// 'New Mexico' is stripped first so the US state never trips the 'mexico' token.
+const FOREIGN_TITLE_RE = /\b(brazil|brasil|belo horizonte|sao paulo|são paulo|rio de janeiro|porto alegre|curitiba|campinas|recife|florianopolis|florianópolis|salvador|fortaleza|brasilia|brasília|mexico|argentina|colombia|chile|peru|canada|toronto|vancouver|ireland|dublin|london|england|united kingdom|germany|berlin|munich|france|paris|spain|madrid|barcelona|portugal|lisbon|poland|warsaw|krakow|netherlands|amsterdam|belgium|brussels|italy|milan|rome|india|bangalore|bengaluru|mumbai|delhi|hyderabad|pune|japan|tokyo|china|shanghai|beijing|singapore|australia|sydney|melbourne|philippines|manila|vietnam|indonesia|jakarta|israel|tel aviv|dubai|egypt|cairo|nigeria|lagos|kenya|nairobi|south africa|romania|bucharest|prague|hungary|budapest|ukraine|kyiv|turkey|istanbul|sweden|stockholm|norway|oslo|denmark|copenhagen|finland|helsinki|switzerland|zurich|austria|vienna|greece|athens|costa rica|guatemala|uruguay|montevideo|ecuador|bolivia|paraguay)\b/i;
+
+// B-17c (2026-07-16): Brazilian city/STATE suffix pattern (e.g. "Belo Horizonte/MG").
+const BR_STATE_SUFFIX_RE = /\/(mg|sp|rj|rs|pr|sc|ba|pe|ce|df|go|es|am|pa)\b/i;
+
+const RESIDENCY_RE   = /\b(living|based|located|residing|resident|must live|must reside)\s+(in|near)\s+([a-z][a-z\s,]{1,40}?)(?:[)\]\|+,]|$)/i;
+const LANGUAGE_RE    = /\b(advanced|fluent|native|proficient|business[- ]level)\s+(german|portuguese|spanish|french|japanese|mandarin|chinese|korean|italian|dutch|polish|hindi|arabic|hebrew|turkish|swedish|norwegian|danish|finnish)\b/i;
+
+/**
+ * Return the list of title-level hard disqualifiers found (empty = clean).
+ * @param {string} title
+ * @returns {string[]}
+ */
+export function titleDisqualifiers(title) {
+  const t = String(title || '');
+  const out = [];
+  const res = t.match(RESIDENCY_RE);
+  if (res && !US_LOCATION_OK.test(res[3])) out.push(`residency:${res[3].trim()}`);
+  const lang = t.match(LANGUAGE_RE);
+  if (lang) out.push(`language:${lang[2].toLowerCase()}`);
+  const foreign = t.replace(/new mexico/ig, '').match(FOREIGN_TITLE_RE);
+  if (foreign) out.push(`foreign-location:${foreign[1].toLowerCase()}`);
+  if (BR_STATE_SUFFIX_RE.test(t)) out.push(`foreign-location:br-state-suffix`);
+  return out;
+}
+
 export function gradeJob(title, keywords) {
   const lower   = String(title || '').toLowerCase();
   const matched = keywords.filter((k) => lower.includes(String(k).toLowerCase()));
+  const disqualifiers = titleDisqualifiers(title);
+  if (disqualifiers.length > 0) {
+    return { grade: 'D', keywords_matched: matched, disqualifiers };
+  }
   let grade;
   if      (matched.length === 0) grade = 'D';
   else if (matched.length === 1) grade = 'C';
@@ -167,7 +207,7 @@ async function main() {
   }
 
   const graded = recent.map((e) => {
-    const { grade, keywords_matched } = gradeJob(e.title, keywords);
+    const { grade, keywords_matched, disqualifiers } = gradeJob(e.title, keywords);
     return {
       company:          e.company,
       role:             e.title,
@@ -176,12 +216,14 @@ async function main() {
       url:              e.url,
       jd_snippet:       null,
       keywords_matched,
+      ...(disqualifiers ? { disqualifiers } : {}),
     };
   });
 
   const counts = { A: 0, B: 0, C: 0, D: 0 };
   for (const g of graded) counts[g.grade]++;
-  console.log(`[worker-grader] graded ${graded.length}: A=${counts.A} B=${counts.B} C=${counts.C} D=${counts.D}`);
+  const dq = graded.filter((g) => g.disqualifiers).length;
+  console.log(`[worker-grader] graded ${graded.length}: A=${counts.A} B=${counts.B} C=${counts.C} D=${counts.D}${dq ? ` (B-17 disqualified: ${dq})` : ''}`);
 
   mkdirSync(DATA, { recursive: true });
   const outPath = outOverride ? resolve(ROOT, outOverride) : join(DATA, `graded-jobs-${date}.json`);

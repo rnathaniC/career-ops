@@ -31,31 +31,105 @@ const DEFAULT_CONFIG = {
   extension_autofill: false,
 };
 
-const CHROMIUM_CANDIDATES = [
-  'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe',
-  'C:\\Program Files\\Microsoft\\Edge\\Application\\msedge.exe',
-  'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
-  'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe',
-];
+// Platform-specific install locations for a Chromium-based system browser.
+// Windows (Rahil's primary machine) is probed first historically; macOS and Linux
+// candidates added 2026-06-24 so the engine is browser-agnostic on any runner.
+const CHROMIUM_CANDIDATES_BY_PLATFORM = {
+  win32: [
+    'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe',
+    'C:\\Program Files\\Microsoft\\Edge\\Application\\msedge.exe',
+    'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
+    'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe',
+  ],
+  darwin: [
+    '/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge',
+    '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+    '/Applications/Chromium.app/Contents/MacOS/Chromium',
+  ],
+  linux: [
+    '/usr/bin/microsoft-edge',
+    '/usr/bin/google-chrome',
+    '/usr/bin/google-chrome-stable',
+    '/usr/bin/chromium',
+    '/usr/bin/chromium-browser',
+  ],
+};
+
+// Back-compat export (Windows candidates) — some callers/tests import this name.
+const CHROMIUM_CANDIDATES = CHROMIUM_CANDIDATES_BY_PLATFORM.win32;
 
 /**
- * Probe common install locations then `where` for a usable Chromium-based browser.
+ * Last-resort fallback: Playwright's own bundled Chromium, so the engine can run
+ * on a headless runner (CI / sandbox) with no system browser installed. Scans the
+ * ms-playwright cache synchronously for a full chrome or chrome-headless-shell binary.
+ * @returns {string|null}
+ */
+export function detectPlaywrightChromium() {
+  const cacheRoots = [
+    process.env.PLAYWRIGHT_BROWSERS_PATH,
+    path.join(process.env.HOME || process.env.USERPROFILE || '', '.cache', 'ms-playwright'),
+    path.join(process.env.LOCALAPPDATA || '', 'ms-playwright'),
+  ].filter(Boolean);
+
+  const binNames = process.platform === 'win32'
+    ? ['chrome.exe', 'chrome-headless-shell.exe']
+    : ['chrome', 'chrome-headless-shell', 'headless_shell'];
+
+  for (const root of cacheRoots) {
+    if (!fs.existsSync(root)) continue;
+    let dirs;
+    try { dirs = fs.readdirSync(root); } catch { continue; }
+    // Prefer the full 'chromium-*' build over 'chromium_headless_shell-*'.
+    dirs.sort((a, b) => (a.includes('headless') ? 1 : 0) - (b.includes('headless') ? 1 : 0));
+    for (const d of dirs) {
+      if (!/^chromium/i.test(d)) continue;
+      const base = path.join(root, d);
+      // Walk a couple of levels for the binary (paths differ per platform/version).
+      const stack = [base];
+      let hops = 0;
+      while (stack.length && hops < 5000) {
+        hops++;
+        const cur = stack.pop();
+        let entries;
+        try { entries = fs.readdirSync(cur, { withFileTypes: true }); } catch { continue; }
+        for (const e of entries) {
+          const full = path.join(cur, e.name);
+          if (e.isDirectory()) stack.push(full);
+          else if (binNames.includes(e.name) && fs.existsSync(full)) return full;
+        }
+      }
+    }
+  }
+  return null;
+}
+
+/**
+ * Probe common install locations, then the platform's PATH lookup, then fall back
+ * to Playwright's bundled Chromium. Cross-platform as of 2026-06-24.
  * @returns {string|null} Absolute path to the executable, or null if none found.
  */
 export function detectChromiumExe() {
-  for (const p of CHROMIUM_CANDIDATES) {
+  const candidates = CHROMIUM_CANDIDATES_BY_PLATFORM[process.platform] || CHROMIUM_CANDIDATES_BY_PLATFORM.linux;
+  for (const p of candidates) {
     if (fs.existsSync(p)) return p;
   }
-  for (const cmd of ['msedge', 'chrome']) {
+  // PATH lookup: `where` on Windows, `which` elsewhere.
+  const isWin = process.platform === 'win32';
+  const lookup = isWin ? 'where' : 'which';
+  const cmds = isWin
+    ? ['msedge', 'chrome']
+    : ['microsoft-edge', 'google-chrome', 'google-chrome-stable', 'chromium', 'chromium-browser'];
+  for (const cmd of cmds) {
     try {
-      const r = spawnSync('where', [cmd], { encoding: 'utf8', shell: false, timeout: 5000 });
+      const r = spawnSync(lookup, [cmd], { encoding: 'utf8', shell: false, timeout: 5000 });
       if (r.status === 0 && r.stdout?.trim()) {
         const line = r.stdout.trim().split('\n')[0].trim();
         if (line && fs.existsSync(line)) return line;
       }
     } catch { /* cmd not on PATH */ }
   }
-  return null;
+  // Final fallback: Playwright's bundled Chromium (headless runners / sandbox).
+  return detectPlaywrightChromium();
 }
 
 /**
@@ -116,26 +190,30 @@ export async function loadBrowserConfig(configPath = DEFAULT_CONFIG_PATH) {
     } else {
       const exePath = cfg.chromium?.executable_path;
       if (exePath && !fs.existsSync(exePath)) {
-        // Configured path missing — probe common locations before failing
+        // Configured path missing — probe common locations + Playwright fallback before failing
         const detected = detectChromiumExe();
         if (detected) {
           console.warn(`[browser-config] ${exePath} not found — auto-detected: ${detected}`);
           cfg.chromium.executable_path = detected;
         } else {
-          throw new BrowserConfigError(
-            `browser.yml: chromium.executable_path not found on disk: ${exePath}\n` +
-            '  No browser found. Install Edge or Chrome, or set BROWSER_PATH in .env',
-          );
+          // No system browser found — clear the path so Playwright uses its bundled Chromium.
+          // This is normal on headless cloud runners where the configured Windows path doesn't exist.
+          console.warn(`[browser-config] ${exePath} not found and no system browser detected — using Playwright bundled Chromium`);
+          cfg.chromium.executable_path = null;
         }
+      } else if (!exePath) {
+        // No path configured at all — try to detect one (incl. Playwright bundled).
+        const detected = detectChromiumExe();
+        if (detected) cfg.chromium.executable_path = detected;
       }
     }
 
     const profilePath = cfg.chromium?.profile_path;
     if (profilePath && !fs.existsSync(profilePath)) {
-      throw new BrowserConfigError(
-        `browser.yml: chromium.profile_path not found on disk: ${profilePath}\n` +
-        '  Run: node scripts/detect-chromium.mjs   to find your profile directory',
-      );
+      // Profile path doesn't exist on this machine (e.g. Windows path on a Linux cloud runner).
+      // Fall back to an ephemeral context rather than blocking the run.
+      console.warn(`[browser-config] chromium.profile_path not found on disk: ${profilePath} — using ephemeral context`);
+      cfg.chromium.profile_path = null;
     }
   }
 
@@ -164,7 +242,7 @@ export async function loadBrowserConfig(configPath = DEFAULT_CONFIG_PATH) {
     if (!fs.existsSync(profilePath)) {
       throw new BrowserConfigError(
         `browser.yml: firefox.profile_path not found on disk: ${profilePath}\n` +
-        '  Your Firefox profile may have moved. Run: node scripts/detect-firefox.mjs',
+        '  Run: node scripts/detect-firefox.mjs   to auto-detect your profile directory',
       );
     }
   }

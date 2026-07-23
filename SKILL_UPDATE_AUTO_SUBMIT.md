@@ -1,10 +1,21 @@
-# SKILL_UPDATE_AUTO_SUBMIT.md — Manual paste into job-pulse-1am-refresh/SKILL.md
+# SKILL_UPDATE_AUTO_SUBMIT.md — OBSOLETE (superseded)
 
-**Rahil: paste the block below as Step 5 in your OneDrive scheduled task SKILL.md.**
-Insert AFTER Step 4 (Cover Letters) and BEFORE the existing Step 5 (AutoSubmit).
-The existing Step 5 becomes Step 6.
-
-Sandbox cannot write to OneDrive directly (see BUGS.md K-2026-06-05-3).
+> **Status: OBSOLETE — do not act on this file.**
+>
+> This doc originally instructed manually pasting the block below into the OneDrive
+> scheduled task's `SKILL.md`, citing "sandbox cannot write to OneDrive directly" as the
+> blocker. That blocker no longer applies — the Auto-Submit logic described here (4-mode
+> escalation, 3-lock live-mode safety rail, Lane-Branch New-Hot/New-Fresh routing) is now
+> fully implemented in code and runs live via the real pipeline scripts:
+>
+> - `scripts/pulse-refresh.mjs` — orchestrates the nightly run
+> - `scripts/referral-queue.mjs` — referral routing
+> - `scripts/auto-submit.mjs` — the 4-mode auto-submit logic described below
+> - `scripts/kanban-inject.mjs` — Lane-Branch New-Hot / New-Fresh injection
+> - `scripts/archive-stale.mjs` — stale-card archival
+>
+> Kept below for historical reference only. If you need current behavior, read the
+> scripts above, not this file.
 
 ---
 

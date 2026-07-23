@@ -250,6 +250,22 @@ Paste job URLs below as \`- [ ] {url}\` then run \`/career-ops pipeline\`.
 ## Processed
 `;
 
+function checkAshbyEntries() {
+  const portalsPath = join(projectRoot, 'portals.yml');
+  if (!existsSync(portalsPath)) {
+    return { warn: true, label: 'Ashby entries: portals.yml absent (check skipped)' };
+  }
+  const content = readFileSync(portalsPath, 'utf-8');
+  if (content.includes('ashbyhq.com')) {
+    return { pass: true, label: 'portals.yml has Ashby entries' };
+  }
+  return {
+    warn: true,
+    label: 'portals.yml has no Ashby entries — Step 0.9 Ashby scan will be a no-op',
+    fix: 'Add companies with careers_url: "https://jobs.ashbyhq.com/<slug>" to portals.yml',
+  };
+}
+
 function checkPipelineFile() {
   const filePath = join(projectRoot, 'data', 'pipeline.md');
   if (existsSync(filePath)) {
@@ -313,6 +329,7 @@ async function main() {
     ...USER_LAYER_PREREQS.map(checkPrereq),
     checkFonts(),
     checkAutoDir('data'),
+    checkAshbyEntries(),
     checkPipelineFile(),
     checkAutoDir('output'),
     checkAutoDir('reports'),

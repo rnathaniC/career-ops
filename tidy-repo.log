@@ -1,0 +1,167 @@
+=== tidy-repo: untracking scratch/cache from git ===
+git version 2.54.0.windows.1
+
+[1] Removing from index only (files kept on disk)...
+
+[2] Staging the .gitignore update too...
+warning: in the working copy of '.gitignore', CRLF will be replaced by LF the next time Git touches it
+
+[3] What will change in this commit (name-status):
+M	.gitignore
+D	cloudflare-worker/.dev.vars
+D	cloudflare-worker/.wrangler/cache/cf.json
+D	cloudflare-worker/.wrangler/state/v3/cache/miniflare-CacheObject/metadata.sqlite
+D	cloudflare-worker/.wrangler/state/v3/cache/miniflare-CacheObject/metadata.sqlite-shm
+D	cloudflare-worker/.wrangler/state/v3/cache/miniflare-CacheObject/metadata.sqlite-wal
+D	cloudflare-worker/.wrangler/tmp/bundle-GjCjJP/checked-fetch.js
+D	cloudflare-worker/.wrangler/tmp/bundle-GjCjJP/middleware-insertion-facade.js
+D	cloudflare-worker/.wrangler/tmp/bundle-GjCjJP/middleware-loader.entry.ts
+D	commit-pulse.log
+D	data/airtable-map.err
+D	data/dead-listings-2026-06-10.json
+D	data/kanban-k2-export-2026-06-11.json
+D	data/kanban-snapshot-smoke.json
+D	data/live-daily-count-2026-06-11.json
+D	data/live-palantir.json
+D	data/live-runs-2026-06-11.json
+D	data/live-samsara.json
+D	data/live-zoox.json
+D	data/secondary-verified-2026-06-11.json
+D	data/test-greenhouse.json
+D	data/test-kanban-snapshot.json
+D	data/test-real-form.json
+D	data/test-real-url.json
+D	data/tmp-graded-2026-06-12b.json
+D	data/tmp-net-new-grader-input.json
+D	data/tmp-new-cards.json
+D	data/tmp-secondary-live.json
+D	data/tmp/kanban-import-shaped-2026-06-12.json
+D	data/tmp/secondary-verified.json
+D	data/tmp/worker-scan.json
+D	data/worker-candidates-2026-06-11.json
+D	data/worker-new-us-2026-06-11.json
+D	data/worker-raw-2026-06-11/gh-anthropic.json
+D	data/worker-raw-2026-06-11/gh-databricks.json
+D	data/worker-raw-2026-06-11/gh-figma.json
+D	data/worker-raw-2026-06-11/gh-linear.json
+D	data/worker-raw-2026-06-11/gh-notion.json
+D	data/worker-raw-2026-06-11/gh-openai.json
+D	data/worker-raw-2026-06-11/gh-stripe.json
+D	data/worker-raw-2026-06-11/lv-figma.json
+D	data/worker-raw-2026-06-11/lv-hex.json
+D	data/worker-raw-2026-06-11/lv-linear.json
+D	data/worker-raw-2026-06-11/lv-notion-hq.json
+D	data/worker-raw-2026-06-11/lv-retool.json
+D	data/worker-raw/gh-anthropic-2026-06-10.json
+D	data/worker-raw/gh-databricks-2026-06-10.json
+D	data/worker-raw/gh-figma-2026-06-10.json
+D	data/worker-raw/gh-linear-2026-06-10.json
+D	data/worker-raw/gh-notion-2026-06-10.json
+D	data/worker-raw/gh-openai-2026-06-10.json
+D	data/worker-raw/gh-stripe-2026-06-10.json
+D	data/worker-raw/lv-figma-2026-06-10.json
+D	data/worker-raw/lv-hex-2026-06-10.json
+D	data/worker-raw/lv-linear-2026-06-10.json
+D	data/worker-raw/lv-notion-hq-2026-06-10.json
+D	data/worker-raw/lv-retool-2026-06-10.json
+D	data/worker-scan-2026-06-12.json
+D	modes/_zztest/probe.md.trash.1782086475
+D	tmp/pulse-worker/gh-anthropic.json
+D	tmp/pulse-worker/gh-databricks.json
+D	tmp/pulse-worker/gh-figma.json
+D	tmp/pulse-worker/gh-linear.json
+D	tmp/pulse-worker/gh-notion.json
+D	tmp/pulse-worker/gh-openai.json
+D	tmp/pulse-worker/gh-stripe.json
+D	tmp/pulse-worker/lv-figma.json
+D	tmp/pulse-worker/lv-hex.json
+D	tmp/pulse-worker/lv-linear.json
+D	tmp/pulse-worker/lv-notion-hq.json
+D	tmp/pulse-worker/lv-retool.json
+D	tmp/pulse-worker/worker-filtered.json
+D	tmp/pulse-worker/worker-fresh.json
+
+[4] Committing cleanup...
+[feat/palantir-zoox-cls-and-livetier 8d4be3c] chore: untrack scratch/cache/worker-dev files swept in by 9adbc09
+ 73 files changed, 26 insertions(+), 3899 deletions(-)
+ delete mode 100644 cloudflare-worker/.dev.vars
+ delete mode 100644 cloudflare-worker/.wrangler/cache/cf.json
+ delete mode 100644 cloudflare-worker/.wrangler/state/v3/cache/miniflare-CacheObject/metadata.sqlite
+ delete mode 100644 cloudflare-worker/.wrangler/state/v3/cache/miniflare-CacheObject/metadata.sqlite-shm
+ delete mode 100644 cloudflare-worker/.wrangler/state/v3/cache/miniflare-CacheObject/metadata.sqlite-wal
+ delete mode 100644 cloudflare-worker/.wrangler/tmp/bundle-GjCjJP/checked-fetch.js
+ delete mode 100644 cloudflare-worker/.wrangler/tmp/bundle-GjCjJP/middleware-insertion-facade.js
+ delete mode 100644 cloudflare-worker/.wrangler/tmp/bundle-GjCjJP/middleware-loader.entry.ts
+ delete mode 100644 commit-pulse.log
+ delete mode 100644 data/airtable-map.err
+ delete mode 100644 data/dead-listings-2026-06-10.json
+ delete mode 100644 data/kanban-k2-export-2026-06-11.json
+ delete mode 100644 data/kanban-snapshot-smoke.json
+ delete mode 100644 data/live-daily-count-2026-06-11.json
+ delete mode 100644 data/live-palantir.json
+ delete mode 100644 data/live-runs-2026-06-11.json
+ delete mode 100644 data/live-samsara.json
+ delete mode 100644 data/live-zoox.json
+ delete mode 100644 data/secondary-verified-2026-06-11.json
+ delete mode 100644 data/test-greenhouse.json
+ delete mode 100644 data/test-kanban-snapshot.json
+ delete mode 100644 data/test-real-form.json
+ delete mode 100644 data/test-real-url.json
+ delete mode 100644 data/tmp-graded-2026-06-12b.json
+ delete mode 100644 data/tmp-net-new-grader-input.json
+ delete mode 100644 data/tmp-new-cards.json
+ delete mode 100644 data/tmp-secondary-live.json
+ delete mode 100644 data/tmp/kanban-import-shaped-2026-06-12.json
+ delete mode 100644 data/tmp/secondary-verified.json
+ delete mode 100644 data/tmp/worker-scan.json
+ delete mode 100644 data/worker-candidates-2026-06-11.json
+ delete mode 100644 data/worker-new-us-2026-06-11.json
+ delete mode 100644 data/worker-raw-2026-06-11/gh-anthropic.json
+ delete mode 100644 data/worker-raw-2026-06-11/gh-databricks.json
+ delete mode 100644 data/worker-raw-2026-06-11/gh-figma.json
+ delete mode 100644 data/worker-raw-2026-06-11/gh-linear.json
+ delete mode 100644 data/worker-raw-2026-06-11/gh-notion.json
+ delete mode 100644 data/worker-raw-2026-06-11/gh-openai.json
+ delete mode 100644 data/worker-raw-2026-06-11/gh-stripe.json
+ delete mode 100644 data/worker-raw-2026-06-11/lv-figma.json
+ delete mode 100644 data/worker-raw-2026-06-11/lv-hex.json
+ delete mode 100644 data/worker-raw-2026-06-11/lv-linear.json
+ delete mode 100644 data/worker-raw-2026-06-11/lv-notion-hq.json
+ delete mode 100644 data/worker-raw-2026-06-11/lv-retool.json
+ delete mode 100644 data/worker-raw/gh-anthropic-2026-06-10.json
+ delete mode 100644 data/worker-raw/gh-databricks-2026-06-10.json
+ delete mode 100644 data/worker-raw/gh-figma-2026-06-10.json
+ delete mode 100644 data/worker-raw/gh-linear-2026-06-10.json
+ delete mode 100644 data/worker-raw/gh-notion-2026-06-10.json
+ delete mode 100644 data/worker-raw/gh-openai-2026-06-10.json
+ delete mode 100644 data/worker-raw/gh-stripe-2026-06-10.json
+ delete mode 100644 data/worker-raw/lv-figma-2026-06-10.json
+ delete mode 100644 data/worker-raw/lv-hex-2026-06-10.json
+ delete mode 100644 data/worker-raw/lv-linear-2026-06-10.json
+ delete mode 100644 data/worker-raw/lv-notion-hq-2026-06-10.json
+ delete mode 100644 data/worker-raw/lv-retool-2026-06-10.json
+ delete mode 100644 data/worker-scan-2026-06-12.json
+ delete mode 100644 modes/_zztest/probe.md.trash.1782086475
+ delete mode 100644 tmp/pulse-worker/gh-anthropic.json
+ delete mode 100644 tmp/pulse-worker/gh-databricks.json
+ delete mode 100644 tmp/pulse-worker/gh-figma.json
+ delete mode 100644 tmp/pulse-worker/gh-linear.json
+ delete mode 100644 tmp/pulse-worker/gh-notion.json
+ delete mode 100644 tmp/pulse-worker/gh-openai.json
+ delete mode 100644 tmp/pulse-worker/gh-stripe.json
+ delete mode 100644 tmp/pulse-worker/lv-figma.json
+ delete mode 100644 tmp/pulse-worker/lv-hex.json
+ delete mode 100644 tmp/pulse-worker/lv-linear.json
+ delete mode 100644 tmp/pulse-worker/lv-notion-hq.json
+ delete mode 100644 tmp/pulse-worker/lv-retool.json
+ delete mode 100644 tmp/pulse-worker/worker-filtered.json
+ delete mode 100644 tmp/pulse-worker/worker-fresh.json
+
+[5] Pushing...
+To https://github.com/rnathaniC/career-ops.git
+   9adbc09..8d4be3c  feat/palantir-zoox-cls-and-livetier -> feat/palantir-zoox-cls-and-livetier
+
+=== DONE. Latest commits: ===
+8d4be3c chore: untrack scratch/cache/worker-dev files swept in by 9adbc09
+9adbc09 pulse: restore truncated package.json scripts + ship CL-Gen & cadence watchdog + commit-hygiene
+85ce555 Apply v1.12.0; restore+widen NUL defense (Kaizen 2026-06-21)

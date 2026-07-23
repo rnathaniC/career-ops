@@ -74,15 +74,70 @@ function findClFileForCard(card) {
     .replace(/-+/g, '-')
     .replace(/^-|-$/g, '');
   if (!slug) return null;
+  // K-0716-1 fix: slug-only match + files[0] picked a stale CL for a different
+  // role at the same company (e.g. Toast IQ card scored against the 2026-05-19
+  // it-delivery-manager CL). Rank candidates: role-slug overlap first, then
+  // newest date embedded in the filename, so multi-role companies each get
+  // their own (and freshest) CL.
+  const roleSlug = (card.role || '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '');
+  const roleTokens = roleSlug.split('-').filter((t) => t.length > 2);
+  const candidates = [];
   for (const dir of ['cover-letters', 'output']) {
     const d = path.join(ROOT, dir);
     if (!fs.existsSync(d)) continue;
-    const files = fs.readdirSync(d).filter(
-      (f) => f.includes(slug) && (f.endsWith('.md') || f.endsWith('.txt')),
-    );
-    if (files.length > 0) return path.join(d, files[0]);
+    for (const f of fs.readdirSync(d)) {
+      if (!f.includes(slug)) continue;
+      if (!f.endsWith('.md') && !f.endsWith('.txt')) continue;
+      const rawOverlap = roleTokens.length
+        ? roleTokens.filter((t) => f.includes(t)).length / roleTokens.length
+        : 0;
+      // Weak overlap (<0.5) is noise — a different role at the same company.
+      // Treating it as a match beat the curated cover-letters/{company}.md
+      // with a stale 1-paragraph stub (Twilio regression during K-0716-1 fix).
+      const overlap = rawOverlap >= 0.5 ? rawOverlap : 0;
+      const curated = dir === 'cover-letters' ? 1 : 0;
+      const dateMatch = f.match(/(\d{4}-\d{2}-\d{2})/);
+      candidates.push({ full: path.join(d, f), overlap, curated, date: dateMatch ? dateMatch[1] : '0000-00-00' });
+    }
+  }
+  if (!candidates.length) return null;
+  candidates.sort(
+    (a, b) => (b.overlap - a.overlap) || (b.curated - a.curated) || b.date.localeCompare(a.date),
+  );
+  // K-DEFECT-2026-07-22: ~150 files in output/ were found to be silently
+  // corrupted — every letter stripped out by a past write/sync failure,
+  // leaving a handful of bytes of stray punctuation (e.g. the Coupa CL that
+  // triggered the 0%-keyword-match / missing-company-name quality-gate hold).
+  // findClFileForCard used to return candidates[0] unconditionally, so a
+  // corrupted file would silently be scored as a real (very bad) cover letter
+  // instead of being treated as missing. Skip corrupted candidates and fall
+  // through to the next-best one; if every candidate is corrupted, return
+  // null so the caller reports "no cover letter found" and regenerates one.
+  for (const c of candidates) {
+    const text = readFileOrNull(c.full);
+    if (text && !isCorruptedCl(text)) return c.full;
   }
   return null;
+}
+
+/**
+ * Heuristic corruption check for a cover-letter file: a real generated or
+ * curated letter is prose (mostly letters). A file with almost no alphabetic
+ * characters is very likely the product of the known write/sync corruption
+ * that has hit this repo before (NUL-byte truncation, letter-stripping),
+ * not an unusually terse but valid letter.
+ * @param {string} text
+ * @returns {boolean}
+ */
+function isCorruptedCl(text) {
+  const trimmed = text.trim();
+  if (trimmed.length < 120) return true;
+  const letters = trimmed.match(/[a-zA-Z]/g) || [];
+  return letters.length / trimmed.length < 0.5;
 }
 
 function readFileOrNull(filePath) {

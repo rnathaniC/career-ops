@@ -29,6 +29,8 @@ import {
   cardToFields,
   isNewer,
   sameTimestamp,
+  snapshotFields,
+  diffSnapshot,
   CARD_ID_FIELD,
   LAST_REFRESHED_FIELD,
   PAT_MISSING_MSG,
@@ -110,6 +112,8 @@ describe('pull', () => {
     const state = JSON.parse(fs.readFileSync(path.join(dataDir, 'airtable-sync-state.json'), 'utf8'));
     assert.equal(state.cards['card-1'].lastRefreshed, '2026-06-16T01:00:00.000Z');
     assert.equal(state.cards['card-2'].recordId, 'rec2');
+    assert.ok(state.cards['card-1'].fieldsSnapshot, 'pull must write a fieldsSnapshot per card for r12 drift detection');
+    assert.equal(state.cards['card-1'].fieldsSnapshot['fldaAdo3CyQX1yttd'], 'Acme');
   });
 
   test('empty Active Pipeline pulls cleanly (no crash, empty outputs)', async () => {
@@ -249,6 +253,65 @@ describe('push', () => {
     assert.equal(state.cards['card-1'].lastRefreshed, '2026-06-16T01:00:00.000Z');
   });
 
+  test('r12: manual Airtable edit that does NOT bump Last Refreshed is still caught as a conflict', async () => {
+    // Regression test for the r12 last-write-wins bug: Rahil edits a field
+    // (e.g. Notes) directly in the Airtable UI. That never bumps the
+    // hand-maintained Last Refreshed field, so the OLD sameTimestamp-only
+    // check would have seen "remote == baseline" and pushed stale local data
+    // straight over his edit. The fieldsSnapshot diff must catch this.
+    const dataDir = freshDir();
+    const pulledRecord = makeRecord('rec1', { cardId: 'card-1', company: 'Acme', role: 'PM', lastRefreshed: '2026-06-16T01:00:00.000Z' });
+    writeState(dataDir, {
+      'card-1': {
+        lastRefreshed: '2026-06-16T01:00:00.000Z',
+        recordId: 'rec1',
+        fieldsSnapshot: snapshotFields(pulledRecord.fields),
+      },
+    });
+    const localCards = [{
+      id: 'card-1', company: 'Acme Updated', columnId: 'new-fresh',
+      lastRefreshed: '2026-06-16T02:00:00.000Z',
+    }];
+    // Rahil hand-edited Company in the Airtable UI — Last Refreshed is
+    // UNCHANGED (still 01:00), but the field content drifted from baseline.
+    const currentRecord = makeRecord('rec1', { cardId: 'card-1', company: 'Acme (Rahil edit)', role: 'PM', lastRefreshed: '2026-06-16T01:00:00.000Z' });
+
+    let patchCalled = false;
+    const fetchImpl = async (_url, opts) => {
+      if (opts && opts.method === 'PATCH') { patchCalled = true; }
+      return { ok: true, json: async () => ({ records: [currentRecord] }) };
+    };
+
+    const res = await push({ pat: 'fake-pat', dataDir, localCards, fetchImpl });
+    assert.equal(res.ok, true);
+    assert.equal(res.pushed, 0);
+    assert.equal(res.conflicts.length, 1, 'field drift with an unchanged Last Refreshed must still be flagged as a conflict');
+    assert.equal(res.conflicts[0].id, 'card-1');
+    assert.ok(res.conflicts[0].driftedFields.length > 0);
+    assert.equal(patchCalled, false, 'PATCH must never be called when a field drifted, even if Last Refreshed did not');
+  });
+
+  test('legacy baseline with no fieldsSnapshot falls back to Last-Refreshed-only check (no crash)', async () => {
+    const dataDir = freshDir();
+    // Old-shape sync-state.json, written before this fix — no fieldsSnapshot key.
+    writeState(dataDir, { 'card-1': { lastRefreshed: '2026-06-16T01:00:00.000Z', recordId: 'rec1' } });
+    const localCards = [{
+      id: 'card-1', company: 'Acme Updated', columnId: 'new-fresh',
+      lastRefreshed: '2026-06-16T02:00:00.000Z',
+    }];
+    const currentRecord = makeRecord('rec1', { cardId: 'card-1', company: 'Acme', role: 'PM', lastRefreshed: '2026-06-16T01:00:00.000Z' });
+    const fetchImpl = async (_url, opts) => {
+      if (opts && opts.method === 'PATCH') {
+        return { ok: true, json: async () => ({ records: [{ id: 'rec1', fields: { ...cardToFields(localCards[0]), [LAST_REFRESHED_FIELD]: '2026-06-16T02:00:00.000Z' } }] }) };
+      }
+      return { ok: true, json: async () => ({ records: [currentRecord] }) };
+    };
+    const res = await push({ pat: 'fake-pat', dataDir, localCards, fetchImpl });
+    assert.equal(res.ok, true);
+    assert.equal(res.pushed, 1, 'legacy baseline (no snapshot) should still push cleanly via the old timestamp check');
+    assert.equal(res.conflicts.length, 0);
+  });
+
   test('archived card (no longer in Active Pipeline) is skipped, not recreated', async () => {
     const dataDir = freshDir();
     writeState(dataDir, { 'card-1': { lastRefreshed: '2026-06-16T01:00:00.000Z', recordId: 'rec1' } });
@@ -305,6 +368,32 @@ describe('recordToCard / cardToFields round trip', () => {
     assert.equal(fields[CARD_ID_FIELD], 'card-1');
     assert.ok(!('fldMTpTyX9CzIhazo' in fields), 'Created At should not be in the push payload');
     assert.equal(fields['fldyDJNWfldoMDVqt'], 'A, B');
+  });
+});
+
+describe('snapshotFields / diffSnapshot (r12 conflict clock)', () => {
+  test('snapshotFields normalizes missing fields to null', () => {
+    const snap = snapshotFields({ [CARD_ID_FIELD]: 'card-1' });
+    assert.equal(snap[CARD_ID_FIELD], 'card-1');
+    assert.equal(snap[LAST_REFRESHED_FIELD], null);
+  });
+
+  test('snapshotFields excludes Created At (pull-only field)', () => {
+    const snap = snapshotFields({ 'fldMTpTyX9CzIhazo': '2026-01-01T00:00:00.000Z' });
+    assert.ok(!('fldMTpTyX9CzIhazo' in snap));
+  });
+
+  test('diffSnapshot reports only the fields that actually changed', () => {
+    const a = snapshotFields({ [CARD_ID_FIELD]: 'card-1', 'fldaAdo3CyQX1yttd': 'Acme' });
+    const b = snapshotFields({ [CARD_ID_FIELD]: 'card-1', 'fldaAdo3CyQX1yttd': 'Acme (edited)' });
+    const drift = diffSnapshot(a, b);
+    assert.deepEqual(drift, ['fldaAdo3CyQX1yttd']);
+  });
+
+  test('diffSnapshot returns empty for identical snapshots', () => {
+    const a = snapshotFields({ [CARD_ID_FIELD]: 'card-1' });
+    const b = snapshotFields({ [CARD_ID_FIELD]: 'card-1' });
+    assert.deepEqual(diffSnapshot(a, b), []);
   });
 });
 

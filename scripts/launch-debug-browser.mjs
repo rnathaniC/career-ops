@@ -28,13 +28,30 @@ function argVal(flag) {
  * Build the browser command-line arguments for remote debugging.
  * Exported for testing.
  */
-export function buildBrowserArgs(port, profilePath) {
-  return [
+export function buildBrowserArgs(port, profilePath, profileDirectory = null) {
+  // Edge/Chrome expect --user-data-dir to be the *User Data* ROOT, with the specific
+  // profile chosen via --profile-directory. A common (auth-breaking) misconfig points
+  // --user-data-dir straight at "...\\User Data\\Default", which makes the browser treat
+  // "Default" as a brand-new, LOGGED-OUT data root — so auto-submit can't act as the user.
+  // Detect that shape and split it so the real authenticated session is used. (B-1 fix 2026-06-26)
+  let userDataDir = profilePath;
+  let profileDir = profileDirectory;
+  if (!profileDir) {
+    const base = String(profilePath).replace(/[\\/]+$/, '');
+    const leaf = base.split(/[\\/]/).pop();
+    if (/^(Default|Profile \d+)$/i.test(leaf)) {
+      profileDir = leaf;
+      userDataDir = base.slice(0, base.length - leaf.length).replace(/[\\/]+$/, '');
+    }
+  }
+  const args = [
     `--remote-debugging-port=${port}`,
-    `--user-data-dir=${profilePath}`,
+    `--user-data-dir=${userDataDir}`,
     '--no-first-run',
     '--no-default-browser-check',
   ];
+  if (profileDir) args.push(`--profile-directory=${profileDir}`);
+  return args;
 }
 
 const PORT = parseInt(argVal('--port') ?? '9222', 10);

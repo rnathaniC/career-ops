@@ -1,14 +1,14 @@
 {
-  "ran_at_utc": "2026-06-21T08:03:12.847Z",
-  "source": "/sessions/youthful-intelligent-heisenberg/mnt/career-ops/data/kanban-import-2026-06-21.json",
+  "ran_at_utc": "2026-07-22T05:23:25.665Z",
+  "source": "/sessions/focused-elegant-hopper/mnt/career-ops/data/kanban-import-2026-07-22.json",
   "grades": [
     "A",
     "B"
   ],
-  "considered": 3,
-  "graded": 0,
-  "fresh": 0,
-  "referral_held": 0,
+  "considered": 37,
+  "graded": 9,
+  "fresh": 2,
+  "referral_held": 7,
   "added": 0,
   "dry_run": false
 }

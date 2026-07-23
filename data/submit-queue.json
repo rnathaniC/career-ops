@@ -53,5 +53,141 @@
     "hasConnection": false,
     "isWarmReferral": false,
     "connectionName": ""
+  },
+  {
+    "company": "Pinterest",
+    "role": "Staff Technical Program Manager, SOX Compliance",
+    "url": "https://www.pinterestcareers.com/jobs/?gh_jid=7997974",
+    "ats": "greenhouse",
+    "grade": "B",
+    "status": "queued",
+    "queued_at": "2026-06-23T05:16:45.913Z",
+    "source_id": "live-2026-06-23-001",
+    "keywords": [
+      "Program Manager",
+      "Technical Program Manager"
+    ],
+    "hasConnection": false,
+    "isWarmReferral": false,
+    "connectionName": ""
+  },
+  {
+    "company": "Lyft",
+    "role": "Senior Technical Program Manager, Infrastructure",
+    "url": "https://app.careerpuck.com/job-board/lyft/job/8604675002?gh_jid=8604675002",
+    "ats": "greenhouse",
+    "grade": "B",
+    "status": "queued",
+    "queued_at": "2026-06-25T05:16:48.690Z",
+    "source_id": "live-2026-06-25-001",
+    "keywords": [
+      "Program Manager",
+      "Technical Program Manager"
+    ],
+    "hasConnection": false,
+    "isWarmReferral": false,
+    "connectionName": ""
+  },
+  {
+    "company": "Leonardo DRS",
+    "role": "Technical Program Manager",
+    "url": "https://leonardodrs.dejobs.org/dallas-tx/technical-program-manager/0531D61394E94603B0996E0D15C6E64C/job/",
+    "ats": "other",
+    "grade": "B",
+    "status": "queued",
+    "queued_at": "2026-07-03T05:17:50.593Z",
+    "source_id": "manual-2026-07-02-003",
+    "keywords": [
+      "Program Manager",
+      "Technical Program Manager"
+    ],
+    "hasConnection": false,
+    "isWarmReferral": false,
+    "connectionName": ""
+  },
+  {
+    "company": "Lyft",
+    "role": "Senior Staff Technical Program Manager, Rider Loyalty",
+    "url": "https://app.careerpuck.com/job-board/lyft/job/8624694002?gh_jid=8624694002",
+    "ats": "greenhouse",
+    "grade": "B",
+    "status": "queued",
+    "queued_at": "2026-07-09T05:24:55.837Z",
+    "source_id": "live-2026-07-09-002",
+    "keywords": [
+      "Program Manager",
+      "Technical Program Manager"
+    ],
+    "hasConnection": false,
+    "isWarmReferral": false,
+    "connectionName": ""
+  },
+  {
+    "company": "Toast",
+    "role": "Principal Technical Program Manager, Toast IQ",
+    "url": "https://careers.toasttab.com/jobs?gh_jid=8054004",
+    "ats": "greenhouse",
+    "grade": "B",
+    "status": "queued",
+    "queued_at": "2026-07-16T03:25:57.693Z",
+    "source_id": "live-2026-07-16-010",
+    "keywords": [
+      "Program Manager",
+      "Technical Program Manager"
+    ],
+    "hasConnection": false,
+    "isWarmReferral": false,
+    "connectionName": ""
+  },
+  {
+    "company": "Lambda Labs",
+    "role": "Technical Program Manager - Data Center Delivery",
+    "url": "https://jobs.ashbyhq.com/lambda/ab7be2d6-9e25-4ba7-9b23-bf3ade24fa65",
+    "ats": "ashby",
+    "grade": "B",
+    "status": "queued",
+    "queued_at": "2026-07-16T03:25:57.693Z",
+    "source_id": "live-2026-07-16-012",
+    "keywords": [
+      "Program Manager",
+      "Technical Program Manager"
+    ],
+    "hasConnection": false,
+    "isWarmReferral": false,
+    "connectionName": ""
+  },
+  {
+    "company": "Duolingo",
+    "role": "Staff Technical Program Manager",
+    "url": "https://careers.duolingo.com/jobs/8638482002?gh_jid=8638482002",
+    "ats": "greenhouse",
+    "grade": "B",
+    "status": "queued",
+    "queued_at": "2026-07-22T05:19:01.977Z",
+    "source_id": "live-2026-07-22-001",
+    "keywords": [
+      "Program Manager",
+      "Technical Program Manager"
+    ],
+    "hasConnection": false,
+    "isWarmReferral": false,
+    "connectionName": ""
+  },
+  {
+    "company": "Twilio",
+    "role": "Senior Technical Program Manager, Services Tools & Diagnostics",
+    "url": "https://job-boards.greenhouse.io/twilio/jobs/8067440",
+    "ats": "greenhouse",
+    "grade": "B",
+    "status": "queued",
+    "queued_at": "2026-07-22T05:19:01.978Z",
+    "source_id": "live-2026-07-22-004",
+    "keywords": [
+      "Program Manager",
+      "Technical Program Manager"
+    ],
+    "hasConnection": false,
+    "isWarmReferral": false,
+    "connectionName": ""
   }
 ]

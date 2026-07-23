@@ -4,6 +4,10 @@
  * Airtable "Active Pipeline" base. Closes TODO(Airtable-Sync) in
  * pulse-refresh.mjs (risk r12 — see sync contract below).
  *
+ * r12 RESOLVED 2026-07-06: conflict detection now diffs the FULL pushable
+ * field set (snapshotFields/diffSnapshot), not just "Last Refreshed" — see
+ * BUGS.md r12 for the full writeup of the last-write-wins bug this closes.
+ *
  * MODES:
  *   --pull   GET all Active Pipeline records → data/kanban-import-{date}.json
  *            (same array-of-cards shape ingest-runner.mjs / referral-queue.mjs /
@@ -66,9 +70,30 @@ export const ACTIVE_FIELD_IDS = {
   'Connection Name': 'fldEpnNHzAkWkGNhb', 'Connection LinkedIn': 'fldFk5zF7iOdDhNXW',
   'Has Connection': 'fld3E2xL0wG1yKxAq', 'Warm Referral': 'fldi1rAwieHmASoax',
   'Created At': 'fldMTpTyX9CzIhazo', 'Last Refreshed': 'fld4hdyB6a8qjzeSZ', 'Notes': 'fldGkJ4cqoLE3yFCa',
+  // Multi-connection referral picker. Create fields then replace null with the returned IDs:
+  //   curl -X POST https://api.airtable.com/v0/meta/bases/appYRJX5x9iVXpbbg/tables/tbldVU2pHhQjOHjzh/fields \
+  //     -H "Authorization: Bearer $AIRTABLE_PAT" -H "Content-Type: application/json" \
+  //     -d '{"name":"Connection Count","type":"number","options":{"precision":0}}'
+  //   curl -X POST https://api.airtable.com/v0/meta/bases/appYRJX5x9iVXpbbg/tables/tbldVU2pHhQjOHjzh/fields \
+  //     -H "Authorization: Bearer $AIRTABLE_PAT" -H "Content-Type: application/json" \
+  //     -d '{"name":"Connection Options","type":"multilineText"}'
+  'Connection Count': 'flddqet5ZZSumFns4',    // TODO: replace with field ID after Airtable field creation
+  'Connection Options': 'fldJu7vzBJaawmMDD',  // TODO: replace with field ID after Airtable field creation
 };
 export const CARD_ID_FIELD = ACTIVE_FIELD_IDS['Card ID'];
 export const LAST_REFRESHED_FIELD = ACTIVE_FIELD_IDS['Last Refreshed'];
+
+// Field names checked for remote drift on push (everything pushable except
+// "Created At", which cardToFields() never writes — see SCHEMA ASSUMPTION
+// above). r12 FIX (2026-07-06): conflict detection used to compare ONLY the
+// hand-maintained "Last Refreshed" field, which is a plain text/date field
+// that only OUR OWN pull/push code ever writes. Rahil editing a card directly
+// in the Airtable UI (Notes, Lane, Company, whatever) never bumps that field,
+// so the old check saw remote == baseline, called it "unchanged", and pushed
+// stale local data straight over his edit — a silent last-write-wins loss.
+// The fix: snapshot every pushable field at pull time and diff the FULL set
+// at push time, so drift on ANY field (not just Last Refreshed) is caught.
+export const CONFLICT_CHECK_FIELD_NAMES = Object.keys(ACTIVE_FIELD_IDS).filter((name) => name !== 'Created At');
 
 // Lane singleSelect choice IDs — informational only. Values are read/written by
 // *name* (e.g. "New-Hot"): Airtable's REST API represents singleSelect field
@@ -165,6 +190,39 @@ export function sameTimestamp(a, b) {
   const tb = Date.parse(b);
   if (Number.isNaN(ta) || Number.isNaN(tb)) return a === b;
   return ta === tb;
+}
+
+/**
+ * Snapshot the pushable fields of a record (fields keyed by field ID) for
+ * conflict-drift comparison. Missing values normalize to null so "field
+ * absent" and "field explicitly empty" compare equal.
+ * @param {object} fields - record.fields, keyed by Airtable field ID
+ * @returns {object} snapshot keyed by field ID
+ */
+export function snapshotFields(fields = {}) {
+  const out = {};
+  for (const name of CONFLICT_CHECK_FIELD_NAMES) {
+    const fieldId = ACTIVE_FIELD_IDS[name];
+    out[fieldId] = fields?.[fieldId] ?? null;
+  }
+  return out;
+}
+
+/**
+ * Compare two field snapshots (same shape as snapshotFields()) and return the
+ * list of field IDs whose value differs.
+ * @returns {string[]} field IDs that drifted
+ */
+export function diffSnapshot(a, b) {
+  if (!a || !b) return [];
+  const keys = new Set([...Object.keys(a), ...Object.keys(b)]);
+  const changed = [];
+  for (const k of keys) {
+    const av = a[k] ?? null;
+    const bv = b[k] ?? null;
+    if (JSON.stringify(av) !== JSON.stringify(bv)) changed.push(k);
+  }
+  return changed;
 }
 
 function todayStamp() {
@@ -272,7 +330,13 @@ export async function pull({
     base: baseId,
     table: tableId,
     cards: Object.fromEntries(
-      cards.map((c) => [c.id, { lastRefreshed: c.lastRefreshed, recordId: c._airtableRecordId }])
+      cards.map((c, i) => [c.id, {
+        lastRefreshed: c.lastRefreshed,
+        recordId: c._airtableRecordId,
+        // r12 FIX: full-field snapshot, not just Last Refreshed — see
+        // CONFLICT_CHECK_FIELD_NAMES comment above for why.
+        fieldsSnapshot: snapshotFields(withCardId[i].fields),
+      }])
     ),
   };
   writeFileSync(statePath, JSON.stringify(state, null, 2) + '\n');
@@ -339,10 +403,28 @@ export async function push({
       archived.push(c.id);
       continue;
     }
-    const remoteLastRefreshed = current.fields?.[LAST_REFRESHED_FIELD];
-    const baselineLastRefreshed = baseline[c.id].lastRefreshed;
-    if (!sameTimestamp(remoteLastRefreshed, baselineLastRefreshed)) {
-      conflicts.push({ id: c.id, baseline: baselineLastRefreshed, remote: remoteLastRefreshed });
+    const remoteFields = current.fields || {};
+    const remoteLastRefreshed = remoteFields[LAST_REFRESHED_FIELD];
+    const baselineEntry = baseline[c.id];
+    const baselineLastRefreshed = baselineEntry.lastRefreshed;
+
+    // r12 FIX: prefer full-field drift detection over the old Last-Refreshed-only
+    // check, since a manual Airtable edit (or any direct-PATCH call site, e.g.
+    // archive-stale.mjs's flow-tag write) can change a field WITHOUT bumping
+    // Last Refreshed, which used to slip past conflict detection entirely.
+    // Fall back to the legacy timestamp-only check for baselines written before
+    // this fix (no fieldsSnapshot yet) so an old sync-state.json doesn't crash.
+    let conflicted;
+    let driftedFields = [];
+    if (baselineEntry.fieldsSnapshot) {
+      driftedFields = diffSnapshot(baselineEntry.fieldsSnapshot, snapshotFields(remoteFields));
+      conflicted = driftedFields.length > 0;
+    } else {
+      conflicted = !sameTimestamp(remoteLastRefreshed, baselineLastRefreshed);
+    }
+
+    if (conflicted) {
+      conflicts.push({ id: c.id, baseline: baselineLastRefreshed, remote: remoteLastRefreshed, driftedFields });
       continue;
     }
     toPush.push({ id: current.id, fields: cardToFields(c) });
@@ -362,6 +444,9 @@ export async function push({
       if (cid && state.cards[cid]) {
         state.cards[cid].lastRefreshed = r.fields?.[LAST_REFRESHED_FIELD] ?? state.cards[cid].lastRefreshed;
         state.cards[cid].recordId = r.id;
+        // r12 FIX: refresh the drift-check snapshot to the just-pushed truth too,
+        // so a same-run second push doesn't re-diff these fields as changed.
+        state.cards[cid].fieldsSnapshot = snapshotFields(r.fields || {});
       }
     }
     state.synced_at_utc = new Date().toISOString();

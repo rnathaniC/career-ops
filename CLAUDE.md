@@ -257,7 +257,10 @@ Default modes are in `modes/` (English). Additional language-specific modes are 
 
 **This system is designed for quality, not quantity.** The goal is to help the user find and apply to roles where there is a genuine match -- not to spam companies with mass applications.
 
-- **NEVER submit an application without the user reviewing it first.** Fill forms, draft answers, generate PDFs -- but always STOP before clicking Submit/Send/Apply. The user makes the final call.
+- **AUTONOMOUS SUBMIT — Fresh lane (override 2026-06-24, authorized by Rahil, Product Owner).** The prior "never submit without review" rule is OVERRIDDEN for the **Fresh lane only**: cards that pass the per-card gates (grade A/B/C eligibility + readiness band >=60 + 5/day cap) auto-submit and move to the **Applied** lane without a human stop. The readiness `<60 = skip` band remains the quality floor and is NOT bypassed.
+- **HOT lane stays human — always hold.** Warm-referral cards (Hot lane) are EXCLUDED from auto-submit by design (`isEligible` rejects `isWarmReferral`). Never auto-fire a card that has a warm connection; these wait for Rahil.
+- **Kill-switch:** `config/lower-tier-test-companies.yml` `enabled: false` instantly halts ALL live submissions.
+- Every autonomous submission is logged to `data/auto-submit-*.json` and surfaced in the daily report.
 - **Strongly discourage low-fit applications.** If a score is below 4.0/5, explicitly recommend against applying. The user's time and the recruiter's time are both valuable. Only proceed if the user has a specific reason to override the score.
 - **Quality over speed.** A well-targeted application to 5 companies beats a generic blast to 50. Guide the user toward fewer, better applications.
 - **Respect recruiters' time.** Every application a human reads costs someone's attention. Only send what's worth reading.

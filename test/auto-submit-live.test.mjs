@@ -39,6 +39,8 @@ import {
   loadLowerTierConfig,
   checkDailyCap,
   incrementDailyCap,
+  detectCaptchaOnPage,
+  pollForCaptcha,
 } from '../scripts/auto-submit.mjs';
 
 import { checkLiveness } from '../scripts/check-job-liveness.mjs';
@@ -128,6 +130,102 @@ describe('CAPTCHA_SELECTORS', () => {
   });
   test('includes Cloudflare challenge selector', () => {
     assert.ok(CAPTCHA_SELECTORS.some((s) => s.includes('cf-challenge')));
+  });
+});
+
+// ── 3b. K-DEFECT-2026-07-21 — CI&T/Lever late-loading hCaptcha regression ──────
+//
+// Repro: on a Lever-hosted posting (confirmed live: CI&T), an invisible hCaptcha
+// widget attaches to the DOM AFTER the early post-goto settle check already ran
+// clean, so the old single-shot detectCaptchaOnPage() call passed through and
+// submitBtn.click() fired into a blocked form (silent 'unconfirmed' instead of
+// 'requires-human'). Fix: pollForCaptcha() re-checks immediately before the
+// submit click, polling briefly so a widget that attaches a beat late is still
+// caught. These tests use a fake Playwright-like `page` (only `.$()` is used by
+// detectCaptchaOnPage) plus injectable `waiter`/`now` so no real timers or
+// browser are needed.
+
+function fakePage(hitOnCallNumber) {
+  // hitOnCallNumber: null = never matches (no captcha ever appears).
+  // 1 = matches on the very first detectCaptchaOnPage() call (early-present case,
+  //     same as the existing Samsara behavior). N>1 = matches only once
+  //     detectCaptchaOnPage has been called N times total across all polls
+  //     (simulates a widget that attaches late, after the early check missed it).
+  let calls = 0;
+  return {
+    async $(sel) {
+      // detectCaptchaOnPage calls page.$() once per selector per invocation;
+      // only count the FIRST selector of a given detectCaptchaOnPage() call so
+      // "callNumber" tracks detectCaptchaOnPage invocations, not per-selector.
+      if (sel !== CAPTCHA_SELECTORS[0]) return null;
+      calls += 1;
+      if (hitOnCallNumber != null && calls >= hitOnCallNumber) {
+        return { found: true }; // truthy stand-in for an ElementHandle
+      }
+      return null;
+    },
+  };
+}
+
+describe('detectCaptchaOnPage', () => {
+  test('returns true when a captcha selector matches', async () => {
+    const page = fakePage(1);
+    assert.equal(await detectCaptchaOnPage(page), true);
+  });
+  test('returns false when no captcha selector matches', async () => {
+    const page = fakePage(null);
+    assert.equal(await detectCaptchaOnPage(page), false);
+  });
+});
+
+describe('pollForCaptcha (CI&T/Lever timing-gap regression)', () => {
+  test('captcha present at the very first check (Samsara-style, early) → true immediately, no polling', async () => {
+    const page = fakePage(1);
+    let waits = 0;
+    const found = await pollForCaptcha(page, { waiter: async () => { waits += 1; } });
+    assert.equal(found, true);
+    assert.equal(waits, 0, 'should not need to poll when captcha is already present');
+  });
+
+  test('captcha absent at first check but appears on the 3rd poll (CI&T/Lever-style, late) → true after polling', async () => {
+    // callNumber 1 = the early no-op check inside pollForCaptcha itself;
+    // calls 2,3,4 = the poll loop. hitOnCallNumber:4 means the captcha is
+    // "absent" for the first 3 checks and present from the 4th check onward —
+    // i.e. it attaches to the DOM partway through the poll window, exactly
+    // the CI&T/Lever repro (invisible hCaptcha loads after the early check).
+    const page = fakePage(4);
+    let waitedMs = 0;
+    let fakeNow = 0;
+    const found = await pollForCaptcha(page, {
+      timeoutMs: 3000,
+      intervalMs: 500,
+      waiter: async (ms) => { waitedMs += ms; fakeNow += ms; },
+      now: () => fakeNow,
+    });
+    assert.equal(found, true, 'a late-attaching captcha must be caught before the timeout elapses');
+    assert.ok(waitedMs > 0 && waitedMs <= 3000, `should poll within the timeout window (waited ${waitedMs}ms)`);
+  });
+
+  test('captcha never appears → false after the full timeout window, does not hang', async () => {
+    const page = fakePage(null);
+    let fakeNow = 0;
+    const found = await pollForCaptcha(page, {
+      timeoutMs: 3000,
+      intervalMs: 500,
+      waiter: async (ms) => { fakeNow += ms; },
+      now: () => fakeNow,
+    });
+    assert.equal(found, false);
+    assert.ok(fakeNow >= 3000, 'should have exhausted the full poll window before giving up');
+  });
+
+  test('default options work against a real (fake) page without explicit waiter/now', async () => {
+    // Sanity check that the exported defaults (500ms interval, 3s timeout,
+    // real setTimeout) don't throw when called the way runLive() calls them —
+    // i.e. pollForCaptcha(page) with no second argument.
+    const page = fakePage(1);
+    const found = await pollForCaptcha(page);
+    assert.equal(found, true);
   });
 });
 

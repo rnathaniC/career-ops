@@ -19,9 +19,11 @@ import { tmpdir } from 'node:os';
 import {
   newestMatching, buildSeenUrls, maxCardSeq, buildFields, injectCards,
   airtableCreateBatch, appendToKanbanImport,
+  normalizeCompany, buildConnectionsMap, resolveCardConnection,
 } from '../scripts/kanban-inject.mjs';
 
 import { ACTIVE_FIELD_IDS } from '../scripts/airtable-sync.mjs';
+import { generateOutreachMessage } from '../scripts/referral-queue.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT      = path.resolve(__dirname, '..');
@@ -362,6 +364,7 @@ describe('injectCards: local kanban-import append', () => {
       date: '2026-06-16',
       fetchImpl: mockFetch,
       kanbanImportPath: kanbanPath,
+      connByCompany: new Map(),  // no connections → hasConnection stays false
     });
 
     const cards = JSON.parse(fs.readFileSync(kanbanPath, 'utf8'));
@@ -433,6 +436,233 @@ describe('CLI: dry-run output file', () => {
     assert.equal(run.dry_run, true);
     assert.equal(run.injected, 0);
     assert.equal(run.skipped_grade_d, 1, 'grade-D Acme Sales Rep should be counted');
+  });
+});
+
+// ── normalizeCompany ──────────────────────────────────────────────────────────
+
+describe('normalizeCompany', () => {
+  test('lowercases plain names', () => {
+    assert.equal(normalizeCompany('Stripe'), 'stripe');
+  });
+  test('strips Inc suffix', () => {
+    assert.equal(normalizeCompany('Stripe, Inc.'), 'stripe');
+    assert.equal(normalizeCompany('Stripe Inc'), 'stripe');
+  });
+  test('strips LLC suffix', () => {
+    assert.equal(normalizeCompany('Google LLC'), 'google');
+  });
+  test('strips Corp suffix', () => {
+    assert.equal(normalizeCompany('Acme Corp.'), 'acme');
+  });
+  test('handles empty/null gracefully', () => {
+    assert.equal(normalizeCompany(''), '');
+    assert.equal(normalizeCompany(null), '');
+  });
+});
+
+// ── resolveCardConnection ─────────────────────────────────────────────────────
+
+describe('resolveCardConnection', () => {
+  const map = new Map([
+    ['stripe', [{ name: 'Jane Doe', url: 'https://linkedin.com/in/jane', position: 'Engineer' }]],
+    ['google', [
+      { name: 'Alice', url: 'https://linkedin.com/in/alice', position: 'PM' },
+      { name: 'Bob',   url: 'https://linkedin.com/in/bob',   position: 'SWE' },
+    ]],
+  ]);
+
+  test('returns hasConnection false with empty connections[] for unknown company', () => {
+    const result = resolveCardConnection('Notion', map);
+    assert.equal(result.hasConnection, false);
+    assert.equal(result.isWarmReferral, false);
+    assert.equal(result.connectionName, '');
+    assert.equal(result.connectionCount, 0);
+    assert.deepEqual(result.connections, []);
+  });
+
+  test('matches exact company name (normalised) and returns single entry', () => {
+    const result = resolveCardConnection('Stripe', map);
+    assert.equal(result.hasConnection, true);
+    assert.equal(result.isWarmReferral, true);
+    assert.equal(result.connectionName, 'Jane Doe');
+    assert.equal(result.connectionLinkedinUrl, 'https://linkedin.com/in/jane');
+    assert.equal(result.connectionCount, 1);
+    assert.equal(result.connections.length, 1);
+    assert.equal(result.connections[0].name, 'Jane Doe');
+    assert.equal(result.connections[0].position, 'Engineer');
+    assert.equal(result.connections[0].url, 'https://linkedin.com/in/jane');
+  });
+
+  test('matches after stripping Inc suffix', () => {
+    const result = resolveCardConnection('Stripe, Inc.', map);
+    assert.equal(result.hasConnection, true);
+    assert.equal(result.connectionName, 'Jane Doe');
+  });
+
+  test('returns ALL matches with connectionCount when multiple connections exist', () => {
+    const result = resolveCardConnection('Google LLC', map);
+    assert.equal(result.hasConnection, true);
+    assert.equal(result.connectionName, 'Alice');  // first match for backward compat
+    assert.equal(result.connectionCount, 2);
+    assert.equal(result.connections.length, 2);
+    assert.equal(result.connections[0].name, 'Alice');
+    assert.equal(result.connections[1].name, 'Bob');
+  });
+});
+
+// ── buildConnectionsMap ───────────────────────────────────────────────────────
+
+describe('buildConnectionsMap', () => {
+  test('returns empty Map for missing file', () => {
+    const map = buildConnectionsMap(path.join(TMP, 'no-such-file.json'));
+    assert.equal(map.size, 0);
+  });
+
+  test('builds map from JSON file', () => {
+    const connPath = path.join(TMP, 'test-connections.json');
+    fs.writeFileSync(connPath, JSON.stringify([
+      { company: 'Acme Corp', name: 'Test User', position: 'Dev', url: 'https://li.com/in/test' },
+    ]));
+    const map = buildConnectionsMap(connPath);
+    assert.ok(map.has('acme'), 'key should be normalised (Corp stripped)');
+    assert.equal(map.get('acme')[0].name, 'Test User');
+  });
+});
+
+// ── injectCards: connection matching ─────────────────────────────────────────
+
+describe('injectCards: connection matching', () => {
+  test('sets New-Hot lane and connection fields for matched company', async () => {
+    const dir = path.join(TMP, 'inject-conn');
+    fs.mkdirSync(dir, { recursive: true });
+
+    let postedFields;
+    const mockFetch = async (_url, opts) => {
+      const body = JSON.parse(opts.body);
+      postedFields = body.records[0].fields;
+      const records = body.records.map((r, i) => ({ id: `rec${i}`, fields: r.fields }));
+      return { ok: true, status: 200, async json() { return { records }; }, async text() { return ''; } };
+    };
+
+    const connByCompany = new Map([
+      ['stripe', [{ name: 'Jane Doe', url: 'https://linkedin.com/in/jane', position: 'Engineer' }]],
+    ]);
+
+    const result = await injectCards({
+      gradedJobs: [GRADED_JOBS[0]],  // Stripe
+      seenUrls: new Set(),
+      pat: 'test-pat',
+      dataDir: dir,
+      date: '2026-06-16',
+      fetchImpl: mockFetch,
+      connByCompany,
+    });
+
+    assert.equal(result.injected, 1);
+    const card = result.cards_injected[0];
+    assert.equal(card.hasConnection, true);
+    assert.equal(card.isWarmReferral, true);
+    assert.equal(card.connectionName, 'Jane Doe');
+    assert.equal(card.columnId, 'new-hot');
+    // Multi-connection shape.
+    assert.equal(card.connectionCount, 1);
+    assert.equal(card.connections.length, 1);
+    assert.equal(card.connections[0].name, 'Jane Doe');
+    assert.equal(card.connections[0].position, 'Engineer');
+    // Verify the Airtable payload also carries the connection fields.
+    assert.equal(postedFields[ACTIVE_FIELD_IDS['Has Connection']], true);
+    assert.equal(postedFields[ACTIVE_FIELD_IDS['Lane']], 'New-Hot');
+    assert.equal(postedFields[ACTIVE_FIELD_IDS['Connection Name']], 'Jane Doe');
+  });
+
+  test('leaves New-Fresh for unmatched company', async () => {
+    const dir = path.join(TMP, 'inject-conn-miss');
+    fs.mkdirSync(dir, { recursive: true });
+
+    let postedFields;
+    const mockFetch = async (_url, opts) => {
+      const body = JSON.parse(opts.body);
+      postedFields = body.records[0].fields;
+      const records = body.records.map((r, i) => ({ id: `rec${i}`, fields: r.fields }));
+      return { ok: true, status: 200, async json() { return { records }; }, async text() { return ''; } };
+    };
+
+    const result = await injectCards({
+      gradedJobs: [GRADED_JOBS[1]],  // Notion — not in map
+      seenUrls: new Set(),
+      pat: 'test-pat',
+      dataDir: dir,
+      date: '2026-06-16',
+      fetchImpl: mockFetch,
+      connByCompany: new Map([['stripe', [{ name: 'Jane', url: '', position: '' }]]]),
+    });
+
+    assert.equal(result.cards_injected[0].hasConnection, false);
+    assert.equal(result.cards_injected[0].columnId, 'new-fresh');
+    assert.equal(postedFields[ACTIVE_FIELD_IDS['Lane']], 'New-Fresh');
+    assert.equal(postedFields[ACTIVE_FIELD_IDS['Has Connection']], false);
+  });
+});
+
+// ── buildFields: connection params ────────────────────────────────────────────
+
+describe('buildFields: with connection', () => {
+  test('sets New-Hot lane and connection fields when hasConnection is true', () => {
+    const fields = buildFields({
+      cardId: 'live-2026-06-16-001', company: 'Stripe', role: 'PM', grade: 'A',
+      platform: 'greenhouse', url: 'https://ex.com/1', keywords: [],
+      nowIso: '2026-06-16T00:00:00Z',
+      hasConnection: true, isWarmReferral: true,
+      connectionName: 'Jane Doe', connectionLinkedinUrl: 'https://linkedin.com/in/jane',
+    });
+    assert.equal(fields[ACTIVE_FIELD_IDS['Lane']], 'New-Hot');
+    assert.equal(fields[ACTIVE_FIELD_IDS['Has Connection']], true);
+    assert.equal(fields[ACTIVE_FIELD_IDS['Warm Referral']], true);
+    assert.equal(fields[ACTIVE_FIELD_IDS['Connection Name']], 'Jane Doe');
+    assert.equal(fields[ACTIVE_FIELD_IDS['Connection LinkedIn']], 'https://linkedin.com/in/jane');
+  });
+});
+
+// ── generateOutreachMessage ───────────────────────────────────────────────────
+
+describe('generateOutreachMessage', () => {
+  test('IC role — casual opener with first name, company, and role', () => {
+    const msg = generateOutreachMessage('Jane Smith', 'Stripe', 'Program Manager', 'Senior Engineer');
+    assert.match(msg, /Hey Jane/);
+    assert.match(msg, /Stripe/);
+    assert.match(msg, /Program Manager/);
+    assert.match(msg, /Senior Engineer/);
+    assert.ok(!msg.startsWith('Hi Jane'), 'IC should use casual "Hey", not formal "Hi"');
+  });
+
+  test('Manager role — casual opener (Manager does not trigger formal tone)', () => {
+    const msg = generateOutreachMessage('Bob Chen', 'Notion', 'Scrum Master', 'Engineering Manager');
+    assert.match(msg, /Hey Bob/);
+    assert.match(msg, /Notion/);
+    assert.match(msg, /Scrum Master/);
+    assert.ok(!msg.startsWith('Hi Bob'), 'Manager should still use casual "Hey"');
+  });
+
+  test('Director role — formal opener with leadership framing', () => {
+    const msg = generateOutreachMessage('Alice Kim', 'Palantir', 'TPM', 'Director of Engineering');
+    assert.match(msg, /Hi Alice/);
+    assert.match(msg, /Palantir/);
+    assert.match(msg, /TPM/);
+    assert.match(msg, /leadership/);
+    assert.ok(!msg.startsWith('Hey Alice'), 'Director should use formal "Hi", not casual "Hey"');
+  });
+
+  test('VP role — formal opener', () => {
+    const msg = generateOutreachMessage('Sam Park', 'Zoox', 'PM', 'VP of Product');
+    assert.match(msg, /Hi Sam/);
+    assert.match(msg, /Zoox/);
+  });
+
+  test('handles missing position gracefully', () => {
+    const msg = generateOutreachMessage('Jo Rivera', 'Acme', 'Dev', '');
+    assert.match(msg, /Hey Jo/);
+    assert.match(msg, /Acme/);
   });
 });
 

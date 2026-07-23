@@ -293,7 +293,7 @@ for (const section of requiredSections) {
 console.log('\n10. Version file');
 
 if (fileExists('VERSION')) {
-  const version = readFile('VERSION').trim();
+  const version = readFile('VERSION').trim().split(/\s+/)[0]; // strip release-please inline comment marker
   if (/^\d+\.\d+\.\d+$/.test(version)) {
     pass(`VERSION is valid semver: ${version}`);
   } else {

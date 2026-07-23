@@ -67,11 +67,13 @@
  */
 
 import { spawn, spawnSync }  from 'node:child_process';
+import { createRequire } from 'node:module';
 import { existsSync, writeFileSync, readFileSync, mkdirSync, appendFileSync } from 'node:fs';
 import { resolve, join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
+const require = createRequire(import.meta.url); // for best-effort sync requires in preflight
 const ROOT      = resolve(__dirname, '..');
 const DATA      = join(ROOT, 'data');
 const LOGS      = join(ROOT, 'logs');
@@ -81,6 +83,7 @@ const LOGS      = join(ROOT, 'logs');
 const date    = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
 mkdirSync(LOGS, { recursive: true });
 const logPath = join(LOGS, `pulse-refresh-${date}.log`);
+appendFileSync(logPath, `[${new Date().toISOString()}] [startup] STARTED\n`);
 
 function ts() { return new Date().toTimeString().slice(0, 8); } // HH:MM:SS
 
@@ -187,6 +190,7 @@ function writeRefreshStatus(summary) {
     primary_scan:  { exit: summary.primary_scan?.exit  ?? null },
     workday_scan:  { exit: summary.workday_scan?.exit  ?? null },
     worker_grader: summary.worker_grader ?? null,
+    ashby_scan:    summary.ashby_scan    ?? null,
     kanban_inject: summary.kanban_inject ?? null,
     ingest:        summary.ingest        ?? null,
     lane_branch:   summary.lane_branch   ?? null,
@@ -217,6 +221,7 @@ const summary = {
   workday_scan:  { attempted: true, skipped: false, exit: null },
   primary_scan:  { exit: null },
   worker_grader: { exit: null, skipped: false },
+  ashby_scan:    { exit: null, skipped: false },
   kanban_inject: { exit: null, skipped: false, injected: null },
   ingest:        { exit: null },
   lane_branch:   { exit: null, hot_count: null, fresh_count: null },
@@ -231,6 +236,19 @@ const summary = {
 // ─── main pipeline (async for tee streaming) ────────────────────────────────
 
 (async () => {
+
+// ─── Step -0.55 — Sync connections from Airtable ─────────────────────────────
+// Pulls the "Connections" Airtable table into config/linkedin-connections.json
+// so kanban-inject (Step 3.5) has the freshest warm-referral data for lane
+// routing (New-Hot vs New-Fresh). Best-effort: missing PAT, table not yet
+// seeded, or any network error warns and continues with the cached file.
+
+log('Step -0.55 — Sync connections (sync-connections.mjs)');
+const connSync = await npm('connections:sync', { step: 'step-0.55' });
+if (!connSync.ok) {
+  warn(`Connections sync exited ${connSync.status} — using cached config/linkedin-connections.json`);
+  summary.notes.push(`Connections sync non-zero exit (${connSync.status}) — run "node scripts/seed-connections.mjs" if the Connections table does not exist yet.`);
+}
 
 // ─── Step -0.5 — Airtable pull ───────────────────────────────────────────────
 // Pulls the live Active Pipeline into a fresh data/kanban-import-{date}.json
@@ -273,6 +291,69 @@ if (!archiveStale.ok) {
   }
   // stdout already flushed to console + log by npm(capture:true) above
 }
+
+// ─── Step -1.1 — Self-healing browser preflight (Kaizen K-0626-1) ─────────────
+// Every cold sandbox boots WITHOUT a launchable Chromium and (on Linux) missing
+// libXdamage.so.1 — which red-lights doctor and fatal-halts the whole run. This
+// repairs both, best-effort, BEFORE doctor so the 1am run heals itself instead of
+// dying. Runs inline (not a child) so LD_LIBRARY_PATH propagates to later spawns.
+function preflightBrowser() {
+  const note = (m) => { log(`Step -1.1 — preflight: ${m}`); };
+  // 1) Ensure a launchable Chromium exists (system Edge/Chrome OR Playwright's bundled build).
+  let chromiumOk = false;
+  try {
+    const { detectChromiumExe, detectPlaywrightChromium } = require('./load-browser-config.mjs');
+    chromiumOk = Boolean(detectChromiumExe?.() || detectPlaywrightChromium?.());
+  } catch { /* fall through to install attempt */ }
+  if (!chromiumOk) {
+    note('no Chromium found — installing Playwright Chromium (best-effort)…');
+    let r = spawnSync('npx', ['playwright', 'install', 'chromium'], { cwd: ROOT, shell: true, encoding: 'utf8' });
+    chromiumOk = r.status === 0;
+    note(chromiumOk ? 'Chromium installed.' : `Chromium install exit ${r.status} — doctor will gate if still missing.`);
+  } else {
+    note('Chromium present.');
+  }
+  // 2) On Linux, make sure libXdamage.so.1 is resolvable; if not, locate a copy and
+  //    prepend its dir to LD_LIBRARY_PATH for every child spawned after this point.
+  if (process.platform === 'linux') {
+    const haveLib = (() => {
+      const r = spawnSync('sh', ['-c', 'ldconfig -p 2>/dev/null | grep -q libXdamage.so.1'], { encoding: 'utf8' });
+      return r.status === 0;
+    })();
+    if (haveLib) {
+      note('libXdamage.so.1 already resolvable.');
+    } else {
+      const cacheDir = join(DATA, '.preflight-libs');
+      // Search existing locations first, then a prior preflight cache, then fetch.
+      let found = spawnSync('sh', ['-c',
+        `find "$HOME/.cache/ms-playwright" /usr/lib /usr/lib/x86_64-linux-gnu "${cacheDir}" -name "libXdamage.so.1*" 2>/dev/null | head -1`
+      ], { encoding: 'utf8' }).stdout.trim();
+      if (!found) {
+        // Proven non-root workaround (tested 2026-06-26): apt-get download the .deb and
+        // extract it into a cache dir — no root, no apt install, survives within the run.
+        note('libXdamage.so.1 missing — fetching via non-root apt-get download…');
+        const fetch = spawnSync('sh', ['-c',
+          `set -e; mkdir -p "${cacheDir}"; cd "${cacheDir}"; ` +
+          `apt-get download libxdamage1 >/dev/null 2>&1 || true; ` +
+          `for d in *.deb; do [ -f "$d" ] && dpkg-deb -x "$d" . 2>/dev/null || true; done; ` +
+          `find . -name "libXdamage.so.1*" 2>/dev/null | head -1`
+        ], { encoding: 'utf8' });
+        found = (fetch.stdout || '').trim();
+      }
+      if (found) {
+        const dir = dirname(found);
+        const cur = process.env.LD_LIBRARY_PATH || '';
+        if (!cur.split(':').includes(dir)) {
+          process.env.LD_LIBRARY_PATH = dir + (cur ? ':' + cur : '');
+        }
+        note(`libXdamage.so.1 ready — added ${dir} to LD_LIBRARY_PATH for this run.`);
+      } else {
+        note('libXdamage.so.1 unavailable (offline?) — doctor will gate if a headed browser is needed.');
+      }
+    }
+  }
+}
+try { preflightBrowser(); } catch (e) { warn(`Step -1.1 preflight threw (non-fatal): ${e.message}`); }
 
 // ─── Step -1 — Doctor preflight ─────────────────────────────────────────────
 
@@ -360,16 +441,19 @@ if (!workerGrader.ok) {
   summary.notes.push(`Worker grader non-zero exit (${workerGrader.status}) — scan output may be empty or portals.yml missing.`);
 }
 
-// ─── Step 0.9 — Greenhouse / Ashby / Lever via Worker ───────────────────────
-// TODO(Worker-Grader): Call the Cloudflare Worker at
-//   https://pulse-jobs-proxy.rahilnathanipulse.workers.dev
-//   per company slug in config/sources.yml, filter titles, grade A/B/C,
-//   resolve connections from config/linkedin-connections.json, and emit cards
-//   into data/kanban-import-[date].json.
-//   Requires: HTTP client, YAML parser, grade-jobs.mjs integration.
-//   Implement after Lane-Branch is designed (cards route to New-Hot or New-Fresh).
-log('Step 0.9 — Worker/Ashby scan: TODO(Worker-Grader) — skipped this phase');
-summary.notes.push('Worker/Ashby scan not yet implemented in orchestrator (TODO Worker-Grader).');
+// ─── Step 0.9 — Ashby scan ───────────────────────────────────────────────────
+// scan.mjs auto-detects Ashby via jobs.ashbyhq.com in careers_url and calls the
+// public posting-api (no auth required). scan-history.tsv deduplication makes a
+// second call safe when Step 0.75 already ran earlier in the pipeline.
+
+log('Step 0.9 — Ashby scan (scan.mjs)');
+const ashbyScan = await npm('scan', { step: 'step-0.9' });
+summary.ashby_scan.exit = ashbyScan.status;
+if (!ashbyScan.ok) {
+  warn(`Ashby scan exited ${ashbyScan.status} — pipeline continues`);
+  summary.ashby_scan.skipped = true;
+  summary.notes.push(`Ashby scan non-zero exit (${ashbyScan.status}).`);
+}
 
 // ─── Steps 1–1.5 — WebSearch secondary scan + URL verification ───────────────
 // TODO(WebSearch-Secondary): Issue 6 high-precision queries for Scrum Master /
@@ -630,13 +714,33 @@ if (summary.notes.length) {
   for (const n of summary.notes) log(`  • ${n}`);
 }
 
+// K-1: check live-runs for submission errors — a clean exit(0) can mask
+// individual run-level errors when every card errored inside auto-submit.
+{
+  const liveRunsPath = join(DATA, `live-runs-${date}.json`);
+  if (existsSync(liveRunsPath) && summary.autosubmit.result === 'clean') {
+    try {
+      const liveRuns = JSON.parse(readFileSync(liveRunsPath, 'utf8'));
+      const runs = Array.isArray(liveRuns) ? liveRuns : (liveRuns.runs ?? []);
+      if (runs.some(r => r.status === 'error')) {
+        summary.autosubmit.result = 'error';
+        warn(`K-1: live-runs-${date}.json has error entries — overriding autosubmit result to "error"`);
+        summary.notes.push(`K-1: live-runs has error entries — autosubmit result overridden to "error".`);
+      }
+    } catch (e) {
+      warn(`K-1: could not parse live-runs-${date}.json: ${e.message}`);
+    }
+  }
+}
+
 // Final exit code propagates the most severe partial state from auto-submit.
-// 0 = clean · 2 = captcha/human-required · 3 = form-blocked/dead.
+// 0 = clean · 1 = error (K-1: live-runs error entries) · 2 = captcha/human-required · 3 = form-blocked/dead.
 // Fatal (1) already hard-exited earlier via abort(). A skipped auto-submit
 // is not an error — the rest of the pipeline still completed cleanly.
 let finalCode = 0;
 if (summary.autosubmit.result === 'captcha-blocked') finalCode = 2;
 else if (summary.autosubmit.result === 'form-blocked') finalCode = 3;
+else if (summary.autosubmit.result === 'error') finalCode = 1;
 
 // ─── Log summary line ────────────────────────────────────────────────────────
 appendLog('summary', [
@@ -645,20 +749,27 @@ appendLog('summary', [
   `workday=${summary.workday_scan.exit}`,
   `scan=${summary.primary_scan.exit}`,
   `grader=${summary.worker_grader.exit}`,
-  `inject=${summary.kanban_inject.exit}(injected=${summary.kanban_inject.injected})`,
+  `inject=${summary.kanban_inject.exit}`,
+  `injected=${summary.kanban_inject.injected}`,
   `ingest=${summary.ingest.exit}`,
-  `lane_branch=${summary.lane_branch.exit}(hot=${summary.lane_branch.hot_count} fresh=${summary.lane_branch.fresh_count})`,
-  `autosubmit=${summary.autosubmit.exit ?? (summary.autosubmit.skipped ? 'skipped' : null)}`,
+  `lane_branch=${summary.lane_branch.exit}`,
+  `hot=${summary.lane_branch.hot_count}`,
+  `fresh=${summary.lane_branch.fresh_count}`,
+  `autosubmit=${summary.autosubmit.exit}${summary.autosubmit.skipped ? '(skipped)' : ''}`,
+  `autosubmit_result=${summary.autosubmit.result}`,
   `airtable_pull=${summary.airtable_sync.pull.exit}`,
   `airtable_push=${summary.airtable_sync.push.exit}`,
-  `archive_stale=${summary.archive_stale.exit}(archived=${summary.archive_stale.archived} tagged=${summary.archive_stale.tagged_flow})`,
-].join(' | '));
+  `archive_stale=${summary.archive_stale.exit}`,
+  `archived=${summary.archive_stale.archived}`,
+  `tagged=${summary.archive_stale.tagged_flow}`,
+  `notes=${summary.notes.length}`,
+].join(' '));
 
-log(`Exit ${finalCode}`);
+log(`Final exit code: ${finalCode}`);
 process.exit(finalCode);
 
-})().catch(e => {
-  console.error('[pulse-refresh] FATAL uncaught:', e);
-  appendLog('orchestrator', `FATAL uncaught: ${e?.message ?? e}`);
+})().catch((err) => {
+  console.error(`[pulse-refresh] FATAL ${err?.stack || err}`);
+  try { appendLog('orchestrator', `FATAL ${err?.message || err}`); } catch {}
   process.exit(1);
 });

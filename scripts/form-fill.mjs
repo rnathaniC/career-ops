@@ -226,6 +226,26 @@ export async function fillWorkdayForm(page, personal, clPath = null) {
   return _runFields(fields, 'workday');
 }
 
+// ── Ashby ─────────────────────────────────────────────────────────────────────
+// B-0716-ASHBY: Ashby sets NO autocomplete attributes, so the generic fallback
+// filled only email (input[type=email]) and left the required Name/Phone empty
+// — submit clicks then died on client-side validation (Lambda ×3, 2026-07-16).
+// System fields have stable ids (_systemfield_name/email/resume); custom fields
+// (phone, LinkedIn) have uuid ids, so match by type / label proximity.
+
+export async function fillAshbyForm(page, personal, clPath = null) {
+  const fields = [
+    { name: 'name',   fn: () => tryFill(page.locator('#_systemfield_name, input[name="_systemfield_name"]').first(), personal.name?.full) },
+    { name: 'email',  fn: () => tryFill(page.locator('#_systemfield_email, input[name="_systemfield_email"], input[type="email"]').first(), personal.contact?.email) },
+    { name: 'phone',  fn: () => tryFill(page.locator('input[type="tel"]').first(), personal.contact?.phone) },
+    { name: 'linkedin', fn: () => tryFill(page.getByLabel(/linkedin/i).first(), personal.links?.linkedin) },
+    { name: 'resume_upload', type: 'upload', key: 'resume', fn: () => uploadResume(page, personal) },
+    { name: 'cl_upload',     type: 'upload', key: 'cl',     fn: () => uploadCoverLetter(page, personal, clPath) },
+  ];
+
+  return _runFields(fields, 'ashby');
+}
+
 // ── Generic fallback ──────────────────────────────────────────────────────────
 
 export async function fillGenericForm(page, personal, clPath = null) {
@@ -240,14 +260,87 @@ export async function fillGenericForm(page, personal, clPath = null) {
   return _runFields(fields, 'generic');
 }
 
+// ── Iframe-aware form-frame resolution ────────────────────────────────────────
+//
+// K-DEFECT-2026-07-13: same root cause as auto-submit.mjs's findSubmitOnPage
+// fix (K-DEFECT-2026-07-07) — Greenhouse embeds (confirmed live on
+// careerpuck.com/Lyft) wrap the real form in an <iframe>, and page.locator()
+// only ever searches the MAIN frame. findSubmitOnPage was fixed to search
+// child frames; form-fill.mjs was not, so on an iframe-embedded posting the
+// fill functions ran against an empty main frame (0/10 fields on Lyft) while
+// findSubmitOnPage correctly found the real submit button inside the iframe —
+// so auto-submit proceeded to click submit on a form it never actually filled,
+// producing a stalled 'unconfirmed' result instead of a clean 'blocked'
+// (no-submit-button) or a real success.
+//
+// Fix: probe each ATS's most reliable "form is present" selector on the main
+// frame first (zero behavior change for the common non-iframe case — this is
+// how every fill call already worked), then poll child frames for up to ~5s
+// (Greenhouse embeds lazy-load ~3.5s, same timing findSubmitOnPage allows for)
+// and fill whichever frame actually has the form fields.
+
+const FORM_PROBE_SELECTORS = {
+  greenhouse: 'input[autocomplete="given-name"], input[name="first_name"], input[id*="first"]',
+  lever:      'input[name="name"], input[autocomplete="name"]',
+  workday:    '[data-automation-id="legalNameSection_firstName"], input[aria-label*="First Name" i]',
+  ashby:      '#_systemfield_name, input[name="_systemfield_name"]',
+  generic:    'input[autocomplete="given-name"], input[autocomplete="email"], input[type="email"]',
+};
+
+async function frameHasForm(frame, ats) {
+  const sel = FORM_PROBE_SELECTORS[ats] || FORM_PROBE_SELECTORS.generic;
+  try {
+    return (await frame.locator(sel).count()) > 0;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Resolve which frame (main page, or a child <iframe>) actually contains the
+ * application form fields, so fillForm() fills the right target.
+ *
+ * Mirrors auto-submit.mjs's findSubmitOnPage(): main frame is checked first
+ * (unchanged behavior for the ~99% non-iframe case), then child frames are
+ * polled every 400ms for up to ~5s to survive lazy-loaded embeds. Falls back
+ * to the main page/frame if no frame ever has the form, so existing
+ * missing_fields reporting (and auto-submit.mjs's B-16 empty-form guard) keep
+ * working exactly as before for genuinely form-less/broken pages.
+ *
+ * @param {import('playwright').Page} page
+ * @param {string} ats
+ * @returns {Promise<import('playwright').Page|import('playwright').Frame>}
+ */
+export async function findFormFrame(page, ats) {
+  // Mock/test pages (no mainFrame/frames support) — behave exactly as before.
+  if (typeof page.mainFrame !== 'function' || typeof page.frames !== 'function') {
+    return page;
+  }
+
+  if (await frameHasForm(page.mainFrame(), ats)) return page;
+
+  const deadline = Date.now() + 5000;
+  do {
+    for (const frame of page.frames()) {
+      if (frame === page.mainFrame()) continue;
+      if (await frameHasForm(frame, ats)) return frame;
+    }
+    await page.waitForTimeout(400);
+  } while (Date.now() < deadline);
+
+  return page;
+}
+
 // ── ATS dispatcher ────────────────────────────────────────────────────────────
 
 export async function fillForm(ats, page, personal, clPath = null) {
+  const target = await findFormFrame(page, ats);
   switch (ats) {
-    case 'greenhouse': return fillGreenhouseForm(page, personal, clPath);
-    case 'lever':      return fillLeverForm(page, personal, clPath);
-    case 'workday':    return fillWorkdayForm(page, personal, clPath);
-    default:           return fillGenericForm(page, personal, clPath);
+    case 'greenhouse': return fillGreenhouseForm(target, personal, clPath);
+    case 'lever':      return fillLeverForm(target, personal, clPath);
+    case 'workday':    return fillWorkdayForm(target, personal, clPath);
+    case 'ashby':      return fillAshbyForm(target, personal, clPath);
+    default:           return fillGenericForm(target, personal, clPath);
   }
 }
 

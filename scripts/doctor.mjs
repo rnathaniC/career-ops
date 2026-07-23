@@ -5,6 +5,7 @@
 import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
+import { homedir } from 'node:os';
 
 const root = process.argv[2] || '.';
 const CRITICAL_JSON = ['package.json', 'data/last-refresh.json', 'data/sus-db.json',
@@ -33,6 +34,30 @@ for (const rel of CRITICAL_JSON) {
   const buf = readFileSync(p);
   if (buf.includes(0)) { bad.push(`${rel}: NUL bytes`); continue; }
   try { JSON.parse(buf.toString('utf8')); } catch (e) { bad.push(`${rel}: invalid JSON (${e.message.slice(0, 60)})`); }
+}
+// K-2: Playwright Chromium auto-fix — detect missing binary and install before
+// auto-submit attempts a browser launch. Checks the ms-playwright cache dir;
+// if no chromium-* entry exists, installs it automatically (best-effort).
+{
+  const pwCacheDirs = ({
+    win32:  [join(process.env.LOCALAPPDATA ?? homedir(), 'ms-playwright')],
+    darwin: [join(homedir(), 'Library', 'Caches', 'ms-playwright')],
+    linux:  [join(homedir(), '.cache', 'ms-playwright'), '/root/.cache/ms-playwright'],
+  })[process.platform] ?? [];
+  const chromiumPresent = pwCacheDirs.some(dir => {
+    if (!existsSync(dir)) return false;
+    try { return readdirSync(dir).some(e => e.startsWith('chromium')); } catch { return false; }
+  });
+  if (!chromiumPresent) {
+    process.stdout.write('DOCTOR: Playwright Chromium not found — installing (K-2)…\n');
+    const r = spawnSync('npx', ['playwright', 'install', 'chromium'],
+      { cwd: root, shell: true, encoding: 'utf8', timeout: 120000, stdio: 'inherit' });
+    if (r.status !== 0) {
+      bad.push('playwright-chromium: binary missing; auto-install failed — run `npx playwright install chromium`');
+    } else {
+      process.stdout.write('DOCTOR: Playwright Chromium installed (K-2).\n');
+    }
+  }
 }
 if (bad.length) {
   console.error(`DOCTOR: ${bad.length} corrupted file(s) — run \`node scripts/fix-nul-bytes.mjs\` to repair:`);

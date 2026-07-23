@@ -103,6 +103,118 @@ describe('detectATS', () => {
 
 });
 
+// ── findSubmitOnPage iframe fallback (K-DEFECT-2026-07-07) ────────────────────
+// Regression coverage for the Lyft/careerpuck.com bug: the real Greenhouse form
+// (and its submit button) can live inside a same-origin-unrelated <iframe> that
+// page.$() never searches. Re-implemented here (same convention as detectATS
+// above — auto-submit.mjs isn't imported directly because of its module-scope
+// side effects) using lightweight fakes for Playwright's Page/Frame surface
+// (mainFrame(), frames(), waitForTimeout(), and frame.$()) so this runs fast
+// and offline — no real browser or network needed.
+
+const ATS_SUBMIT_SELECTORS = {
+  greenhouse: ['button[aria-label="Submit"]', 'button:has-text("Submit Application")'],
+};
+const FALLBACK_SUBMIT_SELECTORS = ['button[type="submit"]:not([aria-hidden]):not([disabled])'];
+function getAtsSubmitSelectors(ats) {
+  return [...(ATS_SUBMIT_SELECTORS[ats] || []), ...FALLBACK_SUBMIT_SELECTORS];
+}
+
+async function findSubmitOnPage(page, ats) {
+  const selectors = getAtsSubmitSelectors(ats);
+  const searchFrame = async (frame) => {
+    for (const sel of selectors) {
+      try {
+        const el = await frame.$(sel);
+        if (el) return el;
+      } catch { /* selector syntax error or frame navigated away — skip */ }
+    }
+    return null;
+  };
+  const mainHit = await searchFrame(page.mainFrame());
+  if (mainHit) return mainHit;
+  const deadline = Date.now() + 5000;
+  do {
+    for (const frame of page.frames()) {
+      if (frame === page.mainFrame()) continue;
+      const hit = await searchFrame(frame);
+      if (hit) return hit;
+    }
+    await page.waitForTimeout(400);
+  } while (Date.now() < deadline);
+  return null;
+}
+
+// Fake Frame: `hitAfterTicks` simulates a frame whose own document is still
+// loading — it won't match the selector until it's been queried this many times,
+// mirroring the real careerpuck.com timing (frame attaches in page.frames()
+// before its DOM has the button rendered).
+function fakeFrame({ isMain = false, hasButton = false, hitAfterTicks = 0 } = {}) {
+  let queries = 0;
+  return {
+    isMain,
+    async $(_sel) {
+      queries++;
+      if (!hasButton) return null;
+      return queries > hitAfterTicks ? { __fakeButton: true } : null;
+    },
+  };
+}
+
+function fakePage({ mainFrame, childFrames = [] }) {
+  let framesSoFar = [mainFrame];
+  let tick = 0;
+  return {
+    mainFrame: () => mainFrame,
+    frames: () => framesSoFar,
+    // Each waitForTimeout() "tick" reveals the next not-yet-attached child frame —
+    // simulates the iframe embed lazy-attaching over several hundred ms.
+    async waitForTimeout(_ms) {
+      if (tick < childFrames.length) framesSoFar = [mainFrame, ...childFrames.slice(0, tick + 1)];
+      tick++;
+    },
+  };
+}
+
+describe('findSubmitOnPage iframe fallback', () => {
+
+  test('finds button directly on the main frame (non-iframe ATS, unchanged behavior)', async () => {
+    const main = fakeFrame({ isMain: true, hasButton: true });
+    const page = fakePage({ mainFrame: main, childFrames: [] });
+    const btn = await findSubmitOnPage(page, 'greenhouse');
+    assert.ok(btn, 'should find the button on the main frame');
+  });
+
+  test('falls back to an already-attached child frame when main frame has no button', async () => {
+    const main  = fakeFrame({ isMain: true, hasButton: false });
+    const child = fakeFrame({ hasButton: true });
+    const page  = fakePage({ mainFrame: main, childFrames: [child] });
+    const btn = await findSubmitOnPage(page, 'greenhouse');
+    assert.ok(btn, 'should find the button in the child frame');
+  });
+
+  test('careerpuck.com case: child frame attaches late AND its content lags a tick behind attachment', async () => {
+    const main  = fakeFrame({ isMain: true, hasButton: false });
+    // Attaches after 1 tick (page.frames() reveals it), but its own $() only
+    // starts matching after 2 more queries — reproduces the exact bug this fix
+    // corrects: a frame that misses on first contact must be re-checked, not
+    // written off just because it was "seen" once.
+    const child = fakeFrame({ hasButton: true, hitAfterTicks: 2 });
+    const page  = fakePage({ mainFrame: main, childFrames: [child] });
+    const btn = await findSubmitOnPage(page, 'greenhouse');
+    assert.ok(btn, 'should eventually find the button once the child frame content settles');
+  });
+
+  test('returns null when no frame ever has a matching button', async () => {
+    const main  = fakeFrame({ isMain: true, hasButton: false });
+    const child = fakeFrame({ hasButton: false });
+    const page  = fakePage({ mainFrame: main, childFrames: [child] });
+    const btn = await findSubmitOnPage(page, 'greenhouse');
+    assert.equal(btn, null);
+  }, { timeout: 8000 });
+
+});
+
 // ── CLI dry-run integration test ──────────────────────────────────────────────
 
 describe('auto-submit CLI', () => {

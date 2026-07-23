@@ -20,6 +20,7 @@ import {
   messagePreview,
   splitByLane,
   formatReferralBlock,
+  generateOutreachMessage,
 } from '../scripts/referral-queue.mjs';
 
 const TMP = fs.mkdtempSync(path.join(tmpdir(), 'career-ops-referral-test-'));
@@ -93,18 +94,47 @@ describe('messagePreview', () => {
 // ── formatReferralBlock ───────────────────────────────────────────────────────
 
 describe('formatReferralBlock', () => {
-  test('includes company, role, connection name, and URL', () => {
+  test('includes company, role, connection name, URL, and connection count', () => {
     const block = formatReferralBlock(SAMPLE_CARDS[1]);
     assert.match(block, /Databricks/);
     assert.match(block, /Field TPM/);
     assert.match(block, /Denny Lee/);
     assert.match(block, /https:\/\/x\/a2/);
+    assert.match(block, /1st-degree match/);
   });
 
-  test('warns when no outreach message is drafted yet', () => {
-    const block = formatReferralBlock(SAMPLE_CARDS[3]);
-    assert.match(block, /no outreach message drafted/);
-    assert.match(block, /draft an outreach message before sending/);
+  test('single connection shows auto-generated message inline', () => {
+    const block = formatReferralBlock(SAMPLE_CARDS[1]);
+    assert.match(block, /Message:/);
+    assert.match(block, /Hey Denny/);
+    assert.match(block, /Databricks/);
+  });
+
+  test('card with no connections[] but connectionName falls back to legacy scalar', () => {
+    const block = formatReferralBlock(SAMPLE_CARDS[3]);  // Jane Doe, no connections[]
+    assert.match(block, /Jane/);
+    assert.match(block, /Message:/);
+  });
+
+  test('multi-connection card shows top match + N-more summary', () => {
+    const multiCard = {
+      id: 'live-M1', company: 'Acme', role: 'TPM', url: 'https://x/m1',
+      hasConnection: true, isWarmReferral: true,
+      connectionName: 'Alice', connectionLinkedinUrl: 'https://li.com/alice',
+      connectionCount: 2,
+      connections: [
+        { name: 'Alice', position: 'PM', url: 'https://li.com/alice' },
+        { name: 'Bob',   position: 'SWE', url: 'https://li.com/bob' },
+      ],
+      closedAt: null,
+    };
+    const block = formatReferralBlock(multiCard);
+    assert.match(block, /2 1st-degree match/);
+    assert.match(block, /Top match.*Alice/);
+    assert.match(block, /1 more/);
+    // Both connections should have messages in the block.
+    assert.match(block, /Hey Alice/);
+    assert.match(block, /Hey Bob/);
   });
 });
 
@@ -160,6 +190,15 @@ describe('referral-queue CLI', () => {
     assert.equal(summary.fresh_count, 1); // live-A1
     assert.deepEqual(summary.fresh_ids, ['live-A1']);
     assert.ok(summary.hot.some((c) => c.id === 'live-A4' && c.message_drafted === false));
+    // New: connectionOptions array with auto-generated messages.
+    for (const card of summary.hot) {
+      assert.ok(Array.isArray(card.connectionOptions), 'connectionOptions should be an array');
+      assert.ok(typeof card.connectionCount === 'number', 'connectionCount should be a number');
+      if (card.connectionOptions.length > 0) {
+        const opt = card.connectionOptions[0];
+        assert.ok(typeof opt.message === 'string' && opt.message.length > 0, 'each option should have a non-empty message');
+      }
+    }
   });
 });
 

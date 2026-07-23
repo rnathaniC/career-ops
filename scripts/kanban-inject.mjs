@@ -36,6 +36,68 @@ import { fileURLToPath } from 'node:url';
 import {
   BASE_ID, ACTIVE_TABLE_ID, ACTIVE_FIELD_IDS, PAT_MISSING_MSG,
 } from './airtable-sync.mjs';
+import { generateOutreachMessage } from './referral-queue.mjs';
+
+// ── connection matching helpers ───────────────────────────────────────────────
+
+const CORP_SUFFIX_RE = /,?\s+(Inc\.?|LLC\.?|Ltd\.?|Corp\.?|Corporation|Co\.|Company|Incorporated)\.?$/i;
+
+/**
+ * Normalise a company name for fuzzy matching: strip common legal suffixes,
+ * trim, lowercase.
+ * @param {string} name
+ * @returns {string}
+ */
+export function normalizeCompany(name) {
+  return (name || '').replace(CORP_SUFFIX_RE, '').trim().toLowerCase();
+}
+
+/**
+ * Build a Map<normalizedCompanyName, entry[]> from config/linkedin-connections.json.
+ * Returns an empty Map if the file is missing or unreadable.
+ * @param {string} connectionsPath  Absolute path to linkedin-connections.json
+ * @returns {Map<string, object[]>}
+ */
+export function buildConnectionsMap(connectionsPath) {
+  const map = new Map();
+  try {
+    const conns = JSON.parse(readFileSync(connectionsPath, 'utf8'));
+    for (const e of conns) {
+      if (!e?.company) continue;
+      const key = normalizeCompany(e.company);
+      if (!map.has(key)) map.set(key, []);
+      map.get(key).push(e);
+    }
+  } catch { /* file missing or invalid JSON — return empty map */ }
+  return map;
+}
+
+/**
+ * Look up all LinkedIn connections for a company and return the full match list.
+ * @param {string} company
+ * @param {Map<string, object[]>} connByCompany
+ * @returns {{
+ *   hasConnection: boolean, isWarmReferral: boolean,
+ *   connectionName: string, connectionLinkedinUrl: string,
+ *   connectionCount: number, connections: Array<{name:string, position:string, url:string}>
+ * }}
+ */
+export function resolveCardConnection(company, connByCompany) {
+  const key = normalizeCompany(company);
+  const matches = connByCompany.get(key) || [];
+  if (!matches.length) {
+    return { hasConnection: false, isWarmReferral: false, connectionName: '', connectionLinkedinUrl: '', connectionCount: 0, connections: [] };
+  }
+  const [first] = matches;
+  return {
+    hasConnection: true,
+    isWarmReferral: true,
+    connectionName: first.name || '',
+    connectionLinkedinUrl: first.url || '',
+    connectionCount: matches.length,
+    connections: matches.map((m) => ({ name: m.name || '', position: m.position || '', url: m.url || '' })),
+  };
+}
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname  = dirname(__filename);
@@ -146,23 +208,42 @@ export function maxCardSeq(dataDir, date) {
  * @param {string} params.url
  * @param {string[]} params.keywords
  * @param {string} params.nowIso
+ * @param {boolean} [params.hasConnection=false]
+ * @param {boolean} [params.isWarmReferral=false]
+ * @param {string}  [params.connectionName='']
+ * @param {string}  [params.connectionLinkedinUrl='']
+ * @param {number}  [params.connectionCount=0]
+ * @param {string}  [params.connectionOptions='']  JSON string of picker payload
  * @returns {object}
  */
-export function buildFields({ cardId, company, role, grade, platform, url, keywords, nowIso }) {
-  return {
-    [ACTIVE_FIELD_IDS['Card ID']]:       cardId,
-    [ACTIVE_FIELD_IDS['Company']]:       company || '',
-    [ACTIVE_FIELD_IDS['Role']]:          role    || '',
-    [ACTIVE_FIELD_IDS['Grade']]:         grade   || '',
-    [ACTIVE_FIELD_IDS['Lane']]:          'New-Fresh',
-    [ACTIVE_FIELD_IDS['Platform']]:      platform || '',
-    [ACTIVE_FIELD_IDS['URL']]:           url     || '',
-    [ACTIVE_FIELD_IDS['Keywords']]:      Array.isArray(keywords) ? keywords.join(', ') : (keywords || ''),
-    [ACTIVE_FIELD_IDS['Created At']]:    nowIso,
-    [ACTIVE_FIELD_IDS['Last Refreshed']]: nowIso,
-    [ACTIVE_FIELD_IDS['Has Connection']]: false,
-    [ACTIVE_FIELD_IDS['Warm Referral']]:  false,
+export function buildFields({
+  cardId, company, role, grade, platform, url, keywords, nowIso,
+  hasConnection = false, isWarmReferral = false,
+  connectionName = '', connectionLinkedinUrl = '',
+  connectionCount = 0, connectionOptions = '',
+}) {
+  const fields = {
+    [ACTIVE_FIELD_IDS['Card ID']]:              cardId,
+    [ACTIVE_FIELD_IDS['Company']]:              company || '',
+    [ACTIVE_FIELD_IDS['Role']]:                 role    || '',
+    [ACTIVE_FIELD_IDS['Grade']]:                grade   || '',
+    [ACTIVE_FIELD_IDS['Lane']]:                 hasConnection ? 'New-Hot' : 'New-Fresh',
+    [ACTIVE_FIELD_IDS['Platform']]:             platform || '',
+    [ACTIVE_FIELD_IDS['URL']]:                  url     || '',
+    [ACTIVE_FIELD_IDS['Keywords']]:             Array.isArray(keywords) ? keywords.join(', ') : (keywords || ''),
+    [ACTIVE_FIELD_IDS['Created At']]:           nowIso,
+    [ACTIVE_FIELD_IDS['Last Refreshed']]:       nowIso,
+    [ACTIVE_FIELD_IDS['Has Connection']]:       hasConnection,
+    [ACTIVE_FIELD_IDS['Warm Referral']]:        isWarmReferral,
+    [ACTIVE_FIELD_IDS['Connection Name']]:      connectionName,
+    [ACTIVE_FIELD_IDS['Connection LinkedIn']]:  connectionLinkedinUrl,
   };
+  // Only set these when field IDs have been provisioned in Airtable (null = not yet created).
+  if (ACTIVE_FIELD_IDS['Connection Count'] != null)
+    fields[ACTIVE_FIELD_IDS['Connection Count']] = connectionCount;
+  if (ACTIVE_FIELD_IDS['Connection Options'] != null && connectionOptions)
+    fields[ACTIVE_FIELD_IDS['Connection Options']] = connectionOptions;
+  return fields;
 }
 
 /**
@@ -221,12 +302,21 @@ export function appendToKanbanImport(kanbanImportPath, newCards) {
  * @param {boolean}  opts.dryRun          If true, don't write anything
  * @param {Function} opts.fetchImpl       Fetch implementation (injectable for tests)
  * @param {string|null} opts.kanbanImportPath  Path to update (null = skip local update)
+ * @param {Map|null} opts.connByCompany   Connection map (injectable for tests; null = load from config)
  * @returns {Promise<{injected, skipped_dupe, skipped_grade_d, errors, cards_injected}>}
  */
 export async function injectCards({
   gradedJobs, seenUrls, pat, dataDir, date,
   dryRun = false, fetchImpl = fetch, kanbanImportPath = null,
+  connByCompany = null,
 }) {
+  // Load connections map for warm-referral lane routing.
+  let _connByCompany = connByCompany;
+  if (_connByCompany == null) {
+    const connPath = join(ROOT, 'config', 'linkedin-connections.json');
+    _connByCompany = buildConnectionsMap(connPath);
+  }
+
   let seq = maxCardSeq(dataDir, date);
   const nowIso = new Date().toISOString();
 
@@ -241,6 +331,14 @@ export async function injectCards({
     seenUrls.add(job.url);
     seq++;
     const cardId = `live-${date}-${String(seq).padStart(3, '0')}`;
+    const conn = resolveCardConnection(job.company, _connByCompany);
+    const connectionOptions = conn.connections.map((c) => ({
+      name:     c.name,
+      position: c.position,
+      url:      c.url,
+      message:  generateOutreachMessage(c.name, job.company, job.role, c.position),
+    }));
+    const connectionOptionsJson = connectionOptions.length ? JSON.stringify(connectionOptions) : '';
     toInject.push({
       cardId,
       company:  job.company,
@@ -250,6 +348,8 @@ export async function injectCards({
       url:      job.url,
       keywords: job.keywords_matched || [],
       nowIso,
+      ...conn,
+      connectionOptions: connectionOptionsJson,
     });
   }
 
@@ -278,40 +378,42 @@ export async function injectCards({
     created = await airtableCreateBatch({ pat, baseId: BASE_ID, tableId: ACTIVE_TABLE_ID, records, fetchImpl });
   } catch (e) {
     errors.push(e.message);
-    // Return partial success — already-built toInject cards are logged but not written locally.
     return { injected: 0, skipped_dupe, skipped_grade_d, errors, cards_injected: [] };
   }
 
-  // Build local card shape (kanban-import compatible) for each injected card.
+  // Map created cards into local kanban-import card shape for board-state/ingest.
   const cards_injected = toInject.map((c) => ({
-    id:             c.cardId,
-    company:        c.company,
-    role:           c.role,
-    grade:          c.grade,
-    platform:       c.platform,
-    columnId:       'new-fresh',
-    url:            c.url,
-    keywords:       c.keywords,
-    jobDescText:    '',
-    connectionName: '',
-    connectionLinkedinUrl: '',
-    hasConnection:  false,
-    isWarmReferral: false,
-    createdAt:      c.nowIso,
-    lastRefreshed:  c.nowIso,
-    closedAt:       null,
+    id:                    c.cardId,
+    company:               c.company,
+    role:                  c.role,
+    grade:                 c.grade,
+    platform:              c.platform || '',
+    columnId:              c.isWarmReferral ? 'new-hot' : 'new-fresh',
+    url:                   c.url,
+    keywords:              Array.isArray(c.keywords) ? c.keywords : [],
+    jobDescText:           '',
+    connectionName:        c.connectionName || '',
+    connectionLinkedinUrl: c.connectionLinkedinUrl || '',
+    hasConnection:         !!c.hasConnection,
+    isWarmReferral:        !!c.isWarmReferral,
+    connectionCount:       c.connectionCount || 0,
+    connectionOptions:     c.connectionOptions || '',
+    createdAt:             c.nowIso,
+    lastRefreshed:         c.nowIso,
+    closedAt:              null,
   }));
 
-  // Append to local kanban-import so ingest-runner picks up these cards this run.
-  if (kanbanImportPath) {
-    appendToKanbanImport(kanbanImportPath, cards_injected);
-    console.log(`[kanban-inject] appended ${cards_injected.length} card(s) → ${kanbanImportPath}`);
-  }
+  // Persist new cards into the newest local kanban-import file.
+  appendToKanbanImport(kanbanImportPath, cards_injected);
 
-  return { injected: created.length, skipped_dupe, skipped_grade_d, errors, cards_injected };
+  return {
+    injected: cards_injected.length,
+    skipped_dupe,
+    skipped_grade_d,
+    errors,
+    cards_injected,
+  };
 }
-
-// ── CLI ───────────────────────────────────────────────────────────────────────
 
 async function main() {
   // Bootstrap .env

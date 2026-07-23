@@ -10,7 +10,7 @@
  * SAFETY LOCKS FOR --live (BOTH REQUIRED to arm live mode):
  *   (a) --allow-tier <tier>                            CLI flag
  *   (b) config/lower-tier-test-companies.yml           enabled: true  (global kill-switch)
- * Per-card gates then apply to EVERY submission: grade A/B eligibility +
+ * Per-card gates then apply to EVERY submission: grade A/B/C eligibility +
  * readiness band (>=60) + 5/day cap. Per-company allowlist removed 2026-06-18.
  *
  * CLI:
@@ -63,6 +63,7 @@ import { fileURLToPath } from 'node:url';
 import { checkLiveness } from './check-job-liveness.mjs';
 import { loadPersonalInfo, PersonalInfoError } from './load-personal-info.mjs';
 import { loadBrowserConfig, BrowserConfigError } from './load-browser-config.mjs';
+import { getValidSessionPath as getValidWorkdaySessionPath } from './workday-login.mjs';
 import { fillForm, formatUploadDetails } from './form-fill.mjs';
 import { VALID_IDS as CANONICAL_STATE_IDS } from '../gen/states.js';
 import { scoreCard, saveReadinessScore } from './readiness-scorer.mjs';
@@ -189,7 +190,7 @@ export function isEligible(card) {
 }
 
 /**
- * Three-band readiness rule for eligible cards (already grade A/B):
+ * Three-band readiness rule for eligible cards (already grade A/B/C):
  *   total < 60        -> skip
  *   60 <= total <= 88 -> submit WITHOUT cover letter
  *   total >= 89       -> submit WITH cover letter (requires one; hold if missing)
@@ -221,6 +222,13 @@ export function detectATS(url) {
   for (const { name, re } of ATS_PATTERNS) {
     if (re.test(url)) return name;
   }
+  // B-ATS-DETECT: company careers pages embed ATS widgets and carry the ATS's
+  // job-id as a query param even when the domain is the company's own. These
+  // markers are authoritative — e.g. careers.datadoghq.com/...?gh_jid=123 is a
+  // Greenhouse-hosted role; SpeedyApply / built-in fill can then handle it.
+  if (/[?&](gh_jid|gh_src)=/i.test(url)) return 'greenhouse';
+  if (/[?&]ashby_jid=/i.test(url))       return 'ashby';
+  if (/[?&]lever-(origin|source)=/i.test(url)) return 'lever';
   return 'unknown';
 }
 
@@ -229,6 +237,10 @@ export function detectATS(url) {
 const ATS_SUBMIT_SELECTORS = {
   greenhouse: ['button[aria-label="Submit"]', 'button:has-text("Submit Application")'],
   lever:      ['button#btn-submit', 'button:has-text("Submit application")'],
+  // B-0716-ASHBY: Ashby renders a form-less React page — no <form>, no
+  // button[type=submit] — so the generic fallback never matched. Its submit
+  // control is a plain <button> labeled "Submit Application".
+  ashby:      ['button:has-text("Submit Application")', 'button:has-text("Submit application")'],
   workday:    ['button[data-automation-id="submitButton"]', '[data-automation-id="bottom-navigation-next-button"]'],
 };
 const FALLBACK_SUBMIT_SELECTORS = ['button[type="submit"]:not([aria-hidden]):not([disabled])'];
@@ -257,11 +269,43 @@ export function isIntermediateStepText(text) {
   return INTERMEDIATE_PATTERNS.some((re) => re.test(text));
 }
 
-async function detectCaptchaOnPage(page) {
+export async function detectCaptchaOnPage(page) {
   for (const sel of CAPTCHA_SELECTORS) {
     if (await page.$(sel).catch(() => null)) return true;
   }
   return false;
+}
+
+/**
+ * K-DEFECT-2026-07-21 (CI&T / Lever): poll for a CAPTCHA immediately before the
+ * submit click, not just once early. Some Lever-hosted ATS embeds attach an
+ * invisible hCaptcha widget to the DOM after the page's initial settle wait —
+ * late enough that a single early check (right after page.goto) sees nothing,
+ * but early enough that it's fully present by the time submit is attempted.
+ * Polls detectCaptchaOnPage at `intervalMs` until `timeoutMs` elapses or a
+ * captcha is found, whichever comes first. Injectable `waiter` and `now` make
+ * this unit-testable without a real Playwright page or real elapsed time.
+ * @param {object} page
+ * @param {{ timeoutMs?: number, intervalMs?: number, waiter?: (ms:number)=>Promise<void>, now?: () => number }} [opts]
+ * @returns {Promise<boolean>}
+ */
+export async function pollForCaptcha(page, opts = {}) {
+  const {
+    timeoutMs  = 3000,
+    intervalMs = 500,
+    waiter     = (ms) => new Promise((r) => setTimeout(r, ms)),
+    now        = () => Date.now(),
+  } = opts;
+
+  let found = await detectCaptchaOnPage(page);
+  if (found) return true;
+
+  const deadline = now() + timeoutMs;
+  while (!found && now() < deadline) {
+    await waiter(intervalMs);
+    found = await detectCaptchaOnPage(page);
+  }
+  return found;
 }
 
 async function detectIntermediateStepOnPage(page) {
@@ -269,21 +313,88 @@ async function detectIntermediateStepOnPage(page) {
   return isIntermediateStepText(text);
 }
 
+// K-DEFECT-2026-07-07: some ATS embeds (confirmed live on careerpuck.com, Lyft's
+// careers site — 2 real postings blocked today) wrap the actual Greenhouse form in
+// an <iframe src="https://job-boards.greenhouse.io/embed/job_app?...">. page.$()
+// only searches the MAIN frame — it never pierces into child frames — so the real
+// submit button (`<button type="submit">Submit application</button>`, confirmed via
+// live Playwright inspection) was invisible to findSubmitOnPage even though the
+// existing selectors (incl. the type="submit" fallback) would have matched it fine
+// once inside the right frame. Root cause is the frame boundary, not the selector
+// text or scroll position. Fix: search the main frame first (existing behavior,
+// zero regression risk for non-iframe ATSes), then fall back to every child frame.
+// The embed can also lazy-load past the caller's short fixed wait (observed:
+// present at ~3.5s/networkidle, absent at ~2s/domcontentloaded on the same URL) —
+// so poll briefly for a same-origin-ATS-ish frame to attach before giving up.
 async function findSubmitOnPage(page, ats) {
-  for (const sel of getAtsSubmitSelectors(ats)) {
+  const selectors = getAtsSubmitSelectors(ats);
+
+  const searchFrame = async (frame) => {
+    for (const sel of selectors) {
+      try {
+        const el = await frame.$(sel);
+        if (el) return el;
+      } catch { /* selector syntax error or frame navigated away — skip */ }
+    }
+    return null;
+  };
+
+  // 1) Main frame (covers the common non-iframe case — unchanged behavior).
+  const mainHit = await searchFrame(page.mainFrame());
+  if (mainHit) return mainHit;
+
+  // 2) Re-check ALL frames on every tick for up to ~8s. A frame can attach
+  //    before its document finishes loading, and SPA main frames (Ashby)
+  //    hydrate their submit button seconds after domcontentloaded — so the
+  //    main frame gets re-checked in the loop too (B-0716-ASHBY).
+  const deadline = Date.now() + 8000;
+  do {
+    for (const frame of page.frames()) {
+      const hit = await searchFrame(frame);
+      if (hit) return hit;
+    }
+    await page.waitForTimeout(400);
+  } while (Date.now() < deadline);
+
+  return null;
+}
+
+// K-DEFECT-2026-07-07: cookie/privacy consent overlays (e.g. company careers
+// pages like pinterestcareers.com) sit on top of the real submit button and
+// make Playwright's actionability check report "element is outside of the
+// viewport" forever, even after repeated auto-scroll retries — because the
+// element is fully covered, not off-screen. Dismiss common consent banners
+// right after page load, before any submit-button search, so they never
+// have a chance to block a click. Best-effort: absence of a banner is fine.
+const CONSENT_BUTTON_SELECTORS = [
+  'button:has-text("Accept All")',
+  'button:has-text("Accept all")',
+  'button:has-text("Accept Cookies")',
+  'button:has-text("I Accept")',
+  'button:has-text("Essential Only")',
+  '#onetrust-accept-btn-handler',
+  '[data-testid="cookie-accept"]',
+  '[aria-label="Accept cookies"]',
+];
+
+async function dismissConsentBanners(page) {
+  for (const sel of CONSENT_BUTTON_SELECTORS) {
     try {
       const el = await page.$(sel);
-      if (el) return el;
-    } catch { /* selector syntax error — skip */ }
+      if (el && (await el.isVisible().catch(() => false))) {
+        await el.click({ timeout: 3000 }).catch(() => {});
+        await page.waitForTimeout(300);
+      }
+    } catch { /* best-effort — no banner present or selector not applicable */ }
   }
-  return null;
 }
 
 // ── Kanban card extraction ────────────────────────────────────────────────────
 
 /**
  * Reads a static kanban HTML file, extracts cards eligible for submission.
- * Eligible = columnId in SUBMIT_READY_STATES + grade A/B + not warm referral.
+ * Eligible = columnId in SUBMIT_READY_STATES + grade A/B (C/D excluded — matches
+ * generate-cl.mjs's eligibleFromBoard() gate) + not warm referral.
  * SUBMIT_READY_STATES defaults to ['evaluated']; override via --ready-states flag.
  */
 export function extractEligibleCards(kanbanPath) {
@@ -378,13 +489,26 @@ export function extractEligibleCardsFromJson(jsonPath) {
     throw new Error(`Kanban JSON parse error: ${e.message}`);
   }
 
-  if (!parsed || typeof parsed.cards !== 'object' || Array.isArray(parsed.cards)) {
-    throw new Error('Kanban JSON must have shape { cards: { [id]: PulseJob }, ... }');
+  // B10 (2026-07-22): kanban-import-{date}.json has shipped in two shapes with
+  // DIFFERENT per-card field names, not just different wrapping:
+  //   06-09-style { version, cards: { [id]: PulseJob } } — object-keyed, real
+  //     K2 PulseJob fields (title, state, external_id, posted_at, ...) that
+  //     pulseJobToCard() translates into the internal card shape.
+  //   06-10-style { seedVersion, generatedAt, cards: [ card, ... ] } — array
+  //     of cards ALREADY in the internal shape (role, columnId, hasConnection,
+  //     isWarmReferral, ...) that kanban-inject.mjs itself writes out — no
+  //     translation needed, and running them through pulseJobToCard would
+  //     blank the role (reads job.title, which doesn't exist on this shape)
+  //     and force columnId back to its 'new' default.
+  // This used to hard-reject the array shape outright, so any day's export
+  // using it silently never reached auto-submit's eligibility pass at all.
+  if (Array.isArray(parsed?.cards)) {
+    return parsed.cards.filter(isEligible);
   }
-
-  const jobs = Object.values(parsed.cards);
-
-  return jobs.map(pulseJobToCard).filter(isEligible);
+  if (parsed && typeof parsed.cards === 'object' && parsed.cards !== null) {
+    return Object.values(parsed.cards).map(pulseJobToCard).filter(isEligible);
+  }
+  throw new Error('Kanban JSON must have shape { cards: { [id]: PulseJob } | card[], ... }');
 }
 
 // ── Cover letter lookup ───────────────────────────────────────────────────────
@@ -712,6 +836,22 @@ const APPLY_BUTTON_SELECTORS = [
  * @returns {{ ats: string } | null}
  */
 export async function navigateToApplicationForm(page, currentAts) {
+  // B-0716-ASHBY: Ashby overview pages (jobs.ashbyhq.com/{org}/{jobId}) render
+  // the form on a client-side "Application" tab that our selector list misses
+  // when the SPA hasn't hydrated yet. The form has a stable direct route at
+  // {jobUrl}/application — navigate there deterministically before falling
+  // back to apply-button hunting. (Lambda ×3 + Delinea 2026-07-12 no-button.)
+  if (currentAts === 'ashby') {
+    try {
+      const u = new URL(page.url());
+      if (/^jobs\.ashbyhq\.com$/i.test(u.hostname) && !/\/application\/?$/i.test(u.pathname)) {
+        const target = `${u.origin}${u.pathname.replace(/\/$/, '')}/application${u.search}`;
+        await page.goto(target, { timeout: 15000, waitUntil: 'domcontentloaded' });
+        await page.waitForTimeout(2000);
+        return { ats: 'ashby' };
+      }
+    } catch { /* fall through to selector hunt */ }
+  }
   for (const sel of APPLY_BUTTON_SELECTORS) {
     try {
       const el = await page.$(sel);
@@ -732,17 +872,8 @@ export async function navigateToApplicationForm(page, currentAts) {
 }
 
 function _detectATS(url) {
-  if (!url) return 'unknown';
-  const ATS_PATTERNS_LOCAL = [
-    { name: 'greenhouse', re: /greenhouse\.io|boards\.greenhouse\.io/i },
-    { name: 'lever',      re: /lever\.co/i },
-    { name: 'ashby',      re: /ashbyhq\.com/i },
-    { name: 'workday',    re: /myworkdayjobs\.com|wd\d+\.myworkdayjobs/i },
-  ];
-  for (const { name, re } of ATS_PATTERNS_LOCAL) {
-    if (re.test(url)) return name;
-  }
-  return 'unknown';
+  // Delegate to the authoritative detectATS (incl. B-ATS-DETECT query-param markers).
+  return detectATS(url);
 }
 
 // ── Browser launch ────────────────────────────────────────────────────────────
@@ -757,9 +888,14 @@ function _detectATS(url) {
  *
  * @param {object} pw          Full playwright module (await import('playwright'))
  * @param {object} browserCfg  Result of loadBrowserConfig()
- * @param {{ headless?: boolean, browserMode?: string, debugPort?: number }} [opts]
+ * @param {{ headless?: boolean, browserMode?: string, debugPort?: number, url?: string }} [opts]
+ *   `url` (2026-07-06, r7/B5 rebuild): the card URL about to be submitted. When
+ *   it's a Workday listing with a fresh pre-auth session saved by
+ *   workday-login.mjs, that tenant-specific storageState is used instead of
+ *   the generic data/auth-state.json in the default launch branch below —
+ *   see workday-login.mjs's getValidSessionPath() for the freshness contract.
  */
-export async function launchBrowserForMode(pw, browserCfg, { headless = false, browserMode = null, debugPort = 9222 } = {}) {
+export async function launchBrowserForMode(pw, browserCfg, { headless = false, browserMode = null, debugPort = 9222, url = null } = {}) {
   const preferred      = browserCfg?.preferred || 'chromium';
   const effectiveMode  = parseBrowserMode(browserMode, browserCfg);
 
@@ -809,8 +945,29 @@ export async function launchBrowserForMode(pw, browserCfg, { headless = false, b
   }
 
   // ── Default: fresh bundled Chromium context ───────────────────────────────────
+  // Load exported auth sessions if present (populated by scripts/export-auth-state.mjs).
+  // This allows headless runs in the Cowork sandbox to submit with real authenticated sessions.
+  //
+  // B5/r7 rebuild (2026-07-06): for a Workday listing, prefer the tenant-specific
+  // session workday-login.mjs saved (data/workday-sessions/{tenant}.json) over the
+  // generic auth-state.json — it's the actual pre-auth this dryRunCard() note has
+  // been promising ("Workday: auth wall likely; pre-auth session required") since
+  // B5 was first closed. Falls through to auth-state.json when no URL is given or
+  // no fresh Workday session exists for that tenant yet.
+  const workdaySessionPath = url ? getValidWorkdaySessionPath(url) : null;
+  const authStatePath = path.join(ROOT, 'data', 'auth-state.json');
+  const storageState  = workdaySessionPath || (fs.existsSync(authStatePath) ? authStatePath : undefined);
+  if (workdaySessionPath) {
+    console.log(`[browser] Loading Workday pre-auth session: ${path.relative(ROOT, workdaySessionPath)}`);
+  } else if (storageState) {
+    console.log('[browser] Loading auth state from data/auth-state.json');
+  } else if (url && /myworkdayjobs\.com|wd\d+\.myworkdayjobs/i.test(url)) {
+    console.warn('[browser] Workday listing, no pre-auth session found — run: node scripts/workday-login.mjs --url "<job url>"');
+  } else {
+    console.warn('[browser] No auth-state.json found — browser will be unauthenticated. Run: node scripts/export-auth-state.mjs');
+  }
   const browser  = await pw.chromium.launch({ headless });
-  const context  = await browser.newContext({ viewport: { width: 1280, height: 900 } });
+  const context  = await browser.newContext({ viewport: { width: 1280, height: 900 }, storageState });
   return { context, browser, isAttached: false, contextWasCreatedByUs: true };
 }
 
@@ -829,7 +986,7 @@ async function runSemiAuto(cards, pw, personal, browserCfg, useExtension, browse
 
     // B7 liveness check
     process.stdout.write('  Liveness check... ');
-    const liveness = await checkLiveness(card.url);
+    const liveness = process.env.PULSE_SKIP_LIVENESS === "1" ? { alive: true, reason: "env-skip" } : await checkLiveness(card.url);
     if (!liveness.alive) {
       console.log(`DEAD (${liveness.reason}) — skipping`);
       results.push({ id: card.id, status: 'dead-listing', reason: liveness.reason, url: card.url });
@@ -872,12 +1029,13 @@ async function runSemiAuto(cards, pw, personal, browserCfg, useExtension, browse
 
     try {
       ({ context, browser, isAttached, contextWasCreatedByUs } =
-        await launchBrowserForMode(pw, browserCfg, { headless: false, browserMode, debugPort }));
+        await launchBrowserForMode(pw, browserCfg, { headless: false, browserMode, debugPort, url: card.url }));
       page = await context.newPage();
 
       console.log(`  Opening browser → ${card.url}`);
       await page.goto(card.url, { timeout: 30000, waitUntil: 'domcontentloaded' });
       await page.waitForTimeout(1500);
+      await dismissConsentBanners(page);
 
       // K-15: If no submit button on listing page, look for "Apply for this job" button
       let submitBtn = await findSubmitOnPage(page, ats);
@@ -898,7 +1056,7 @@ async function runSemiAuto(cards, pw, personal, browserCfg, useExtension, browse
       if (useExtension) {
         const attachLabel = isAttached ? 'attached CDP' : 'persistent context';
         process.stdout.write(`  Waiting 5s for SpeedyApply to autofill (${attachLabel})...`);
-        await page.waitForTimeout(5000);
+        await page.waitForTimeout(Number(process.env.PULSE_AUTOFILL_WAIT_MS ?? 5000));
         console.log(' done.');
         fillReport = { extension: true, note: `deferred to SpeedyApply extension (${attachLabel}, waited 5s)` };
       } else if (personal) {
@@ -1038,7 +1196,27 @@ async function runLive(cards, pw, allowTier, personal, browserCfg, useExtension,
 
   let { count: dailyCount, capPath } = checkDailyCap();
 
+  // B-0717-3 dup-guard (2026-07-17): never live-attempt a card that already has a
+  // pre-click journal entry from ANY day (see click-journal-*.jsonl). A journaled
+  // click means a submit MAY have landed; re-attempting risks a duplicate
+  // application until the entry is reconciled against a confirmation email.
+  const journaledIds = new Set();
+  try {
+    for (const jf of fs.readdirSync(path.join(ROOT, 'data')).filter((f) => /^click-journal-.*\.jsonl$/.test(f))) {
+      for (const line of fs.readFileSync(path.join(ROOT, 'data', jf), 'utf8').split('\n')) {
+        if (!line.trim()) continue;
+        try { const rec = JSON.parse(line); if (rec.phase === 'pre-click' && rec.id) journaledIds.add(rec.id); } catch { /* skip bad line */ }
+      }
+    }
+  } catch { /* no journals yet */ }
+
   for (const card of cards) {
+    if (journaledIds.has(card.id)) {
+      console.log(`\n[live] SKIP ${card.id} (${card.company}) — click-journal dup-guard: prior submit click recorded, awaiting email reconciliation`);
+      results.push({ id: card.id, status: 'skipped', reason: 'journal-dup-guard', url: card.url });
+      continue;
+    }
+
     if (dailyCount >= LIVE_DAILY_CAP) {
       console.log(`\n[live] Hard cap reached (${LIVE_DAILY_CAP}/day). Stopping.`);
       break;
@@ -1060,7 +1238,7 @@ async function runLive(cards, pw, allowTier, personal, browserCfg, useExtension,
 
     // B7 liveness check
     process.stdout.write('  Liveness check... ');
-    const liveness = await checkLiveness(card.url);
+    const liveness = process.env.PULSE_SKIP_LIVENESS === "1" ? { alive: true, reason: "env-skip" } : await checkLiveness(card.url);
     if (!liveness.alive) {
       console.log(`DEAD (${liveness.reason}) — skipping`);
       results.push({ id: card.id, status: 'dead-listing', reason: liveness.reason, url: card.url });
@@ -1099,11 +1277,12 @@ async function runLive(cards, pw, allowTier, personal, browserCfg, useExtension,
 
     try {
       ({ context, browser, isAttached, contextWasCreatedByUs } =
-        await launchBrowserForMode(pw, browserCfg, { headless: !useExtension, browserMode, debugPort }));
+        await launchBrowserForMode(pw, browserCfg, { headless: !useExtension, browserMode, debugPort, url: card.url }));
       page = await context.newPage();
 
       await page.goto(card.url, { timeout: 30000, waitUntil: 'domcontentloaded' });
       await page.waitForTimeout(2000);
+      await dismissConsentBanners(page);
 
       // CAPTCHA check — mark and skip this card
       if (await detectCaptchaOnPage(page)) {
@@ -1152,10 +1331,11 @@ async function runLive(cards, pw, allowTier, personal, browserCfg, useExtension,
       // Form fill — extension autofill or built-in selectors
       if (useExtension) {
         const attachLabel = isAttached ? 'attached CDP' : 'persistent context';
-        process.stdout.write(`  Waiting 5s for SpeedyApply to autofill (${attachLabel})...`);
-        await page.waitForTimeout(5000);
+        const ssWaitMs = Math.max(2000, parseInt(process.env.SPEEDYAPPLY_WAIT_MS || '5000', 10) || 5000);
+        process.stdout.write(`  Waiting ${ssWaitMs}ms for SpeedyApply to autofill (${attachLabel})...`);
+        await page.waitForTimeout(ssWaitMs);
         console.log(' done.');
-        fillReport = { extension: true, note: `deferred to SpeedyApply (${attachLabel}, 5s wait)` };
+        fillReport = { extension: true, note: `deferred to SpeedyApply (${attachLabel}, ${ssWaitMs}ms wait)` };
       } else if (personal) {
         try {
           fillReport = await fillForm(ats, page, personal, clForSubmit);
@@ -1163,27 +1343,94 @@ async function runLive(cards, pw, allowTier, personal, browserCfg, useExtension,
           for (const line of formatUploadDetails(fillReport.upload_details || {})) console.log(line);
         } catch (e) {
           console.log(`  Form fill error: ${e.message} — continuing`);
+          // B-0717-1 fix: a thrown fillForm left fillReport undefined, which
+          // BYPASSED the B-16 empty-form guard below (guard requires truthy
+          // fillReport). Synthesize a zero-fill report so the guard applies.
+          fillReport = { extension: false, filled: 0, total: 0, missing_fields: [], upload_details: {}, fill_error: e.message };
         }
+      }
+
+      // B-16 guard (2026-07-10): never click submit on a form we demonstrably did
+      // not fill. An empty submit either bounces off client validation (wasted
+      // attempt, misleading UNCONFIRMED) or - worse - files a blank application.
+      // Only applies to built-in fill (extension path reports no per-field counts).
+      if (fillReport && fillReport.extension !== true
+          && Number(fillReport.filled) === 0
+          && !(fillReport.upload_details && fillReport.upload_details.resume && fillReport.upload_details.resume.uploaded === true)) {
+        console.log('  B-16 guard: 0 fields filled and no resume uploaded - NOT clicking submit (form-blocked)');
+        ssPath = await screenshot(page, card, 'empty-form-guard').catch(() => null);
+        results.push({ id: card.id, status: 'blocked', reason: 'empty-form-guard', url: card.url, screenshot: ssPath, fill: fillReport });
+        formBlocked++;
+        continue;
       }
 
       // Pre-submit screenshot
       ssPath = await screenshot(page, card, 'pre-submit');
       console.log(`  Pre-submit screenshot: ${ssPath}`);
 
-      // Click submit
-      await submitBtn.click();
+      // K-DEFECT-2026-07-21 (CI&T / Lever): the early CAPTCHA check above runs
+      // right after page.goto + a short settle wait. That's enough for most
+      // ATSes, but on at least one Lever-hosted posting (CI&T) an invisible
+      // hCaptcha widget attaches to the DOM AFTER that early check already ran
+      // clean — so the stale "no captcha" result stood, submitBtn.click() fired
+      // anyway, and the card silently fell through to 'unconfirmed' instead of
+      // being cleanly flagged 'requires-human' the way Samsara's captcha (which
+      // was already present at the early check) is handled. Re-run the same
+      // detector immediately before the click via pollForCaptcha, which polls
+      // briefly (up to 3s) since a late-loading widget can still be a beat
+      // away from attaching.
+      const captchaJustAppeared = await pollForCaptcha(page);
+      if (captchaJustAppeared) {
+        console.log('  → CAPTCHA appeared just before submit — marking requires-human, skipping card');
+        ssPath = await screenshot(page, card, 'captcha').catch(() => null);
+        results.push({ id: card.id, status: 'requires-human', reason: 'captcha-detected-pre-submit', url: card.url, screenshot: ssPath });
+        captchaBlocked++;
+        continue;
+      }
+
+      // B-0717-2 fix (2026-07-17): journal-first click record. The sandbox bash
+      // cap can kill this process between click and results-write, silently losing
+      // the fact that a live submit was attempted. Append a crash-safe JSONL line
+      // BEFORE clicking so no click can ever go unrecorded.
+      try {
+        const journalPath = path.join(ROOT, 'data', `click-journal-${DATE_STAMP}.jsonl`);
+        fs.appendFileSync(journalPath, JSON.stringify({ at: new Date().toISOString(), id: card.id, company: card.company, role: card.role, url: card.url, ats, fill: fillReport ? { filled: fillReport.filled, total: fillReport.total, extension: fillReport.extension === true } : null, screenshot: ssPath, phase: 'pre-click' }) + '\n');
+      } catch (jErr) { console.log(`  (click-journal write failed: ${jErr.message})`); }
+
+      // Click submit — B-14 fix: viewport-safe fallback (scrollIntoView → force → DOM click)
+      try {
+        await submitBtn.scrollIntoViewIfNeeded().catch(() => {});
+        await submitBtn.click({ timeout: 30000 });
+      } catch (clickErr) {
+        if (/outside of the viewport|Timeout/i.test(clickErr.message)) {
+          console.log('  Click blocked (' + clickErr.message.split('\n')[0] + ') — B-14 fallback: force/DOM click');
+          await submitBtn.click({ force: true, timeout: 5000 }).catch(async () => {
+            await submitBtn.evaluate((el) => el.click());
+          });
+        } else { throw clickErr; }
+      }
       console.log('  Clicked submit. Waiting for confirmation (60s)...');
 
+      // "Last push" confirmation. SpeedyApply fills to the 1-yard line; the engine
+      // clicks submit and only counts it APPLIED on a real success signal — either an
+      // on-page confirmation (text or confirmation-style URL) or, failing that, an ATS
+      // confirmation email reconciled downstream (see unconfirmed result fields below).
       let confirmed_flag = false;
+      const CONFIRM_TEXT = /thank you for applying|application (submitted|received|complete)|we (received|have received) your application|thanks for applying|successfully submitted|your application has been (submitted|received)|submission (confirmed|received)|application confirmation/i;
+      const CONFIRM_URL  = /confirmation|thank[-_ ]?you|submitted|success|applied|complete/i;
       try {
         await Promise.race([
-          page.waitForURL((url) => url !== card.url, { timeout: 60000 }),
-          page.waitForSelector('text="Thank you for applying"',       { timeout: 60000 }),
-          page.waitForSelector('text="Application submitted"',        { timeout: 60000 }),
-          page.waitForSelector('text="We received your application"', { timeout: 60000 }),
+          page.waitForURL((url) => String(url) !== card.url && CONFIRM_URL.test(String(url)), { timeout: 60000 }),
+          page.getByText(CONFIRM_TEXT).first().waitFor({ state: 'visible', timeout: 60000 }),
         ]);
         confirmed_flag = true;
-      } catch { /* 60s timeout — no confirmation */ }
+      } catch (e) {
+        // B-6 diagnostics (2026-07-16): this catch used to swallow the reason.
+        // Ashby runs "waited 60s" in <10s wall-clock, meaning waitForFunction
+        // THREW (context destroyed / strict-mode violation), not timed out —
+        // log it so the next run can tell a real timeout from a broken wait.
+        console.log(`  (confirmation wait ended early: ${String(e?.message || e).split('\n')[0].slice(0, 140)})`);
+      }
 
       const ssAfter = await screenshot(page, card,confirmed_flag ? 'confirmed' : 'unconfirmed').catch(() => null);
 
@@ -1198,7 +1445,7 @@ async function runLive(cards, pw, allowTier, personal, browserCfg, useExtension,
       } else {
         console.log('  → UNCONFIRMED: no confirmation within 60s — NOT marking as applied');
         unconfirmed++;
-        results.push({ id: card.id, status: 'unconfirmed', url: card.url, ats, screenshot: ssAfter, fill_report: fillReport, note: 'no-confirmation-60s' });
+        results.push({ id: card.id, company: card.company, role: card.role, status: 'unconfirmed', url: card.url, ats, screenshot: ssAfter, fill_report: fillReport, note: 'no-confirmation-60s', clicked_submit_at: new Date().toISOString(), needs_email_confirmation: true });
       }
 
     } catch (e) {
@@ -1217,15 +1464,19 @@ async function runLive(cards, pw, allowTier, personal, browserCfg, useExtension,
   }
 
   const outPath = path.join(ROOT, 'data', `live-runs-${DATE_STAMP}.json`);
+  // B-4 fix (K-4, 2026-07-03): append-mode — merge with any earlier run today
+  // instead of overwriting, so per-card invocations accumulate in one file.
+  let prevRun = null;
+  try { prevRun = JSON.parse(fs.readFileSync(outPath, 'utf8')); } catch { /* first run today */ }
   writeJSON(outPath, {
     ran_at:          new Date().toISOString(),
     mode:            'live',
     allow_tier:      allowTier,
-    confirmed,
-    unconfirmed,
-    captcha_blocked: captchaBlocked,
-    form_blocked:    formBlocked,
-    results,
+    confirmed:       confirmed      + (Number(prevRun?.confirmed)       || 0),
+    unconfirmed:     unconfirmed    + (Number(prevRun?.unconfirmed)     || 0),
+    captcha_blocked: captchaBlocked + (Number(prevRun?.captcha_blocked) || 0),
+    form_blocked:    formBlocked    + (Number(prevRun?.form_blocked)    || 0),
+    results:         [...(Array.isArray(prevRun?.results) ? prevRun.results : []), ...results],
   });
   console.log(`\n[live] Written → ${path.relative(ROOT, outPath)}`);
 

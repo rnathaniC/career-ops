@@ -779,12 +779,15 @@ if (newLines.length > 0) {
 if (!DRY_RUN) {
   writeFileAtomic(APPS_FILE, appLines.join('\n'));
 
-  // Move processed files to merged/
-  if (!existsSync(MERGED_DIR)) mkdirSync(MERGED_DIR, { recursive: true });
+  // Move processed files to merged/YYYY-MM/ (r10, 2026-07-22): a flat merged/
+  // dir accumulates hundreds of files with no organization on a large batch.
+  // Archiving by month keeps the directory browsable without deleting history.
+  const monthDir = join(MERGED_DIR, new Date().toISOString().slice(0, 7));
+  if (!existsSync(monthDir)) mkdirSync(monthDir, { recursive: true });
   for (const file of tsvFiles) {
-    renameSync(join(ADDITIONS_DIR, file), join(MERGED_DIR, file));
+    renameSync(join(ADDITIONS_DIR, file), join(monthDir, file));
   }
-  console.log(`\n✅ Moved ${tsvFiles.length} TSVs to merged/`);
+  console.log(`\n✅ Moved ${tsvFiles.length} TSVs to merged/${basename(monthDir)}/`);
 }
 
 console.log(`\n📊 Summary: +${added} added, 🔄${updated} updated, ⏭️${skipped} skipped`);
