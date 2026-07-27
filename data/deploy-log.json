@@ -1,5 +1,21 @@
 {
   "version": 1,
   "note": "Append-only deploy audit trail. Written by dispatch-relay.mjs on each --dispatch.",
-  "entries": []
+  "entries": [
+    {
+      "at": "2026-07-27T23:51:04.149Z",
+      "result": "dispatched",
+      "message": "close ship-gap: dispatch 7 validated files (1143e96)",
+      "files": [
+        "package.json",
+        "scripts/export-board-state.mjs",
+        "scripts/pulse-refresh.mjs",
+        "check-syntax.mjs",
+        "dispatch-relay.mjs",
+        "data/dispatch-manifest.json",
+        "data/deploy-log.json"
+      ],
+      "gate": "exist+parse+committed"
+    }
+  ]
 }

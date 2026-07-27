@@ -1,16 +1,23 @@
 {
   "version": 1,
-  "last_dispatch": null,
+  "last_dispatch": "2026-07-27T23:51:04.149Z",
   "note": "Dispatch subsystem restored 2026-06-15 (TD1). 'pending' = validated, awaiting commit+dispatch.",
   "pending": [
-    "package.json",
-    "scripts/export-board-state.mjs",
-    "scripts/pulse-refresh.mjs",
-    "check-syntax.mjs",
-    "dispatch-relay.mjs",
-    "data/dispatch-manifest.json",
-    "data/deploy-log.json",
     "portals.yml"
   ],
-  "dispatched": []
+  "dispatched": [
+    {
+      "at": "2026-07-27T23:51:04.149Z",
+      "files": [
+        "package.json",
+        "scripts/export-board-state.mjs",
+        "scripts/pulse-refresh.mjs",
+        "check-syntax.mjs",
+        "dispatch-relay.mjs",
+        "data/dispatch-manifest.json",
+        "data/deploy-log.json"
+      ],
+      "message": "close ship-gap: dispatch 7 validated files (1143e96)"
+    }
+  ]
 }
