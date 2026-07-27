@@ -189,5 +189,39 @@
     "hasConnection": false,
     "isWarmReferral": false,
     "connectionName": ""
+  },
+  {
+    "company": "OpenTable",
+    "role": "Sr Technical Program Manager",
+    "url": "https://job-boards.greenhouse.io/opentable/jobs/8644106002",
+    "ats": "greenhouse",
+    "grade": "B",
+    "status": "queued",
+    "queued_at": "2026-07-23T05:18:19.683Z",
+    "source_id": "live-2026-07-23-006",
+    "keywords": [
+      "Program Manager",
+      "Technical Program Manager"
+    ],
+    "hasConnection": false,
+    "isWarmReferral": false,
+    "connectionName": ""
+  },
+  {
+    "company": "Pinterest",
+    "role": "Sr. Staff Technical Program Manager",
+    "url": "https://www.pinterestcareers.com/jobs/?gh_jid=7494652",
+    "ats": "greenhouse",
+    "grade": "B",
+    "status": "queued",
+    "queued_at": "2026-07-27T23:31:54.945Z",
+    "source_id": "live-2026-07-24-001",
+    "keywords": [
+      "Program Manager",
+      "Technical Program Manager"
+    ],
+    "hasConnection": false,
+    "isWarmReferral": false,
+    "connectionName": ""
   }
 ]

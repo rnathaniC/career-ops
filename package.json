@@ -42,6 +42,7 @@
     "cadence": "node scripts/cadence-watchdog.mjs",
     "connections:sync": "node scripts/sync-connections.mjs",
     "pulse:refresh": "node scripts/pulse-refresh.mjs",
+    "pulse:daily-report": "node scripts/daily-health-report.mjs",
     "cadence:mark": "node scripts/cadence-mark.mjs",
     "workday:login": "node scripts/workday-login.mjs",
     "workday:sessions": "node scripts/workday-login.mjs --list",

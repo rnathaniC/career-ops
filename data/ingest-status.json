@@ -1,6 +1,6 @@
 {
-  "ran_at_utc": "2026-07-22T05:23:25.665Z",
-  "source": "/sessions/focused-elegant-hopper/mnt/career-ops/data/kanban-import-2026-07-22.json",
+  "ran_at_utc": "2026-07-27T23:31:54.984Z",
+  "source": "/sessions/optimistic-zen-edison/mnt/career-ops/data/kanban-import-2026-07-27.json",
   "grades": [
     "A",
     "B"
@@ -9,6 +9,7 @@
   "graded": 9,
   "fresh": 2,
   "referral_held": 7,
-  "added": 0,
-  "dry_run": false
+  "added": 1,
+  "queue_size_after": 13,
+  "backup": "data/submit-queue.json.bak-1785195114946"
 }
