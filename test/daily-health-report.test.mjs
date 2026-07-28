@@ -113,6 +113,26 @@ describe('collectFlags', () => {
     assert.deepEqual(flags.techDebt, []);
     assert.deepEqual(flags.actions, []);
   });
+
+  test('gitignored user files (portals.yml) are excluded from the ship-gap flag', () => {
+    // portals.yml is a per-user gitignored file the ship-gate can never dispatch;
+    // it must NOT appear as a "validated but NOT dispatched" tech-debt nag, while
+    // a normal source file in the same pending set still surfaces.
+    const dispatch = { pending: ['portals.yml', 'scripts/real.mjs'] };
+    const flags = collectFlags(cleanRefresh(), dispatch, { gap_count: 0 }, { hot_count: 4 });
+    const shipGap = flags.techDebt.find((t) => /NOT dispatched/.test(t));
+    assert.ok(shipGap, 'the normal file must still produce a ship-gap flag');
+    assert.ok(!/portals\.yml/.test(shipGap), 'portals.yml must not appear in the ship-gap flag');
+    assert.ok(/scripts\/real\.mjs/.test(shipGap), 'the normal file must still be listed');
+    assert.ok(/^1 file\(s\)/.test(shipGap), 'count must reflect shippable files only (1, not 2)');
+  });
+
+  test('a pending set of ONLY gitignored user files yields no ship-gap flag or kaizen', () => {
+    const dispatch = { pending: ['portals.yml', 'config/profile.yml', 'modes\\_profile.md'] };
+    const flags = collectFlags(cleanRefresh(), dispatch, { gap_count: 0 }, { hot_count: 4 });
+    assert.ok(!flags.techDebt.some((t) => /NOT dispatched/.test(t)), 'no ship-gap tech-debt');
+    assert.ok(!flags.kaizen.some((k) => /dispatch-relay/.test(k)), 'no dispatch kaizen nag');
+  });
 });
 
 describe('hoursSince', () => {

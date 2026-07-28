@@ -121,6 +121,34 @@ export function computeHealthScore(refresh, cadence, referral, now = Date.now())
   return { score, grade, verdict, factors };
 }
 
+// ── user (gitignored) files — never shippable ────────────────────
+// These are the per-user layer files that .gitignore intentionally keeps out
+// of the repo forever ("User config and customization (never auto-updated)").
+// dispatch-relay's ship-gate already refuses them ("git state 'untracked' — not
+// shippable"), so if they ever land in the dispatch manifest's `pending` array
+// they'd nag as a validated-but-not-dispatched tech-debt flag FOREVER — a false
+// permanent alarm. We exclude them from the ship-gap computation here.
+//
+// This is the same canonical set as doctor.mjs's USER_LAYER_PREREQS (cv.md,
+// config/profile.yml, modes/_profile.md, portals.yml). We can't import it —
+// doctor.mjs is a CLI that runs process.exit() at module load — so we mirror it.
+// If that list changes, update this one too (kept small + explicit on purpose).
+export const USER_GITIGNORED_FILES = new Set([
+  'cv.md',
+  'config/profile.yml',
+  'modes/_profile.md',
+  'portals.yml',
+]);
+
+// True when `f` is one of the per-user gitignored files above. Normalises
+// Windows back-slashes and leading "./" so manifest paths match regardless of
+// how they were written.
+export function isUserGitignoredFile(f) {
+  if (typeof f !== 'string') return false;
+  const norm = f.trim().replace(/\\/g, '/').replace(/^\.\//, '');
+  return USER_GITIGNORED_FILES.has(norm);
+}
+
 // ── tech-debt / kaizen flags (pure) ──────────────────────────────
 export function collectFlags(refresh, dispatch, cadence, referral) {
   const techDebt = [];
@@ -137,9 +165,14 @@ export function collectFlags(refresh, dispatch, cadence, referral) {
     }
   }
 
-  if (dispatch && Array.isArray(dispatch.pending) && dispatch.pending.length) {
+  // Only shippable files count toward the commit+ship gap. Per-user gitignored
+  // files (portals.yml, config/profile.yml, …) can never be committed, so they'd
+  // otherwise nag here forever even though the ship-gate correctly refuses them.
+  const shippablePending = (dispatch && Array.isArray(dispatch.pending) ? dispatch.pending : [])
+    .filter((f) => !isUserGitignoredFile(f));
+  if (shippablePending.length) {
     techDebt.push(
-      `${dispatch.pending.length} file(s) validated but NOT dispatched (commit+ship gap): ${dispatch.pending.join(', ')}`,
+      `${shippablePending.length} file(s) validated but NOT dispatched (commit+ship gap): ${shippablePending.join(', ')}`,
     );
     kaizen.push('Commit + `node dispatch-relay.mjs --dispatch` the pending files to close the validated-but-vanished risk.');
   }
