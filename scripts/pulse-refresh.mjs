@@ -229,7 +229,7 @@ const summary = {
   airtable_sync: { pull: { exit: null, skipped: false }, push: { exit: null, skipped: false } },
   archive_stale: { exit: null, skipped: false, archived: null, tagged_flow: null },
   cover_letters: 0,
-  cadence:       { gap_count: null, missing: [] },
+  cadence:       { gap_count: null, missing: [], silent_misses: [] },
   notes:         [],
 };
 
@@ -381,10 +381,16 @@ log('Step -0.9 — Cadence watchdog (cadence-watchdog.mjs)');
 const cadence = await npm('cadence', { capture: true, step: 'step-0.9' });
 try {
   const cs = JSON.parse(readFileSync(join(DATA, 'cadence-status.json'), 'utf8'));
-  summary.cadence.gap_count = cs.gap_count ?? null;
-  summary.cadence.missing   = cs.missing   ?? [];
-  if ((cs.gap_count ?? 0) > 0) {
-    summary.notes.push(`Cadence watchdog: ${cs.gap_count} missed run(s) in last ${cs.window_days}d — ${cs.missing.join(', ')}. Investigate the scheduler (last run ${cs.last_run}).`);
+  summary.cadence.gap_count     = cs.gap_count     ?? null;
+  summary.cadence.missing       = cs.missing       ?? [];
+  summary.cadence.silent_misses = cs.silent_misses ?? [];
+  const silent = cs.silent_misses ?? [];
+  if (silent.length > 0) {
+    // The worst kind: a marker exists but the pipeline produced no fresh data.
+    summary.notes.push(`Cadence watchdog: ${silent.length} SILENT miss(es) [marker present but last-refresh never advanced] — ${silent.join(', ')}. The 1 AM task may be firing cadence-mark WITHOUT running the real pipeline. Investigate now.`);
+  }
+  if ((cs.missing?.length ?? 0) > 0) {
+    summary.notes.push(`Cadence watchdog: ${cs.missing.length} missed run(s) [no log] in last ${cs.window_days}d — ${cs.missing.join(', ')}. Investigate the scheduler (last genuine run ${cs.last_run}).`);
   }
 } catch (e) {
   warn(`Cadence watchdog output unreadable: ${e.message}`);

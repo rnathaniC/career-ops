@@ -29,6 +29,7 @@
 import { readFileSync, writeFileSync, existsSync, readdirSync, mkdirSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { USER_GITIGNORED_FILES, isUserGitignoredFile } from '../user-files.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 export const ROOT = path.resolve(__dirname, '..');
@@ -109,8 +110,26 @@ export function computeHealthScore(refresh, cadence, referral, now = Date.now())
     if (typeof exit === 'number' && exit !== 0) ding(pen, `${name} exit=${exit}`);
   }
 
-  const gaps = (cadence && cadence.gap_count) ?? (refresh.cadence && refresh.cadence.gap_count) ?? 0;
-  if (gaps > 0) ding(Math.min(gaps * 5, 20), `cadence: ${gaps} missed run(s) in last 7d`);
+  // Cadence health — a cadence MARKER alone must NEVER count as a run. The
+  // watchdog now separates genuine runs from SILENT misses (marker present but
+  // last-refresh never advanced — the masking bug K-2026-07-28 hardened against).
+  // Prefer the granular arrays; fall back to the legacy scalar gap_count for
+  // older cadence-status.json blobs so this stays backward compatible.
+  const cadSrc = cadence || (refresh && refresh.cadence) || {};
+  const silentMisses = Array.isArray(cadSrc.silent_misses) ? cadSrc.silent_misses : [];
+  if (Array.isArray(cadSrc.missing) || silentMisses.length) {
+    const hardMissing = Array.isArray(cadSrc.missing) ? cadSrc.missing : [];
+    if (hardMissing.length) ding(Math.min(hardMissing.length * 5, 20), `cadence: ${hardMissing.length} missed run(s) in last 7d`);
+    if (silentMisses.length) {
+      ding(
+        Math.min(silentMisses.length * 8, 30),
+        `SILENT pipeline miss(es) — cadence marker present but no fresh refresh: ${silentMisses.join(', ')}`,
+      );
+    }
+  } else {
+    const gaps = cadSrc.gap_count ?? 0;
+    if (gaps > 0) ding(Math.min(gaps * 5, 20), `cadence: ${gaps} missed run(s) in last 7d`);
+  }
 
   const hot = (referral && referral.hot_count) ?? (refresh.lane_branch && refresh.lane_branch.hot_count) ?? 0;
   if (hot > 20) ding(5, `referral backlog: ${hot} New-Hot cards waiting on Rahil`);
@@ -122,32 +141,17 @@ export function computeHealthScore(refresh, cadence, referral, now = Date.now())
 }
 
 // ── user (gitignored) files — never shippable ────────────────────
-// These are the per-user layer files that .gitignore intentionally keeps out
-// of the repo forever ("User config and customization (never auto-updated)").
-// dispatch-relay's ship-gate already refuses them ("git state 'untracked' — not
-// shippable"), so if they ever land in the dispatch manifest's `pending` array
-// they'd nag as a validated-but-not-dispatched tech-debt flag FOREVER — a false
-// permanent alarm. We exclude them from the ship-gap computation here.
+// These per-user layer files are the customization layer that .gitignore keeps
+// out of the repo forever. dispatch-relay's ship-gate already refuses them
+// ("git state 'untracked' — not shippable"), so if they ever land in the
+// dispatch manifest's `pending` array they'd nag as a validated-but-not-
+// dispatched tech-debt flag FOREVER — a false permanent alarm. We exclude them
+// from the ship-gap computation here (see collectFlags below).
 //
-// This is the same canonical set as doctor.mjs's USER_LAYER_PREREQS (cv.md,
-// config/profile.yml, modes/_profile.md, portals.yml). We can't import it —
-// doctor.mjs is a CLI that runs process.exit() at module load — so we mirror it.
-// If that list changes, update this one too (kept small + explicit on purpose).
-export const USER_GITIGNORED_FILES = new Set([
-  'cv.md',
-  'config/profile.yml',
-  'modes/_profile.md',
-  'portals.yml',
-]);
-
-// True when `f` is one of the per-user gitignored files above. Normalises
-// Windows back-slashes and leading "./" so manifest paths match regardless of
-// how they were written.
-export function isUserGitignoredFile(f) {
-  if (typeof f !== 'string') return false;
-  const norm = f.trim().replace(/\\/g, '/').replace(/^\.\//, '');
-  return USER_GITIGNORED_FILES.has(norm);
-}
+// The canonical set + matcher now live in ../user-files.mjs, shared with
+// doctor.mjs's USER_LAYER_PREREQS so the two can NEVER drift. Imported above;
+// re-exported here so this module's public API is unchanged.
+export { USER_GITIGNORED_FILES, isUserGitignoredFile };
 
 // ── tech-debt / kaizen flags (pure) ──────────────────────────────
 export function collectFlags(refresh, dispatch, cadence, referral) {
@@ -177,10 +181,34 @@ export function collectFlags(refresh, dispatch, cadence, referral) {
     kaizen.push('Commit + `node dispatch-relay.mjs --dispatch` the pending files to close the validated-but-vanished risk.');
   }
 
-  const gaps = (cadence && cadence.gap_count) ?? (refresh && refresh.cadence && refresh.cadence.gap_count) ?? 0;
-  if (gaps > 0) {
-    const missing = (cadence && cadence.missing) || (refresh && refresh.cadence && refresh.cadence.missing) || [];
-    kaizen.push(`Scheduler missed ${gaps} run(s)${missing.length ? ` (${missing.join(', ')})` : ''} — verify the 1 AM task is firing and writing cadence markers.`);
+  const cadSrc = cadence || (refresh && refresh.cadence) || {};
+  const silentMisses = Array.isArray(cadSrc.silent_misses) ? cadSrc.silent_misses : [];
+  const hardMissing = Array.isArray(cadSrc.missing) ? cadSrc.missing : [];
+  const gaps = cadSrc.gap_count ?? 0;
+
+  // Hard scheduler gaps — days with no run log at all. Prefer the explicit
+  // hard-missing array; fall back to the legacy scalar gap_count.
+  const hardCount = hardMissing.length || (silentMisses.length ? 0 : gaps);
+  if (hardCount > 0) {
+    kaizen.push(
+      `Scheduler missed ${hardCount} run(s)${hardMissing.length ? ` (${hardMissing.join(', ')})` : ''} — verify the 1 AM task is firing and writing cadence markers.`,
+    );
+  }
+
+  // SILENT misses — the worst failure mode: a cadence marker was written but the
+  // pipeline produced no fresh data (last-refresh never advanced). This is the
+  // exact outage that hid for 5 days. Surface each one loudly so it can never
+  // masquerade as a healthy run behind a green marker again.
+  for (const d of silentMisses) {
+    techDebt.push(`⚠ marker present but no fresh refresh — silent pipeline miss on ${d}`);
+  }
+  if (silentMisses.length) {
+    actions.push(
+      `Pipeline SILENTLY missed on ${silentMisses.join(', ')} — a cadence marker exists but no fresh data was produced. Check whether the 1 AM task actually runs \`npm run pulse:refresh\`.`,
+    );
+    kaizen.push(
+      `${silentMisses.length} day(s) wrote a cadence marker but never advanced last-refresh (${silentMisses.join(', ')}) — confirm the scheduler executes the real pipeline, not just cadence-mark.`,
+    );
   }
 
   const hot = (referral && referral.hot_count) ?? 0;
@@ -223,6 +251,10 @@ export function buildReport(ctx) {
     out.push(`- Last 1 AM run: \`${line(refresh.ran_at_utc)}\` · mode \`${line(refresh.mode)}\` · doctor \`${line(refresh.doctor)}\``);
     const age = hoursSince(refresh.ran_at_utc, now);
     out.push(`- Data age: ${age == null ? 'unknown' : age.toFixed(1) + 'h'}`);
+    const silent = cadence && Array.isArray(cadence.silent_misses) ? cadence.silent_misses : [];
+    if (silent.length) {
+      out.push(`- 🚨 SILENT pipeline miss(es): ${silent.join(', ')} — a cadence marker was written but last-refresh never advanced (masked outage; these do NOT count as runs).`);
+    }
   } else {
     out.push('- ⚠️ `last-refresh.json` unavailable — the 1 AM pipeline telemetry could not be read.');
   }

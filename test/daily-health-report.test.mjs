@@ -90,6 +90,43 @@ describe('computeHealthScore', () => {
     const h = computeHealthScore(cleanRefresh(), { gap_count: 0 }, { hot_count: 26 }, NOW);
     assert.equal(h.score, 95);
   });
+
+  test('SILENT misses (marker but no fresh refresh) deduct and are named in factors', () => {
+    // K-2026-07-28: a cadence marker without an advanced last-refresh must NOT be
+    // treated as a healthy run — it is a masked outage and must deduct + surface.
+    const h = computeHealthScore(
+      cleanRefresh(),
+      { gap_count: 3, missing: [], silent_misses: ['2026-07-24', '2026-07-27', '2026-07-28'] },
+      { hot_count: 4 },
+      NOW,
+    );
+    assert.equal(h.score, 76); // -24 for 3 silent misses (3*8, capped 30)
+    assert.ok(h.factors.some((f) => /SILENT pipeline miss/.test(f)));
+    assert.ok(h.factors.some((f) => /2026-07-24/.test(f)));
+  });
+
+  test('an advanced last-refresh day is healthy — a marker-only day is NOT', () => {
+    // Day WITH real fresh data (no silent miss) stays clean/GREEN...
+    const healthy = computeHealthScore(
+      cleanRefresh(),
+      { gap_count: 0, missing: [], silent_misses: [] },
+      { hot_count: 4 },
+      NOW,
+    );
+    assert.equal(healthy.score, 100);
+    assert.equal(healthy.verdict, 'GREEN');
+    assert.ok(!healthy.factors.some((f) => /SILENT/.test(f)));
+
+    // ...while the same telemetry with a marker-only day is penalised and flagged.
+    const masked = computeHealthScore(
+      cleanRefresh(),
+      { gap_count: 1, missing: [], silent_misses: ['2026-07-24'] },
+      { hot_count: 4 },
+      NOW,
+    );
+    assert.ok(masked.score < healthy.score, 'a silent-miss day must score lower than a genuine run');
+    assert.ok(masked.factors.some((f) => /SILENT pipeline miss/.test(f)));
+  });
 });
 
 describe('collectFlags', () => {
@@ -112,6 +149,34 @@ describe('collectFlags', () => {
     const flags = collectFlags(cleanRefresh(), { pending: [] }, { gap_count: 0 }, { hot_count: 4 });
     assert.deepEqual(flags.techDebt, []);
     assert.deepEqual(flags.actions, []);
+  });
+
+  test('silent misses surface loudly as tech-debt + action + kaizen', () => {
+    const flags = collectFlags(
+      cleanRefresh(),
+      { pending: [] },
+      { gap_count: 3, missing: ['2026-07-25'], silent_misses: ['2026-07-24', '2026-07-27'] },
+      { hot_count: 4 },
+    );
+    // Exact loud flag format, one per silent-miss day.
+    assert.ok(flags.techDebt.some((t) => /marker present but no fresh refresh — silent pipeline miss on 2026-07-24/.test(t)));
+    assert.ok(flags.techDebt.some((t) => /silent pipeline miss on 2026-07-27/.test(t)));
+    // Action + kaizen call out the masking explicitly.
+    assert.ok(flags.actions.some((a) => /SILENTLY missed/.test(a)));
+    assert.ok(flags.kaizen.some((k) => /never advanced last-refresh/.test(k)));
+    // A true hard-missing day still surfaces its own kaizen, separately.
+    assert.ok(flags.kaizen.some((k) => /Scheduler missed 1 run/.test(k)));
+  });
+
+  test('a day whose last-refresh advanced (no silent miss) yields no silent-miss flags', () => {
+    const flags = collectFlags(
+      cleanRefresh(),
+      { pending: [] },
+      { gap_count: 0, missing: [], silent_misses: [] },
+      { hot_count: 4 },
+    );
+    assert.ok(!flags.techDebt.some((t) => /silent pipeline miss/.test(t)));
+    assert.ok(!flags.actions.some((a) => /SILENTLY missed/.test(a)));
   });
 
   test('gitignored user files (portals.yml) are excluded from the ship-gap flag', () => {

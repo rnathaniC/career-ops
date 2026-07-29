@@ -8,6 +8,7 @@
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
+import { USER_GITIGNORED_FILES } from './user-files.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const argv = process.argv.slice(2);
@@ -121,40 +122,38 @@ function checkPlaywrightMcp(root) {
   };
 }
 
-// Single source of truth for the four user-layer prerequisites (the list
-// AGENTS.md "First Run" documents). BOTH the human checklist (`checkPrereq`)
-// and the machine-readable cold-start state (`onboardingState`) derive from
-// THIS array, so they cannot drift. Paths use "/" and are split for join().
-const USER_LAYER_PREREQS = [
-  {
-    path: 'cv.md',
-    fix: [
-      'Create cv.md in the project root with your CV in markdown',
-      'See examples/ for reference CVs',
-    ],
-  },
-  {
-    path: 'config/profile.yml',
-    fix: [
-      'Run: cp config/profile.example.yml config/profile.yml',
-      'Then edit it with your details',
-    ],
-  },
-  {
-    path: 'modes/_profile.md',
-    fix: [
-      'Run: cp modes/_profile.template.md modes/_profile.md',
-      'Then customize your archetypes / targeting narrative',
-    ],
-  },
-  {
-    path: 'portals.yml',
-    fix: [
-      'Run: cp templates/portals.example.yml portals.yml',
-      'Then customize with your target companies',
-    ],
-  },
-];
+// Human-facing remediation text, keyed by canonical user-layer path. The PATH
+// set itself is the single source of truth in ./user-files.mjs (shared with
+// scripts/daily-health-report.mjs so the two can NEVER drift); doctor owns only
+// the fix instructions here.
+const PREREQ_FIXES = {
+  'cv.md': [
+    'Create cv.md in the project root with your CV in markdown',
+    'See examples/ for reference CVs',
+  ],
+  'config/profile.yml': [
+    'Run: cp config/profile.example.yml config/profile.yml',
+    'Then edit it with your details',
+  ],
+  'modes/_profile.md': [
+    'Run: cp modes/_profile.template.md modes/_profile.md',
+    'Then customize your archetypes / targeting narrative',
+  ],
+  'portals.yml': [
+    'Run: cp templates/portals.example.yml portals.yml',
+    'Then customize with your target companies',
+  ],
+};
+
+// The four user-layer prerequisites (the list AGENTS.md "First Run" documents).
+// Derived from the shared canonical set so it cannot drift. BOTH the human
+// checklist (`checkPrereq`) and the machine-readable cold-start state
+// (`onboardingState`) derive from THIS array. Paths use "/" and are split for
+// join().
+const USER_LAYER_PREREQS = USER_GITIGNORED_FILES.map((path) => ({
+  path,
+  fix: PREREQ_FIXES[path],
+}));
 
 function prereqPresent(root, path) {
   return existsSync(join(root, ...path.split('/')));
