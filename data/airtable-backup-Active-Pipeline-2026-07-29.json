@@ -1,0 +1,765 @@
+{
+  "base": "appYRJX5x9iVXpbbg",
+  "table": "Active-Pipeline",
+  "tableId": "tbldVU2pHhQjOHjzh",
+  "pulledAt": "2026-07-29T02:42:00.391Z",
+  "recordCount": 37,
+  "records": [
+    {
+      "id": "rec0b2tG9HcGjUAAW",
+      "createdTime": "2026-07-22T05:18:56.000Z",
+      "fields": {
+        "Has Connection": true,
+        "Last Refreshed": "2026-07-22T05:18:54.738Z",
+        "Connection Name": "Denny Lee",
+        "Grade": "C",
+        "Connection LinkedIn": "https://www.linkedin.com/in/dennyglee",
+        "Connection Options": "[{\"name\":\"Denny Lee\",\"position\":\"Product Management Director, Developer Relations\",\"url\":\"https://www.linkedin.com/in/dennyglee\",\"message\":\"Hi Denny, I hope you're well. I came across the Staff Program Manager, People M&A role at Databricks and, given your leadership there, wanted to reach out directly. I'd welcome the opportunity to connect if you have a few minutes — or a warm introduction to the hiring team if that's easier.\"},{\"name\":\"Denny Lee\",\"position\":\"Product Management Director, Developer Relations\",\"url\":\"https://www.linkedin.com/in/dennyglee\",\"message\":\"Hi Denny, I hope you're well. I came across the Staff Program Manager, People M&A role at Databricks and, given your leadership there, wanted to reach out directly. I'd welcome the opportunity to connect if you have a few minutes — or a warm introduction to the hiring team if that's easier.\"}]",
+        "Created At": "2026-07-28T05:15:55.733Z",
+        "URL": "https://databricks.com/company/careers/open-positions/job?gh_jid=8637368002",
+        "Company": "Databricks",
+        "Connection Count": 2,
+        "Warm Referral": true,
+        "Platform": "greenhouse",
+        "Role": "Staff Program Manager, People M&A",
+        "Card ID": "live-2026-07-22-011",
+        "Lane": "New-Hot",
+        "Keywords": "Program Manager"
+      }
+    },
+    {
+      "id": "rec1DfYNl0KXGOrzm",
+      "createdTime": "2026-07-22T05:18:55.000Z",
+      "fields": {
+        "Has Connection": true,
+        "Last Refreshed": "2026-07-22T05:18:54.738Z",
+        "Connection Name": "Dardan Lajqi",
+        "Grade": "C",
+        "Connection LinkedIn": "https://www.linkedin.com/in/dardanlajqi",
+        "Connection Options": "[{\"name\":\"Dardan Lajqi\",\"position\":\"Head of Technical Program Management | WW Technical Solutions\",\"url\":\"https://www.linkedin.com/in/dardanlajqi\",\"message\":\"Hi Dardan, I hope you're well. I came across the Senior Product Manager - Fleet and Lifecycle Management role at Datadog and, given your leadership there, wanted to reach out directly. I'd welcome the opportunity to connect if you have a few minutes — or a warm introduction to the hiring team if that's easier.\"},{\"name\":\"Dardan Lajqi\",\"position\":\"Head of Technical Program Management | WW Technical Solutions\",\"url\":\"https://www.linkedin.com/in/dardanlajqi\",\"message\":\"Hi Dardan, I hope you're well. I came across the Senior Product Manager - Fleet and Lifecycle Management role at Datadog and, given your leadership there, wanted to reach out directly. I'd welcome the opportunity to connect if you have a few minutes — or a warm introduction to the hiring team if that's easier.\"}]",
+        "Created At": "2026-07-28T05:15:55.733Z",
+        "URL": "https://careers.datadoghq.com/detail/8077142/?gh_jid=8077142",
+        "Company": "Datadog",
+        "Connection Count": 2,
+        "Warm Referral": true,
+        "Platform": "greenhouse",
+        "Role": "Senior Product Manager - Fleet and Lifecycle Management",
+        "Card ID": "live-2026-07-22-009",
+        "Lane": "New-Hot",
+        "Keywords": "Product Manager"
+      }
+    },
+    {
+      "id": "rec1cBpvdUrbPqAFL",
+      "createdTime": "2026-07-23T05:18:13.000Z",
+      "fields": {
+        "Last Refreshed": "2026-07-23T05:18:12.813Z",
+        "Grade": "C",
+        "Created At": "2026-07-23T05:18:12.813Z",
+        "URL": "https://job-boards.greenhouse.io/anaplan/jobs/8434478002",
+        "Company": "Anaplan",
+        "Connection Count": 0,
+        "Platform": "greenhouse",
+        "Role": "Technical BA & Scrum Master",
+        "Card ID": "live-2026-07-23-007",
+        "Lane": "New-Fresh",
+        "Keywords": "Scrum Master"
+      }
+    },
+    {
+      "id": "rec8fuRzDORk3zdVj",
+      "createdTime": "2026-07-13T05:21:38.000Z",
+      "fields": {
+        "Has Connection": true,
+        "Last Refreshed": "2026-07-17T05:17:45.774Z",
+        "Connection Name": "Denny Lee",
+        "Grade": "B",
+        "Connection LinkedIn": "https://www.linkedin.com/in/dennyglee",
+        "Notes": "RESTORED 2026-07-08 after archive-stale reaped it (r14 recurrence #4). Original Created At: 2026-07-03. Waiting on Rahil → warm referral via Denny Lee.",
+        "Created At": "2026-07-28T05:15:55.733Z",
+        "URL": "https://databricks.com/company/careers/open-positions/job?gh_jid=8549259002",
+        "Company": "Databricks",
+        "Warm Referral": true,
+        "Platform": "greenhouse",
+        "Role": "Sr. Field Technical Program Manager, Forward Deployed Engineering - Public Sector",
+        "Card ID": "live-2026-07-03-005",
+        "Lane": "New-Hot",
+        "Keywords": "Program Manager\nTechnical Program Manager"
+      }
+    },
+    {
+      "id": "recAAPJa50tPHgI5K",
+      "createdTime": "2026-07-23T05:18:13.000Z",
+      "fields": {
+        "Last Refreshed": "2026-07-23T05:18:12.813Z",
+        "Grade": "C",
+        "Created At": "2026-07-23T05:18:12.813Z",
+        "URL": "https://job-boards.greenhouse.io/twilio/jobs/8076800",
+        "Company": "Twilio",
+        "Connection Count": 0,
+        "Platform": "greenhouse",
+        "Role": "Staff, Data Product Manager",
+        "Card ID": "live-2026-07-23-002",
+        "Lane": "New-Fresh",
+        "Keywords": "Product Manager"
+      }
+    },
+    {
+      "id": "recC9xfJA53hdoX4u",
+      "createdTime": "2026-07-23T05:18:13.000Z",
+      "fields": {
+        "Has Connection": true,
+        "Last Refreshed": "2026-07-23T05:18:12.813Z",
+        "Connection Name": "Shamila Zindani Merchant",
+        "Grade": "C",
+        "Connection LinkedIn": "https://www.linkedin.com/in/shamilazindani",
+        "Connection Options": "[{\"name\":\"Shamila Zindani Merchant\",\"position\":\"Global Head of Seller Experience & Insights\",\"url\":\"https://www.linkedin.com/in/shamilazindani\",\"message\":\"Hi Shamila, I hope you're well. I came across the Privacy Operations Program Manager role at Stripe and, given your leadership there, wanted to reach out directly. I'd welcome the opportunity to connect if you have a few minutes — or a warm introduction to the hiring team if that's easier.\"},{\"name\":\"Shamila Zindani Merchant\",\"position\":\"Global Head of Seller Experience & Insights\",\"url\":\"https://www.linkedin.com/in/shamilazindani\",\"message\":\"Hi Shamila, I hope you're well. I came across the Privacy Operations Program Manager role at Stripe and, given your leadership there, wanted to reach out directly. I'd welcome the opportunity to connect if you have a few minutes — or a warm introduction to the hiring team if that's easier.\"}]",
+        "Created At": "2026-07-28T05:15:55.733Z",
+        "URL": "https://stripe.com/jobs/search?gh_jid=8053517",
+        "Company": "Stripe",
+        "Connection Count": 2,
+        "Warm Referral": true,
+        "Platform": "greenhouse",
+        "Role": "Privacy Operations Program Manager",
+        "Card ID": "live-2026-07-23-004",
+        "Lane": "New-Hot",
+        "Keywords": "Program Manager"
+      }
+    },
+    {
+      "id": "recCOrmO9meOkQaCk",
+      "createdTime": "2026-07-13T05:21:38.000Z",
+      "fields": {
+        "Has Connection": true,
+        "Last Refreshed": "2026-07-17T05:17:45.774Z",
+        "Connection Name": "Shamila Zindani Merchant",
+        "Grade": "B",
+        "Connection LinkedIn": "https://www.linkedin.com/in/shamilazindani",
+        "Created At": "2026-07-28T05:15:55.733Z",
+        "URL": "https://stripe.com/jobs/search?gh_jid=8050340",
+        "Company": "Stripe",
+        "Warm Referral": true,
+        "Platform": "greenhouse",
+        "Role": "Technical Program Manager, Bridge",
+        "Card ID": "live-2026-07-08-001",
+        "Lane": "New-Hot",
+        "Keywords": "Program Manager, Technical Program Manager"
+      }
+    },
+    {
+      "id": "recDfKB7n1SmqsCKC",
+      "createdTime": "2026-07-13T05:21:38.000Z",
+      "fields": {
+        "Has Connection": true,
+        "Last Refreshed": "2026-07-17T05:17:45.774Z",
+        "Connection Name": "Denny Lee",
+        "Grade": "B",
+        "Connection LinkedIn": "https://www.linkedin.com/in/dennyglee",
+        "Notes": "RESTORED 2026-07-08 after archive-stale reaped it (r14 recurrence #4). Original Created At: 2026-07-03. Waiting on Rahil → warm referral via Denny Lee.",
+        "Created At": "2026-07-28T05:15:55.733Z",
+        "URL": "https://databricks.com/company/careers/open-positions/job?gh_jid=8583037002",
+        "Company": "Databricks",
+        "Warm Referral": true,
+        "Platform": "greenhouse",
+        "Role": "Sr. Field Technical Program Manager, Forward Deployed Engineering",
+        "Card ID": "live-2026-07-03-003",
+        "Lane": "New-Hot",
+        "Keywords": "Program Manager\nTechnical Program Manager"
+      }
+    },
+    {
+      "id": "recGJmFPQIdqKZnDr",
+      "createdTime": "2026-07-22T05:18:55.000Z",
+      "fields": {
+        "Has Connection": true,
+        "Last Refreshed": "2026-07-22T05:18:54.738Z",
+        "Connection Name": "Dardan Lajqi",
+        "Grade": "C",
+        "Connection LinkedIn": "https://www.linkedin.com/in/dardanlajqi",
+        "Connection Options": "[{\"name\":\"Dardan Lajqi\",\"position\":\"Head of Technical Program Management | WW Technical Solutions\",\"url\":\"https://www.linkedin.com/in/dardanlajqi\",\"message\":\"Hi Dardan, I hope you're well. I came across the Senior Product Manager - Regulated Industries, Data Center and New Market Expansions role at Datadog and, given your leadership there, wanted to reach out directly. I'd welcome the opportunity to connect if you have a few minutes — or a warm introduction to the hiring team if that's easier.\"},{\"name\":\"Dardan Lajqi\",\"position\":\"Head of Technical Program Management | WW Technical Solutions\",\"url\":\"https://www.linkedin.com/in/dardanlajqi\",\"message\":\"Hi Dardan, I hope you're well. I came across the Senior Product Manager - Regulated Industries, Data Center and New Market Expansions role at Datadog and, given your leadership there, wanted to reach out directly. I'd welcome the opportunity to connect if you have a few minutes — or a warm introduction to the hiring team if that's easier.\"}]",
+        "Created At": "2026-07-28T05:15:55.733Z",
+        "URL": "https://careers.datadoghq.com/detail/8069340/?gh_jid=8069340",
+        "Company": "Datadog",
+        "Connection Count": 2,
+        "Warm Referral": true,
+        "Platform": "greenhouse",
+        "Role": "Senior Product Manager - Regulated Industries, Data Center and New Market Expansions",
+        "Card ID": "live-2026-07-22-010",
+        "Lane": "New-Hot",
+        "Keywords": "Product Manager"
+      }
+    },
+    {
+      "id": "recGMUxKx2RXkCkjZ",
+      "createdTime": "2026-07-17T05:20:43.000Z",
+      "fields": {
+        "Has Connection": true,
+        "Last Refreshed": "2026-07-17T05:20:42.812Z",
+        "Connection Name": "Denny Lee",
+        "Grade": "C",
+        "Connection LinkedIn": "https://www.linkedin.com/in/dennyglee",
+        "Connection Options": "[{\"name\":\"Denny Lee\",\"position\":\"Product Management Director, Developer Relations\",\"url\":\"https://www.linkedin.com/in/dennyglee\",\"message\":\"Hi Denny, I hope you're well. I came across the Associate Product Manager, New Grad (2027 Start) role at Databricks and, given your leadership there, wanted to reach out directly. I'd welcome the opportunity to connect if you have a few minutes — or a warm introduction to the hiring team if that's easier.\"},{\"name\":\"Denny Lee\",\"position\":\"Product Management Director, Developer Relations\",\"url\":\"https://www.linkedin.com/in/dennyglee\",\"message\":\"Hi Denny, I hope you're well. I came across the Associate Product Manager, New Grad (2027 Start) role at Databricks and, given your leadership there, wanted to reach out directly. I'd welcome the opportunity to connect if you have a few minutes — or a warm introduction to the hiring team if that's easier.\"}]",
+        "Created At": "2026-07-28T05:15:55.733Z",
+        "URL": "https://databricks.com/company/careers/open-positions/job?gh_jid=7586263002",
+        "Company": "Databricks",
+        "Connection Count": 2,
+        "Warm Referral": true,
+        "Platform": "greenhouse",
+        "Role": "Associate Product Manager, New Grad (2027 Start)",
+        "Card ID": "live-2026-07-17-004",
+        "Lane": "New-Hot",
+        "Keywords": "Product Manager"
+      }
+    },
+    {
+      "id": "recHvbw7cLvL08n3T",
+      "createdTime": "2026-07-16T03:24:21.000Z",
+      "fields": {
+        "Has Connection": true,
+        "Last Refreshed": "2026-07-17T05:17:45.774Z",
+        "Connection Name": "Shamila Zindani Merchant",
+        "Grade": "C",
+        "Connection LinkedIn": "https://www.linkedin.com/in/shamilazindani",
+        "Created At": "2026-07-28T05:15:55.733Z",
+        "URL": "https://stripe.com/jobs/search?gh_jid=8043083",
+        "Company": "Stripe",
+        "Warm Referral": true,
+        "Platform": "greenhouse",
+        "Role": "Staff Product Manager, Issuing",
+        "Card ID": "live-2026-07-11-001",
+        "Lane": "New-Hot"
+      }
+    },
+    {
+      "id": "recJfSZ3VLL7vuFMS",
+      "createdTime": "2026-07-16T03:25:52.000Z",
+      "fields": {
+        "Has Connection": true,
+        "Last Refreshed": "2026-07-17T05:17:45.774Z",
+        "Connection Name": "Dardan Lajqi",
+        "Grade": "C",
+        "Connection LinkedIn": "https://www.linkedin.com/in/dardanlajqi",
+        "Connection Options": "[{\"name\":\"Dardan Lajqi\",\"position\":\"Head of Technical Program Management | WW Technical Solutions\",\"url\":\"https://www.linkedin.com/in/dardanlajqi\",\"message\":\"Hi Dardan, I hope you're well. I came across the Senior Product Manager – Observability Data Platform role at Datadog and, given your leadership there, wanted to reach out directly. I'd welcome the opportunity to connect if you have a few minutes — or a warm introduction to the hiring team if that's easier.\"},{\"name\":\"Dardan Lajqi\",\"position\":\"Head of Technical Program Management | WW Technical Solutions\",\"url\":\"https://www.linkedin.com/in/dardanlajqi\",\"message\":\"Hi Dardan, I hope you're well. I came across the Senior Product Manager – Observability Data Platform role at Datadog and, given your leadership there, wanted to reach out directly. I'd welcome the opportunity to connect if you have a few minutes — or a warm introduction to the hiring team if that's easier.\"}]",
+        "Created At": "2026-07-28T05:15:55.733Z",
+        "URL": "https://careers.datadoghq.com/detail/8065192/?gh_jid=8065192",
+        "Company": "Datadog",
+        "Connection Count": 2,
+        "Warm Referral": true,
+        "Platform": "greenhouse",
+        "Role": "Senior Product Manager – Observability Data Platform",
+        "Card ID": "live-2026-07-16-006",
+        "Lane": "New-Hot",
+        "Keywords": "Product Manager"
+      }
+    },
+    {
+      "id": "recMX3tqYRkFwuaho",
+      "createdTime": "2026-07-14T05:18:16.000Z",
+      "fields": {
+        "Has Connection": true,
+        "Last Refreshed": "2026-07-17T05:17:45.774Z",
+        "Connection Name": "Shamila Zindani Merchant",
+        "Grade": "C",
+        "Connection LinkedIn": "https://www.linkedin.com/in/shamilazindani",
+        "Connection Options": "[{\"name\":\"Shamila Zindani Merchant\",\"position\":\"Global Head of Seller Experience & Insights\",\"url\":\"https://www.linkedin.com/in/shamilazindani\",\"message\":\"Hi Shamila, I hope you're well. I came across the Risk PMO Program Manager role at Stripe and, given your leadership there, wanted to reach out directly. I'd welcome the opportunity to connect if you have a few minutes — or a warm introduction to the hiring team if that's easier.\"},{\"name\":\"Shamila Zindani Merchant\",\"position\":\"Global Head of Seller Experience & Insights\",\"url\":\"https://www.linkedin.com/in/shamilazindani\",\"message\":\"Hi Shamila, I hope you're well. I came across the Risk PMO Program Manager role at Stripe and, given your leadership there, wanted to reach out directly. I'd welcome the opportunity to connect if you have a few minutes — or a warm introduction to the hiring team if that's easier.\"}]",
+        "Created At": "2026-07-28T05:15:55.733Z",
+        "URL": "https://stripe.com/jobs/search?gh_jid=8055659",
+        "Company": "Stripe",
+        "Connection Count": 2,
+        "Warm Referral": true,
+        "Platform": "greenhouse",
+        "Role": "Risk PMO Program Manager",
+        "Card ID": "live-2026-07-14-001",
+        "Lane": "New-Hot",
+        "Keywords": "Program Manager"
+      }
+    },
+    {
+      "id": "recMf8JiTtXvpbaQy",
+      "createdTime": "2026-07-13T05:21:38.000Z",
+      "fields": {
+        "Has Connection": true,
+        "Last Refreshed": "2026-07-17T05:17:45.774Z",
+        "Connection Name": "Shamila Zindani Merchant",
+        "Grade": "B",
+        "Connection LinkedIn": "https://www.linkedin.com/in/shamilazindani",
+        "Created At": "2026-07-28T05:15:55.733Z",
+        "URL": "https://stripe.com/jobs/search?gh_jid=8042055",
+        "Company": "Stripe",
+        "Warm Referral": true,
+        "Platform": "greenhouse",
+        "Role": "Technical Program Manager, Money-as-a-Service",
+        "Card ID": "live-2026-07-08-002",
+        "Lane": "New-Hot",
+        "Keywords": "Program Manager, Technical Program Manager"
+      }
+    },
+    {
+      "id": "recNyuhkNkwdqnbFl",
+      "createdTime": "2026-07-24T05:19:13.000Z",
+      "fields": {
+        "Last Refreshed": "2026-07-24T05:19:11.221Z",
+        "Grade": "C",
+        "Created At": "2026-07-24T05:19:11.221Z",
+        "URL": "https://www.samsara.com/company/careers/roles/8060732?gh_jid=8060732",
+        "Company": "Samsara",
+        "Connection Count": 0,
+        "Platform": "greenhouse",
+        "Role": "Principal Business Technology Product Manager",
+        "Card ID": "live-2026-07-24-004",
+        "Lane": "New-Fresh",
+        "Keywords": "Product Manager"
+      }
+    },
+    {
+      "id": "recPiD9dWZByWfJIO",
+      "createdTime": "2026-07-23T05:18:13.000Z",
+      "fields": {
+        "Has Connection": true,
+        "Last Refreshed": "2026-07-23T05:18:12.813Z",
+        "Connection Name": "Shamila Zindani Merchant",
+        "Grade": "C",
+        "Connection LinkedIn": "https://www.linkedin.com/in/shamilazindani",
+        "Connection Options": "[{\"name\":\"Shamila Zindani Merchant\",\"position\":\"Global Head of Seller Experience & Insights\",\"url\":\"https://www.linkedin.com/in/shamilazindani\",\"message\":\"Hi Shamila, I hope you're well. I came across the Program Manager, Security GRC role at Stripe and, given your leadership there, wanted to reach out directly. I'd welcome the opportunity to connect if you have a few minutes — or a warm introduction to the hiring team if that's easier.\"},{\"name\":\"Shamila Zindani Merchant\",\"position\":\"Global Head of Seller Experience & Insights\",\"url\":\"https://www.linkedin.com/in/shamilazindani\",\"message\":\"Hi Shamila, I hope you're well. I came across the Program Manager, Security GRC role at Stripe and, given your leadership there, wanted to reach out directly. I'd welcome the opportunity to connect if you have a few minutes — or a warm introduction to the hiring team if that's easier.\"}]",
+        "Created At": "2026-07-28T05:15:55.733Z",
+        "URL": "https://stripe.com/jobs/search?gh_jid=8078131",
+        "Company": "Stripe",
+        "Connection Count": 2,
+        "Warm Referral": true,
+        "Platform": "greenhouse",
+        "Role": "Program Manager, Security GRC",
+        "Card ID": "live-2026-07-23-005",
+        "Lane": "New-Hot",
+        "Keywords": "Program Manager"
+      }
+    },
+    {
+      "id": "recQF6fh2yHvUcsEo",
+      "createdTime": "2026-07-24T05:19:13.000Z",
+      "fields": {
+        "Last Refreshed": "2026-07-24T05:19:11.221Z",
+        "Grade": "C",
+        "Created At": "2026-07-24T05:19:11.221Z",
+        "URL": "https://job-boards.greenhouse.io/anaplan/jobs/8638684002",
+        "Company": "Anaplan",
+        "Connection Count": 0,
+        "Platform": "greenhouse",
+        "Role": "Sr. Security Program Manager, Commercial & Federal Compliance",
+        "Card ID": "live-2026-07-24-002",
+        "Lane": "New-Fresh",
+        "Keywords": "Program Manager"
+      }
+    },
+    {
+      "id": "recTC7X5FphMsMWl2",
+      "createdTime": "2026-07-22T05:18:55.000Z",
+      "fields": {
+        "Has Connection": true,
+        "Last Refreshed": "2026-07-22T05:18:54.738Z",
+        "Connection Name": "Dardan Lajqi",
+        "Grade": "C",
+        "Connection LinkedIn": "https://www.linkedin.com/in/dardanlajqi",
+        "Connection Options": "[{\"name\":\"Dardan Lajqi\",\"position\":\"Head of Technical Program Management | WW Technical Solutions\",\"url\":\"https://www.linkedin.com/in/dardanlajqi\",\"message\":\"Hi Dardan, I hope you're well. I came across the Product Manager II - Alerting role at Datadog and, given your leadership there, wanted to reach out directly. I'd welcome the opportunity to connect if you have a few minutes — or a warm introduction to the hiring team if that's easier.\"},{\"name\":\"Dardan Lajqi\",\"position\":\"Head of Technical Program Management | WW Technical Solutions\",\"url\":\"https://www.linkedin.com/in/dardanlajqi\",\"message\":\"Hi Dardan, I hope you're well. I came across the Product Manager II - Alerting role at Datadog and, given your leadership there, wanted to reach out directly. I'd welcome the opportunity to connect if you have a few minutes — or a warm introduction to the hiring team if that's easier.\"}]",
+        "Created At": "2026-07-28T05:15:55.733Z",
+        "URL": "https://careers.datadoghq.com/detail/8076871/?gh_jid=8076871",
+        "Company": "Datadog",
+        "Connection Count": 2,
+        "Warm Referral": true,
+        "Platform": "greenhouse",
+        "Role": "Product Manager II - Alerting",
+        "Card ID": "live-2026-07-22-008",
+        "Lane": "New-Hot",
+        "Keywords": "Product Manager"
+      }
+    },
+    {
+      "id": "recTZf2bXQDLt60jI",
+      "createdTime": "2026-07-22T05:18:55.000Z",
+      "fields": {
+        "Has Connection": true,
+        "Last Refreshed": "2026-07-22T05:18:54.738Z",
+        "Connection Name": "Shamila Zindani Merchant",
+        "Grade": "C",
+        "Connection LinkedIn": "https://www.linkedin.com/in/shamilazindani",
+        "Connection Options": "[{\"name\":\"Shamila Zindani Merchant\",\"position\":\"Global Head of Seller Experience & Insights\",\"url\":\"https://www.linkedin.com/in/shamilazindani\",\"message\":\"Hi Shamila, I hope you're well. I came across the Product Manager, Connect role at Stripe and, given your leadership there, wanted to reach out directly. I'd welcome the opportunity to connect if you have a few minutes — or a warm introduction to the hiring team if that's easier.\"},{\"name\":\"Shamila Zindani Merchant\",\"position\":\"Global Head of Seller Experience & Insights\",\"url\":\"https://www.linkedin.com/in/shamilazindani\",\"message\":\"Hi Shamila, I hope you're well. I came across the Product Manager, Connect role at Stripe and, given your leadership there, wanted to reach out directly. I'd welcome the opportunity to connect if you have a few minutes — or a warm introduction to the hiring team if that's easier.\"}]",
+        "Created At": "2026-07-28T05:15:55.733Z",
+        "URL": "https://stripe.com/jobs/search?gh_jid=8065034",
+        "Company": "Stripe",
+        "Connection Count": 2,
+        "Warm Referral": true,
+        "Platform": "greenhouse",
+        "Role": "Product Manager, Connect",
+        "Card ID": "live-2026-07-22-006",
+        "Lane": "New-Hot",
+        "Keywords": "Product Manager"
+      }
+    },
+    {
+      "id": "recVMALNX2poiMQxD",
+      "createdTime": "2026-07-16T03:25:52.000Z",
+      "fields": {
+        "Has Connection": true,
+        "Last Refreshed": "2026-07-17T05:17:45.774Z",
+        "Connection Name": "Dardan Lajqi",
+        "Grade": "B",
+        "Connection LinkedIn": "https://www.linkedin.com/in/dardanlajqi",
+        "Connection Options": "[{\"name\":\"Dardan Lajqi\",\"position\":\"Head of Technical Program Management | WW Technical Solutions\",\"url\":\"https://www.linkedin.com/in/dardanlajqi\",\"message\":\"Hi Dardan, I hope you're well. I came across the Technical Program Manager 2, Technical Solutions role at Datadog and, given your leadership there, wanted to reach out directly. I'd welcome the opportunity to connect if you have a few minutes — or a warm introduction to the hiring team if that's easier.\"},{\"name\":\"Dardan Lajqi\",\"position\":\"Head of Technical Program Management | WW Technical Solutions\",\"url\":\"https://www.linkedin.com/in/dardanlajqi\",\"message\":\"Hi Dardan, I hope you're well. I came across the Technical Program Manager 2, Technical Solutions role at Datadog and, given your leadership there, wanted to reach out directly. I'd welcome the opportunity to connect if you have a few minutes — or a warm introduction to the hiring team if that's easier.\"}]",
+        "Created At": "2026-07-28T05:15:55.733Z",
+        "URL": "https://careers.datadoghq.com/detail/8030837/?gh_jid=8030837",
+        "Company": "Datadog",
+        "Connection Count": 2,
+        "Warm Referral": true,
+        "Platform": "greenhouse",
+        "Role": "Technical Program Manager 2, Technical Solutions",
+        "Card ID": "live-2026-07-16-008",
+        "Lane": "New-Hot",
+        "Keywords": "Program Manager, Technical Program Manager"
+      }
+    },
+    {
+      "id": "recVUOuVTCbiOeot6",
+      "createdTime": "2026-07-14T05:18:16.000Z",
+      "fields": {
+        "Has Connection": true,
+        "Last Refreshed": "2026-07-17T05:17:45.774Z",
+        "Connection Name": "Landon McCaig",
+        "Grade": "C",
+        "Connection LinkedIn": "https://www.linkedin.com/in/landon-m-3471b5143",
+        "Connection Options": "[{\"name\":\"Landon McCaig\",\"position\":\"Professional Services Leader\",\"url\":\"https://www.linkedin.com/in/landon-m-3471b5143\",\"message\":\"Hey Landon, I noticed you're at Intercom as Professional Services Leader. I'm exploring the Technology Enablement Program Manager opportunity there and thought I'd reach out — would love a quick chat or a warm intro if you're open to it.\"},{\"name\":\"Landon McCaig\",\"position\":\"Professional Services Leader\",\"url\":\"https://www.linkedin.com/in/landon-m-3471b5143\",\"message\":\"Hey Landon, I noticed you're at Intercom as Professional Services Leader. I'm exploring the Technology Enablement Program Manager opportunity there and thought I'd reach out — would love a quick chat or a warm intro if you're open to it.\"}]",
+        "Created At": "2026-07-28T05:15:55.733Z",
+        "URL": "https://job-boards.greenhouse.io/intercom/jobs/8053727",
+        "Company": "Intercom",
+        "Connection Count": 2,
+        "Warm Referral": true,
+        "Platform": "greenhouse",
+        "Role": "Technology Enablement Program Manager",
+        "Card ID": "live-2026-07-14-002",
+        "Lane": "New-Hot",
+        "Keywords": "Program Manager"
+      }
+    },
+    {
+      "id": "recX9S5HKOumZzFZI",
+      "createdTime": "2026-07-13T05:21:38.000Z",
+      "fields": {
+        "Has Connection": true,
+        "Last Refreshed": "2026-07-17T05:17:45.774Z",
+        "Connection Name": "Shamila Zindani Merchant",
+        "Grade": "C",
+        "Connection LinkedIn": "https://www.linkedin.com/in/shamilazindani",
+        "Notes": "RESTORED 2026-07-08 after archive-stale reaped it (r14 recurrence #4). Original Created At: 2026-07-03. Waiting on Rahil → warm referral via Shamila Zindani Merchant.",
+        "Created At": "2026-07-28T05:15:55.733Z",
+        "URL": "https://stripe.com/jobs/search?gh_jid=8040052",
+        "Company": "Stripe",
+        "Warm Referral": true,
+        "Platform": "greenhouse",
+        "Role": "Product Manager, Risk Product Experience",
+        "Card ID": "live-2026-07-03-002",
+        "Lane": "New-Hot",
+        "Keywords": "Product Manager"
+      }
+    },
+    {
+      "id": "recbiyeydrF3oYaqE",
+      "createdTime": "2026-07-13T05:21:38.000Z",
+      "fields": {
+        "Has Connection": true,
+        "Last Refreshed": "2026-07-17T05:17:45.774Z",
+        "Connection Name": "Denny Lee",
+        "Grade": "B",
+        "Connection LinkedIn": "https://www.linkedin.com/in/dennyglee",
+        "Notes": "RESTORED 2026-07-08 after archive-stale reaped it (r14 recurrence #4). Original Created At: 2026-07-03. Waiting on Rahil → warm referral via Denny Lee.",
+        "Created At": "2026-07-28T05:15:55.733Z",
+        "URL": "https://databricks.com/company/careers/open-positions/job?gh_jid=8586460002",
+        "Company": "Databricks",
+        "Warm Referral": true,
+        "Platform": "greenhouse",
+        "Role": "Sr. Field Technical Program Manager, Forward Deployed Engineering - Canada",
+        "Card ID": "live-2026-07-03-004",
+        "Lane": "New-Hot",
+        "Keywords": "Program Manager\nTechnical Program Manager"
+      }
+    },
+    {
+      "id": "recc8qhFW70jI3Wdg",
+      "createdTime": "2026-07-16T03:25:52.000Z",
+      "fields": {
+        "Has Connection": true,
+        "Last Refreshed": "2026-07-17T05:17:45.774Z",
+        "Connection Name": "Shamila Zindani Merchant",
+        "Grade": "C",
+        "Connection LinkedIn": "https://www.linkedin.com/in/shamilazindani",
+        "Connection Options": "[{\"name\":\"Shamila Zindani Merchant\",\"position\":\"Global Head of Seller Experience & Insights\",\"url\":\"https://www.linkedin.com/in/shamilazindani\",\"message\":\"Hi Shamila, I hope you're well. I came across the AI Product Manager, Professional Services role at Stripe and, given your leadership there, wanted to reach out directly. I'd welcome the opportunity to connect if you have a few minutes — or a warm introduction to the hiring team if that's easier.\"},{\"name\":\"Shamila Zindani Merchant\",\"position\":\"Global Head of Seller Experience & Insights\",\"url\":\"https://www.linkedin.com/in/shamilazindani\",\"message\":\"Hi Shamila, I hope you're well. I came across the AI Product Manager, Professional Services role at Stripe and, given your leadership there, wanted to reach out directly. I'd welcome the opportunity to connect if you have a few minutes — or a warm introduction to the hiring team if that's easier.\"}]",
+        "Created At": "2026-07-28T05:15:55.733Z",
+        "URL": "https://stripe.com/jobs/search?gh_jid=8064526",
+        "Company": "Stripe",
+        "Connection Count": 2,
+        "Warm Referral": true,
+        "Platform": "greenhouse",
+        "Role": "AI Product Manager, Professional Services",
+        "Card ID": "live-2026-07-16-003",
+        "Lane": "New-Hot",
+        "Keywords": "Product Manager"
+      }
+    },
+    {
+      "id": "recfRUIzOMLSbyhRA",
+      "createdTime": "2026-07-16T03:25:52.000Z",
+      "fields": {
+        "Has Connection": true,
+        "Last Refreshed": "2026-07-17T05:17:45.774Z",
+        "Connection Name": "Dardan Lajqi",
+        "Grade": "C",
+        "Connection LinkedIn": "https://www.linkedin.com/in/dardanlajqi",
+        "Connection Options": "[{\"name\":\"Dardan Lajqi\",\"position\":\"Head of Technical Program Management | WW Technical Solutions\",\"url\":\"https://www.linkedin.com/in/dardanlajqi\",\"message\":\"Hi Dardan, I hope you're well. I came across the Staff Product Manager, Observability Data Platforms role at Datadog and, given your leadership there, wanted to reach out directly. I'd welcome the opportunity to connect if you have a few minutes — or a warm introduction to the hiring team if that's easier.\"},{\"name\":\"Dardan Lajqi\",\"position\":\"Head of Technical Program Management | WW Technical Solutions\",\"url\":\"https://www.linkedin.com/in/dardanlajqi\",\"message\":\"Hi Dardan, I hope you're well. I came across the Staff Product Manager, Observability Data Platforms role at Datadog and, given your leadership there, wanted to reach out directly. I'd welcome the opportunity to connect if you have a few minutes — or a warm introduction to the hiring team if that's easier.\"}]",
+        "Created At": "2026-07-28T05:15:55.733Z",
+        "URL": "https://careers.datadoghq.com/detail/8065187/?gh_jid=8065187",
+        "Company": "Datadog",
+        "Connection Count": 2,
+        "Warm Referral": true,
+        "Platform": "greenhouse",
+        "Role": "Staff Product Manager, Observability Data Platforms",
+        "Card ID": "live-2026-07-16-007",
+        "Lane": "New-Hot",
+        "Keywords": "Product Manager"
+      }
+    },
+    {
+      "id": "recgSsQJfYrHoHNU8",
+      "createdTime": "2026-07-23T05:18:13.000Z",
+      "fields": {
+        "Last Refreshed": "2026-07-23T05:18:12.813Z",
+        "Grade": "B",
+        "Created At": "2026-07-23T05:18:12.813Z",
+        "URL": "https://job-boards.greenhouse.io/opentable/jobs/8644106002",
+        "Company": "OpenTable",
+        "Connection Count": 0,
+        "Platform": "greenhouse",
+        "Role": "Sr Technical Program Manager",
+        "Card ID": "live-2026-07-23-006",
+        "Lane": "New-Fresh",
+        "Keywords": "Program Manager, Technical Program Manager"
+      }
+    },
+    {
+      "id": "recik3wdP8WRLNOmJ",
+      "createdTime": "2026-07-14T05:17:21.000Z",
+      "fields": {
+        "Has Connection": true,
+        "Last Refreshed": "2026-07-09T05:24:46.618Z",
+        "Connection Name": "Dardan Lajqi",
+        "Grade": "C",
+        "Connection LinkedIn": "https://www.linkedin.com/in/dardanlajqi",
+        "Created At": "2026-07-28T05:15:55.733Z",
+        "URL": "https://careers.datadoghq.com/detail/8013872/?gh_jid=8013872",
+        "Company": "Datadog",
+        "Warm Referral": true,
+        "Platform": "greenhouse",
+        "Role": "Principal Program Manager, Technical Product Learning – Technical Solutions Enablement",
+        "Card ID": "live-2026-07-09-003",
+        "Lane": "New-Hot",
+        "Keywords": "Program Manager"
+      }
+    },
+    {
+      "id": "recjeaR83Mr3Dz2CU",
+      "createdTime": "2026-07-24T05:19:13.000Z",
+      "fields": {
+        "Last Refreshed": "2026-07-24T05:19:11.221Z",
+        "Grade": "B",
+        "Created At": "2026-07-24T05:19:11.221Z",
+        "URL": "https://www.pinterestcareers.com/jobs/?gh_jid=7494652",
+        "Company": "Pinterest",
+        "Connection Count": 0,
+        "Platform": "greenhouse",
+        "Role": "Sr. Staff Technical Program Manager",
+        "Card ID": "live-2026-07-24-001",
+        "Lane": "New-Fresh",
+        "Keywords": "Program Manager, Technical Program Manager"
+      }
+    },
+    {
+      "id": "reckK91FMBbDwmCkD",
+      "createdTime": "2026-07-16T03:29:19.000Z",
+      "fields": {
+        "Has Connection": true,
+        "Last Refreshed": "2026-07-17T05:17:45.774Z",
+        "Connection Name": "Shamila Zindani Merchant",
+        "Grade": "C",
+        "Connection LinkedIn": "https://www.linkedin.com/in/shamilazindani",
+        "Created At": "2026-07-28T05:15:55.733Z",
+        "URL": "https://stripe.com/jobs/search?gh_jid=7517535",
+        "Company": "Stripe",
+        "Warm Referral": true,
+        "Platform": "greenhouse",
+        "Role": "Staff Product Manager, ML Foundations and GenAI",
+        "Card ID": "live-2026-07-10-001",
+        "Lane": "New-Hot"
+      }
+    },
+    {
+      "id": "reclM9fdtyyd8wuIn",
+      "createdTime": "2026-07-23T05:18:13.000Z",
+      "fields": {
+        "Last Refreshed": "2026-07-23T05:18:12.813Z",
+        "Grade": "C",
+        "Created At": "2026-07-23T05:18:12.813Z",
+        "URL": "https://boards.greenhouse.io/figma/jobs/6119781004?gh_jid=6119781004",
+        "Company": "Figma",
+        "Connection Count": 0,
+        "Platform": "greenhouse",
+        "Role": "Product Manager, Acquisition",
+        "Card ID": "live-2026-07-23-001",
+        "Lane": "New-Fresh",
+        "Keywords": "Product Manager"
+      }
+    },
+    {
+      "id": "reco51ijZfNgYqkrV",
+      "createdTime": "2026-07-23T05:18:13.000Z",
+      "fields": {
+        "Has Connection": true,
+        "Last Refreshed": "2026-07-23T05:18:12.813Z",
+        "Connection Name": "Shamila Zindani Merchant",
+        "Grade": "C",
+        "Connection LinkedIn": "https://www.linkedin.com/in/shamilazindani",
+        "Connection Options": "[{\"name\":\"Shamila Zindani Merchant\",\"position\":\"Global Head of Seller Experience & Insights\",\"url\":\"https://www.linkedin.com/in/shamilazindani\",\"message\":\"Hi Shamila, I hope you're well. I came across the Operations Program Manager role at Stripe and, given your leadership there, wanted to reach out directly. I'd welcome the opportunity to connect if you have a few minutes — or a warm introduction to the hiring team if that's easier.\"},{\"name\":\"Shamila Zindani Merchant\",\"position\":\"Global Head of Seller Experience & Insights\",\"url\":\"https://www.linkedin.com/in/shamilazindani\",\"message\":\"Hi Shamila, I hope you're well. I came across the Operations Program Manager role at Stripe and, given your leadership there, wanted to reach out directly. I'd welcome the opportunity to connect if you have a few minutes — or a warm introduction to the hiring team if that's easier.\"}]",
+        "Created At": "2026-07-28T05:15:55.733Z",
+        "URL": "https://stripe.com/jobs/search?gh_jid=8039423",
+        "Company": "Stripe",
+        "Connection Count": 2,
+        "Warm Referral": true,
+        "Platform": "greenhouse",
+        "Role": "Operations Program Manager",
+        "Card ID": "live-2026-07-23-003",
+        "Lane": "New-Hot",
+        "Keywords": "Program Manager"
+      }
+    },
+    {
+      "id": "recoJPhLTvgEsjqwo",
+      "createdTime": "2026-07-16T03:25:52.000Z",
+      "fields": {
+        "Has Connection": true,
+        "Last Refreshed": "2026-07-17T05:17:45.774Z",
+        "Connection Name": "Shamila Zindani Merchant",
+        "Grade": "C",
+        "Connection LinkedIn": "https://www.linkedin.com/in/shamilazindani",
+        "Connection Options": "[{\"name\":\"Shamila Zindani Merchant\",\"position\":\"Global Head of Seller Experience & Insights\",\"url\":\"https://www.linkedin.com/in/shamilazindani\",\"message\":\"Hi Shamila, I hope you're well. I came across the Product Manager, Cash Platform role at Stripe and, given your leadership there, wanted to reach out directly. I'd welcome the opportunity to connect if you have a few minutes — or a warm introduction to the hiring team if that's easier.\"},{\"name\":\"Shamila Zindani Merchant\",\"position\":\"Global Head of Seller Experience & Insights\",\"url\":\"https://www.linkedin.com/in/shamilazindani\",\"message\":\"Hi Shamila, I hope you're well. I came across the Product Manager, Cash Platform role at Stripe and, given your leadership there, wanted to reach out directly. I'd welcome the opportunity to connect if you have a few minutes — or a warm introduction to the hiring team if that's easier.\"}]",
+        "Created At": "2026-07-28T05:15:55.733Z",
+        "URL": "https://stripe.com/jobs/search?gh_jid=8064900",
+        "Company": "Stripe",
+        "Connection Count": 2,
+        "Warm Referral": true,
+        "Platform": "greenhouse",
+        "Role": "Product Manager, Cash Platform",
+        "Card ID": "live-2026-07-16-004",
+        "Lane": "New-Hot",
+        "Keywords": "Product Manager"
+      }
+    },
+    {
+      "id": "recoyEL4HcXWENUL1",
+      "createdTime": "2026-07-24T05:19:13.000Z",
+      "fields": {
+        "Last Refreshed": "2026-07-24T05:19:11.221Z",
+        "Grade": "C",
+        "Created At": "2026-07-24T05:19:11.221Z",
+        "URL": "https://www.okta.com/company/careers/opportunity/8080748?gh_jid=8080748",
+        "Company": "Okta",
+        "Connection Count": 0,
+        "Platform": "greenhouse",
+        "Role": "Executive Briefing Program Manager",
+        "Card ID": "live-2026-07-24-003",
+        "Lane": "New-Fresh",
+        "Keywords": "Program Manager"
+      }
+    },
+    {
+      "id": "rectYsfw5Bz0oR1G9",
+      "createdTime": "2026-07-16T03:25:52.000Z",
+      "fields": {
+        "Has Connection": true,
+        "Last Refreshed": "2026-07-17T05:17:45.774Z",
+        "Connection Name": "Shamila Zindani Merchant",
+        "Grade": "C",
+        "Connection LinkedIn": "https://www.linkedin.com/in/shamilazindani",
+        "Connection Options": "[{\"name\":\"Shamila Zindani Merchant\",\"position\":\"Global Head of Seller Experience & Insights\",\"url\":\"https://www.linkedin.com/in/shamilazindani\",\"message\":\"Hi Shamila, I hope you're well. I came across the Product Manager, E-Invoicing role at Stripe and, given your leadership there, wanted to reach out directly. I'd welcome the opportunity to connect if you have a few minutes — or a warm introduction to the hiring team if that's easier.\"},{\"name\":\"Shamila Zindani Merchant\",\"position\":\"Global Head of Seller Experience & Insights\",\"url\":\"https://www.linkedin.com/in/shamilazindani\",\"message\":\"Hi Shamila, I hope you're well. I came across the Product Manager, E-Invoicing role at Stripe and, given your leadership there, wanted to reach out directly. I'd welcome the opportunity to connect if you have a few minutes — or a warm introduction to the hiring team if that's easier.\"}]",
+        "Created At": "2026-07-28T05:15:55.733Z",
+        "URL": "https://stripe.com/jobs/search?gh_jid=8041655",
+        "Company": "Stripe",
+        "Connection Count": 2,
+        "Warm Referral": true,
+        "Platform": "greenhouse",
+        "Role": "Product Manager, E-Invoicing",
+        "Card ID": "live-2026-07-16-005",
+        "Lane": "New-Hot",
+        "Keywords": "Product Manager"
+      }
+    },
+    {
+      "id": "recw70ulnE4zQStwl",
+      "createdTime": "2026-07-14T05:17:21.000Z",
+      "fields": {
+        "Has Connection": true,
+        "Last Refreshed": "2026-07-09T05:24:46.618Z",
+        "Connection Name": "Dardan Lajqi",
+        "Grade": "C",
+        "Connection LinkedIn": "https://www.linkedin.com/in/dardanlajqi",
+        "Created At": "2026-07-28T05:15:55.733Z",
+        "URL": "https://careers.datadoghq.com/detail/8052135/?gh_jid=8052135",
+        "Company": "Datadog",
+        "Warm Referral": true,
+        "Platform": "greenhouse",
+        "Role": "Product Manager II - Security Graph Experience",
+        "Card ID": "live-2026-07-09-004",
+        "Lane": "New-Hot",
+        "Keywords": "Product Manager"
+      }
+    },
+    {
+      "id": "reczGdtE9VEiCGSgQ",
+      "createdTime": "2026-07-22T05:18:55.000Z",
+      "fields": {
+        "Has Connection": true,
+        "Last Refreshed": "2026-07-22T05:18:54.738Z",
+        "Connection Name": "Shamila Zindani Merchant",
+        "Grade": "B",
+        "Connection LinkedIn": "https://www.linkedin.com/in/shamilazindani",
+        "Connection Options": "[{\"name\":\"Shamila Zindani Merchant\",\"position\":\"Global Head of Seller Experience & Insights\",\"url\":\"https://www.linkedin.com/in/shamilazindani\",\"message\":\"Hi Shamila, I hope you're well. I came across the Technical Program Manager, Manager role at Stripe and, given your leadership there, wanted to reach out directly. I'd welcome the opportunity to connect if you have a few minutes — or a warm introduction to the hiring team if that's easier.\"},{\"name\":\"Shamila Zindani Merchant\",\"position\":\"Global Head of Seller Experience & Insights\",\"url\":\"https://www.linkedin.com/in/shamilazindani\",\"message\":\"Hi Shamila, I hope you're well. I came across the Technical Program Manager, Manager role at Stripe and, given your leadership there, wanted to reach out directly. I'd welcome the opportunity to connect if you have a few minutes — or a warm introduction to the hiring team if that's easier.\"}]",
+        "Created At": "2026-07-28T05:15:55.733Z",
+        "URL": "https://stripe.com/jobs/search?gh_jid=8007738",
+        "Company": "Stripe",
+        "Connection Count": 2,
+        "Warm Referral": true,
+        "Platform": "greenhouse",
+        "Role": "Technical Program Manager, Manager",
+        "Card ID": "live-2026-07-22-007",
+        "Lane": "New-Hot",
+        "Keywords": "Program Manager, Technical Program Manager"
+      }
+    },
+    {
+      "id": "reczgdVY8Q1ldh5xj",
+      "createdTime": "2026-07-22T05:18:55.000Z",
+      "fields": {
+        "Has Connection": true,
+        "Last Refreshed": "2026-07-22T05:18:54.738Z",
+        "Connection Name": "Shamila Zindani Merchant",
+        "Grade": "C",
+        "Connection LinkedIn": "https://www.linkedin.com/in/shamilazindani",
+        "Connection Options": "[{\"name\":\"Shamila Zindani Merchant\",\"position\":\"Global Head of Seller Experience & Insights\",\"url\":\"https://www.linkedin.com/in/shamilazindani\",\"message\":\"Hi Shamila, I hope you're well. I came across the Consumer Operations, Program Manager role at Stripe and, given your leadership there, wanted to reach out directly. I'd welcome the opportunity to connect if you have a few minutes — or a warm introduction to the hiring team if that's easier.\"},{\"name\":\"Shamila Zindani Merchant\",\"position\":\"Global Head of Seller Experience & Insights\",\"url\":\"https://www.linkedin.com/in/shamilazindani\",\"message\":\"Hi Shamila, I hope you're well. I came across the Consumer Operations, Program Manager role at Stripe and, given your leadership there, wanted to reach out directly. I'd welcome the opportunity to connect if you have a few minutes — or a warm introduction to the hiring team if that's easier.\"}]",
+        "Created At": "2026-07-28T05:15:55.733Z",
+        "URL": "https://stripe.com/jobs/search?gh_jid=8074923",
+        "Company": "Stripe",
+        "Connection Count": 2,
+        "Warm Referral": true,
+        "Platform": "greenhouse",
+        "Role": "Consumer Operations, Program Manager",
+        "Card ID": "live-2026-07-22-005",
+        "Lane": "New-Hot",
+        "Keywords": "Program Manager"
+      }
+    }
+  ]
+}

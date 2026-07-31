@@ -5,9 +5,18 @@
  * Two intake lanes age out on their own clock:
  *   New-Fresh  archived after 33h
  *   New-Hot    archived after 99h
- * "Archived" = create the row in the Archive table (tblxzlwcG0hVwvo17, base
- * appYRJX5x9iVXpbbg), then delete it from Active Pipeline (tbldVU2pHhQjOHjzh) —
- * create-then-delete, never the reverse, so a failed create never loses data.
+ * "Archived" = append the card to a LOCAL append-only ledger
+ * (data/archive-ledger.json), then delete it from Active Pipeline
+ * (tbldVU2pHhQjOHjzh, base appYRJX5x9iVXpbbg) — ledger-then-delete, never the
+ * reverse, so a failed ledger write never loses data.
+ *
+ * WHY LOCAL (2026-07-29): the Airtable base hit its record cap
+ * (TOO_MANY_RECORDS_IN_BASE) because archived history accumulated in Airtable
+ * forever. History no longer belongs in Airtable — the base now holds only the
+ * ACTIVE working set. Archived cards are written to the local ledger instead,
+ * which keeps the base permanently under the cap. The old Airtable Archive
+ * table (tblxzlwcG0hVwvo17) was exported to data/airtable-backup-Archive-*.json
+ * and seeded into data/archive-ledger.json, then emptied.
  *
  * FLOW TAG: if a card leaves New-Fresh/New-Hot for any other lane (Applied,
  * Blocked, or anything else — including New-Fresh <-> New-Hot) before its
@@ -205,6 +214,67 @@ export async function airtableDeleteBatch({ pat, baseId, tableId, recordIds, fet
   return results;
 }
 
+// ─── local append-only archive ledger ───────────────────────────────────────
+//
+// Replaces the old Airtable Archive table. Archived cards are appended here so
+// the Airtable base holds only the active working set and never refills toward
+// the record cap. Append-only: we read the existing array, push, and rewrite —
+// never truncate.
+
+export const ARCHIVE_LEDGER_FILE = 'archive-ledger.json';
+
+/** Reverse of ACTIVE_FIELD_IDS: Airtable field ID -> human field name. */
+const ACTIVE_FIELD_ID_TO_NAME = Object.fromEntries(
+  Object.entries(ACTIVE_FIELD_IDS).map(([name, id]) => [id, name])
+);
+
+/**
+ * Map one Active Pipeline record (fields keyed by field ID, i.e.
+ * returnFieldsByFieldId shape) to a readable, self-contained ledger entry.
+ * Field values are stored by human name so the ledger is legible without the
+ * schema. The Airtable record id is retained for traceability.
+ */
+export function mapActiveRecordToLedgerEntry(record, { archivedAt, dateStr } = {}) {
+  const rawFields = record.fields || {};
+  const fields = {};
+  for (const [fieldId, value] of Object.entries(rawFields)) {
+    fields[ACTIVE_FIELD_ID_TO_NAME[fieldId] || fieldId] = value;
+  }
+  return {
+    card_id: rawFields[CARD_ID_FIELD] || null,
+    lane: fields['Lane'] || null,
+    created_at: fields['Created At'] || null,
+    archived_at: archivedAt || new Date().toISOString(),
+    archived_on: dateStr || todayStamp(),
+    airtable_record_id: record.id || null,
+    source: 'active-pipeline',
+    fields,
+  };
+}
+
+/**
+ * Append entries to the local archive ledger (a JSON array file), preserving
+ * everything already there. Reads the current file (missing/corrupt → starts a
+ * fresh array), concatenates, and rewrites. Returns { ok, total } or throws so
+ * the caller can skip the delete step and avoid data loss.
+ */
+export function appendArchiveLedger(ledgerPath, entries) {
+  let existing = [];
+  if (existsSync(ledgerPath)) {
+    try {
+      const parsed = JSON.parse(readFileSync(ledgerPath, 'utf8'));
+      if (Array.isArray(parsed)) existing = parsed;
+    } catch {
+      // Corrupt/unreadable ledger: do NOT clobber it. Fail loudly so the caller
+      // skips deletes — the card stays in Active Pipeline and is retried later.
+      throw new Error(`archive ledger ${ledgerPath} exists but is not valid JSON array — refusing to overwrite; skipping archive this run`);
+    }
+  }
+  const updated = existing.concat(entries);
+  writeFileSync(ledgerPath, JSON.stringify(updated, null, 2) + '\n');
+  return { ok: true, total: updated.length };
+}
+
 // ─── engine ──────────────────────────────────────────────────────────────
 
 function todayStamp() {
@@ -218,8 +288,9 @@ function todayStamp() {
 export async function run({
   pat, dataDir, dateStr = todayStamp(), now = new Date(), fetchImpl = fetch,
   baseId = BASE_ID, activeTableId = ACTIVE_TABLE_ID, archiveTableId = ARCHIVE_TABLE_ID,
-  apply = false,
+  ledgerPath = null, apply = false,
 } = {}) {
+  const resolvedLedgerPath = ledgerPath || join(dataDir, ARCHIVE_LEDGER_FILE);
   if (!pat) return { ok: false, error: PAT_MISSING_MSG };
 
   let records;
@@ -292,39 +363,42 @@ export async function run({
     }
   }
 
-  // ── archiving ──
+  // ── archiving (local ledger, then delete from Active Pipeline) ──
+  //
+  // History is written to a LOCAL append-only ledger instead of the Airtable
+  // Archive table, so the base never refills toward its record cap. Order is
+  // ledger-first, delete-second: a card is only removed from Active Pipeline
+  // once it is durably recorded locally, so a failed ledger write never loses
+  // data (the card simply stays in Active and is retried next run).
   const archived = [];
   if (toArchive.length) {
     if (!apply) {
       for (const a of toArchive) archived.push({ cardId: a.cardId, lane: a.laneName, createdAt: a.createdAt });
     } else {
-      const fieldMapRes = await fetchArchiveFieldMap({ pat, baseId, archiveTableId, fetchImpl });
-      if (!fieldMapRes.ok) {
-        errors.push(`Archive field mapping failed — archiving skipped this run: ${fieldMapRes.error}`);
-      } else {
-        if (fieldMapRes.unmapped.length) {
-          errors.push(`Archive table has no field matching Active Pipeline name(s): ${fieldMapRes.unmapped.join(', ')} — those columns will be blank on archived rows.`);
-        }
+      const nowIso = (now instanceof Date ? now : new Date()).toISOString();
+      const ledgerEntries = toArchive.map((a) => mapActiveRecordToLedgerEntry(a.record, { archivedAt: nowIso, dateStr }));
+      let ledgerOk = false;
+      try {
+        const res = appendArchiveLedger(resolvedLedgerPath, ledgerEntries);
+        ledgerOk = res.ok;
+      } catch (e) {
+        // Ledger write failed — do NOT delete anything from Active Pipeline.
+        errors.push(`Archive ledger write failed — archiving skipped this run (no cards deleted, no data loss): ${e.message}`);
+      }
+
+      if (ledgerOk) {
+        // Ledger is durable; now remove the archived cards from Active Pipeline.
+        // Delete is batched (10/req); a failed batch is reported but the card is
+        // already safe in the ledger, so it is not data loss — just a card that
+        // lingers in Active and gets re-archived (idempotent by card id) later.
         for (let i = 0; i < toArchive.length; i += 10) {
           const batch = toArchive.slice(i, i + 10);
-          const archiveFieldsBatch = batch.map((a) => mapActiveFieldsToArchive(a.record.fields, fieldMapRes.fieldMap));
-          let created;
-          try {
-            created = await airtableCreateBatch({ pat, baseId, tableId: archiveTableId, records: archiveFieldsBatch, fetchImpl });
-          } catch (e) {
-            errors.push(`Archive create failed for batch starting at card ${batch[0].cardId}: ${e.message}`);
-            continue;
-          }
-          if (created.length !== batch.length) {
-            errors.push(`Archive create returned ${created.length} record(s) for a batch of ${batch.length} starting at card ${batch[0].cardId} — skipping delete for this batch as a precaution.`);
-            continue;
-          }
           const activeIds = batch.map((a) => a.record.id);
           try {
             await airtableDeleteBatch({ pat, baseId, tableId: activeTableId, recordIds: activeIds, fetchImpl });
             for (const a of batch) archived.push({ cardId: a.cardId, lane: a.laneName, createdAt: a.createdAt });
           } catch (e) {
-            errors.push(`Archive create succeeded but delete from Active Pipeline failed for batch starting at card ${batch[0].cardId}: ${e.message} — these card(s) now exist in BOTH tables, needs manual cleanup.`);
+            errors.push(`Card(s) written to the local archive ledger but delete from Active Pipeline failed for batch starting at card ${batch[0].cardId}: ${e.message} — card(s) still live in Active Pipeline and will be re-archived next run.`);
           }
         }
       }
@@ -339,7 +413,7 @@ export async function run({
     errors.push(`Could not write ${outPath}: ${e.message}`);
   }
 
-  return { ok: true, ...summary, outPath };
+  return { ok: true, ...summary, outPath, ledgerPath: resolvedLedgerPath };
 }
 
 // ── CLI guard (prevents main() from running on import) ────────────────────────
@@ -377,6 +451,7 @@ async function main() {
   for (const t of res.tagged_flow) console.log(`  flow: ${t.cardId} ${t.tag}`);
   for (const n of res.notes) console.log(`  note: ${n}`);
   for (const e of res.errors) console.warn(`[archive-stale] WARN ${e}`);
+  if (apply && res.archived.length) console.log(`[archive-stale] archived history appended → ${res.ledgerPath}`);
   console.log(`[archive-stale] summary written → ${res.outPath}`);
 
   process.exit(0);

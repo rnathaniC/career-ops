@@ -77,6 +77,10 @@ describe('buildBrowserArgs', () => {
 
 describe('launchBrowserForMode — CDP connect failure', () => {
 
+  // ensureBrowser is stubbed to a no-op (endpoint "already up") so these tests
+  // exercise the connectOverCDP failure path WITHOUT auto-launching a real browser.
+  const ensureUp = async () => ({ alreadyRunning: true, launched: false });
+
   test('throws with a message pointing to launch-debug-browser.mjs when connect fails', async () => {
     const mockPw = {
       chromium: {
@@ -86,7 +90,7 @@ describe('launchBrowserForMode — CDP connect failure', () => {
     const cfg = { preferred: 'chromium', chromium: { profile_path: '/some/profile', executable_path: '' }, firefox: {} };
 
     await assert.rejects(
-      () => launchBrowserForMode(mockPw, cfg, { browserMode: 'connect', debugPort: 9222 }),
+      () => launchBrowserForMode(mockPw, cfg, { browserMode: 'connect', debugPort: 9222, ensureBrowser: ensureUp }),
       (e) => /launch-debug-browser/.test(e.message),
     );
   });
@@ -100,8 +104,43 @@ describe('launchBrowserForMode — CDP connect failure', () => {
     const cfg = { preferred: 'chromium', chromium: { profile_path: '/profile', executable_path: '' }, firefox: {} };
 
     await assert.rejects(
-      () => launchBrowserForMode(mockPw, cfg, { browserMode: 'connect', debugPort: 9999 }),
+      () => launchBrowserForMode(mockPw, cfg, { browserMode: 'connect', debugPort: 9999, ensureBrowser: ensureUp }),
       (e) => /9999/.test(e.message),
+    );
+  });
+
+  test('auto-launches the debug browser before attaching, then connects', async () => {
+    const calls = [];
+    const mockPw = {
+      chromium: {
+        connectOverCDP: async () => {
+          calls.push('connect');
+          // Minimal CDP browser stub: no pre-existing contexts → helper creates one.
+          return {
+            contexts: () => [],
+            newContext: async () => ({ id: 'ctx' }),
+          };
+        },
+      },
+    };
+    const cfg = { preferred: 'chromium', chromium: { profile_path: '/some/profile', executable_path: '' }, firefox: {} };
+    const ensureBrowser = async (port) => { calls.push(`ensure:${port}`); return { alreadyRunning: false, launched: true }; };
+
+    const res = await launchBrowserForMode(mockPw, cfg, { browserMode: 'connect', debugPort: 9222, ensureBrowser });
+
+    assert.deepEqual(calls, ['ensure:9222', 'connect'], 'ensureBrowser must run before connectOverCDP');
+    assert.equal(res.isAttached, true, 'CDP attach must not be owned by us');
+    assert.equal(res.contextWasCreatedByUs, true);
+  });
+
+  test('surfaces a clear error when auto-launch times out (browser never comes up)', async () => {
+    const mockPw = { chromium: { connectOverCDP: async () => { throw new Error('should not reach here'); } } };
+    const cfg = { preferred: 'chromium', chromium: { profile_path: '/some/profile', executable_path: '' }, firefox: {} };
+    const ensureBrowser = async () => { throw new Error('did not become reachable on port 9222 within 30000ms'); };
+
+    await assert.rejects(
+      () => launchBrowserForMode(mockPw, cfg, { browserMode: 'connect', debugPort: 9222, ensureBrowser }),
+      (e) => /auto-launch debug browser/.test(e.message) && /reachable/.test(e.message),
     );
   });
 

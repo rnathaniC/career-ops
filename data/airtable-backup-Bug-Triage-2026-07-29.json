@@ -1,0 +1,442 @@
+{
+  "base": "appYRJX5x9iVXpbbg",
+  "table": "Bug-Triage",
+  "tableId": "tbluPDZXxXo47QWTx",
+  "pulledAt": "2026-07-29T02:42:05.941Z",
+  "recordCount": 33,
+  "records": [
+    {
+      "id": "rec3neUPy0RnR8gG0",
+      "createdTime": "2026-07-08T15:33:55.000Z",
+      "fields": {
+        "Status": "Resolved",
+        "Source": "career-ops repo audit",
+        "Description": "auth-state.json (session/cookie state) was left untracked in git but had no .gitignore rule, so it could be accidentally committed and leak session secrets.",
+        "Severity": "High",
+        "Title": "data/auth-state.json untracked but not gitignored",
+        "Notes": ".gitignore rule added."
+      }
+    },
+    {
+      "id": "rec6Fj0iYEW0XnV2y",
+      "createdTime": "2026-07-08T15:33:55.000Z",
+      "fields": {
+        "Status": "Resolved",
+        "Source": "career-ops BUGS.md (r7) / repo audit",
+        "Description": "Both scripts were lost to the r7 OneDrive truncation incident and never rebuilt until now.",
+        "Date Found": "2026-06-04",
+        "Severity": "High",
+        "Title": "linkedin-dm.mjs and workday-login.mjs missing entirely (r7 truncation)",
+        "Date Resolved": "2026-07-08",
+        "Notes": "Rebuilt from git history. NOT yet validated against live LinkedIn/Workday — needs Rahil's manual validation before real use."
+      }
+    },
+    {
+      "id": "rec7P44g86urnbETr",
+      "createdTime": "2026-07-08T15:34:33.000Z",
+      "fields": {
+        "Status": "In Progress",
+        "Source": "BUGS.md sweep (B7)",
+        "Description": "auto-submit.mjs was wasting a full Playwright launch on expired job pages that redirect to a marketing page or careers home (no-submit-button x469, dead-listing-redirect x57).",
+        "Date Found": "2026-06-05",
+        "Severity": "Medium",
+        "Title": "B7 — AutoSubmit launches browser on dead/expired listings",
+        "Notes": "check-job-liveness.mjs (HEAD request, 5s timeout) now runs before every browser launch in both semi-auto and live modes; 4 test scenarios covered. Next: monitor data/dead-listings-{date}.json on live runs to calibrate the CAREERS_RE pattern against false positives. Owner: Rahil."
+      }
+    },
+    {
+      "id": "rec7ev7lf3Fkew1h9",
+      "createdTime": "2026-07-08T15:33:55.000Z",
+      "fields": {
+        "Status": "Open",
+        "Source": "career-ops tracking, upstream github.com/santifer/career-ops/issues/506",
+        "Description": "Browser-driven JD fetching and liveness checks for SPA job boards may return stale or empty content without a configured Playwright MCP.",
+        "Severity": "Low",
+        "Title": "Playwright MCP tools not configured",
+        "Notes": "Low urgency, tracked upstream. Effort check 2026-07-22: this needs an actual Playwright MCP server configured/connected (a Claude Code/session-config change, not a repo code fix) -- not something wireable from inside this repo in a quick pass. Leaving Open at Low priority as before."
+      }
+    },
+    {
+      "id": "recAZ9rX7ve6NAm1L",
+      "createdTime": "2026-07-08T15:34:33.000Z",
+      "fields": {
+        "Status": "In Progress",
+        "Source": "BUGS.md sweep (B-13)",
+        "Description": "The referral queue was showing cards that had been archived in the same run because the B-9 filter was Fresh-only.",
+        "Date Found": "2026-07-06",
+        "Severity": "Medium",
+        "Title": "B-13 — Hot-lane referral queue showed same-run-archived cards",
+        "Notes": "Fixed in referral-queue.mjs on 7/06 and verified live (hot lane 9→8), but the fix is pending commit — same uncommitted-work risk flagged in the 'Uncommitted work sitting on Rahil's machine' card above."
+      }
+    },
+    {
+      "id": "recBz8gKkkiHZQPZ2",
+      "createdTime": "2026-07-08T15:34:33.000Z",
+      "fields": {
+        "Status": "Resolved",
+        "Source": "BUGS.md sweep (r10)",
+        "Description": "batch/tracker-additions/*.tsv grows unbounded after merge-tracker.mjs runs — no archival or max-age policy, hundreds of files on a large batch.",
+        "Date Found": "2026-06-04",
+        "Severity": "Low",
+        "Title": "r10 — tracker-additions TSVs accumulate with no cleanup",
+        "Date Resolved": "2026-07-22",
+        "Notes": "RESOLVED 2026-07-22 -- merge-tracker.mjs now archives processed TSVs into batch/tracker-additions/merged/YYYY-MM/ instead of a flat merged/ dir, so the folder stays organized by month instead of dumping hundreds of files in one place. Files still aren't deleted (full history preserved), just organized. Uncommitted."
+      }
+    },
+    {
+      "id": "recCXf6SOmS9jlOg3",
+      "createdTime": "2026-07-08T15:34:33.000Z",
+      "fields": {
+        "Status": "In Progress",
+        "Source": "BUGS.md sweep (r8)",
+        "Description": "A new state must be added in three places — templates/states.yml, normalize-statuses.mjs, and dashboard/internal/data/career.go — or it silently mismatches.",
+        "Date Found": "2026-06-04",
+        "Severity": "Medium",
+        "Title": "r8 — state model triplication",
+        "Notes": "codegen-states.mjs now generates gen/states.json|.js|.go, but full migration (wiring normalize-statuses.mjs and career.go to import from the generated files instead of hand-coded lists) is still pending. Owner: Rahil."
+      }
+    },
+    {
+      "id": "recD2yc3iUfiUCBoz",
+      "createdTime": "2026-07-08T15:33:55.000Z",
+      "fields": {
+        "Status": "Resolved",
+        "Source": "career-ops BUGS.md (r12) / conversation with Rahil",
+        "Description": "airtable-sync.mjs's push() only compared the 'Last Refreshed' field to detect conflicts. A direct edit in the Airtable UI to any other field (Notes, Company, Lane, etc.) never bumped that field, so push() saw 'unchanged' and silently overwrote the real edit with stale local data.",
+        "Date Found": "2026-07-06",
+        "Severity": "High",
+        "Title": "r12 — Airtable two-way sync last-write-wins on Last Refreshed",
+        "Date Resolved": "2026-07-06",
+        "Notes": "Fixed by snapshotting all pushable fields at pull time (snapshotFields) and diffing the full set on push (diffSnapshot), instead of comparing only Last Refreshed. Backward-compatible fallback for old-shape sync-state files. Regression test added in test/airtable-sync.test.mjs."
+      }
+    },
+    {
+      "id": "recF3fUhlsAQ77ZjG",
+      "createdTime": "2026-07-08T15:33:55.000Z",
+      "fields": {
+        "Status": "Escalated-Needs Rahil",
+        "Source": "Dispatch session 2026-07-06",
+        "Description": "The r12 fix, workday-login/linkedin-dm rebuild, and Lyft fix are all sitting uncommitted on Rahil's local machine. Sandbox couldn't safely commit due to the r7 OneDrive corruption risk.",
+        "Date Found": "2026-07-06",
+        "Severity": "Medium",
+        "Title": "Uncommitted work sitting on Rahil's machine",
+        "Notes": "Exact terminal steps already given to Rahil separately in chat. Checked 2026-07-22: git log shows the last commit is still 8d4be3c from 2026-06-21 -- no new commit has landed, and git status still shows the same modified/untracked files (form-fill.mjs, auto-submit.mjs, test/*, scripts/linkedin-dm.mjs, scripts/workday-login.mjs, etc.) plus new work from today's session. Still genuinely pending -- leaving as Escalated."
+      }
+    },
+    {
+      "id": "recICPeAKt73Dv0dp",
+      "createdTime": "2026-07-08T15:33:55.000Z",
+      "fields": {
+        "Status": "Resolved",
+        "Source": "Dispatch session",
+        "Description": "Doc referenced an OneDrive blocker for auto-submit that had already been solved elsewhere, risking confusion for future readers.",
+        "Severity": "Low",
+        "Title": "Stale SKILL_UPDATE_AUTO_SUBMIT.md pointing at solved OneDrive blocker",
+        "Date Resolved": "2026-07-06",
+        "Notes": "Marked OBSOLETE with a pointer to the real implementation."
+      }
+    },
+    {
+      "id": "recIp1QPaEnF3UXzA",
+      "createdTime": "2026-07-08T15:33:55.000Z",
+      "fields": {
+        "Status": "Resolved",
+        "Source": "AutoSubmit live run",
+        "Description": "A cookie consent banner overlay on Pinterest's ATS page intercepted the click meant for the submit button.",
+        "Severity": "Medium",
+        "Title": "Pinterest cookie consent banner blocking submit click",
+        "Notes": "dismissConsentBanners() added."
+      }
+    },
+    {
+      "id": "recJmrp8aqvtiZC8f",
+      "createdTime": "2026-07-08T15:34:33.000Z",
+      "fields": {
+        "Status": "Resolved",
+        "Source": "BUGS.md sweep (B10)",
+        "Description": "06-09's file is object-keyed with no columnId/createdAt; 06-10's is array-of-objects with columnId/createdAt. 13 cards (4 + 9) are pending import and the single import path may not handle both shapes.",
+        "Date Found": "2026-06-10",
+        "Severity": "Medium",
+        "Title": "B10 — kanban-import-{date}.json schema diverged 06-09 vs 06-10",
+        "Date Resolved": "2026-07-22",
+        "Notes": "RESOLVED 2026-07-22 -- root cause was in auto-submit.mjs's extractEligibleCardsFromJson(): it hard-rejected (threw on) the 06-10-style array-of-cards shape entirely, only accepting the 06-09-style object-keyed PulseJob shape. Also found the two shapes differ in per-card field names, not just wrapping (06-09 uses K2 PulseJob fields like title/state; 06-10's array is already in auto-submit's native card shape with role/columnId) -- a naive 'just unwrap the array' fix would have blanked roles and reset columnId to its default. Fixed to detect and correctly handle both without translation errors. Verified against the real 06-09 and 06-10 files: 06-09 -> 4 eligible cards correctly parsed (unchanged); 06-10 -> no longer throws, correctly evaluates each card. All 71 tests across test/auto-submit-live.test.mjs + test/auto-submit.test.mjs pass. Uncommitted. Note: kanban-inject.mjs's separate buildSeenUrls() dedup-set builder has a related but distinct gap (reads the wrong nesting level for both shapes, contributing 0 URLs from kanban-import-*.json to the seen-set) -- not fixed here since it's a different function/consumer, flagged for a follow-up look."
+      }
+    },
+    {
+      "id": "recN5cVRgy74kt9hd",
+      "createdTime": "2026-07-22T06:09:09.000Z",
+      "fields": {
+        "Status": "Resolved",
+        "Source": "Discovered during 2026-07-22 test-suite run (test/auto-submit-live.test.mjs 'extractEligibleCards' suite was failing 2 of 5)",
+        "Description": "isEligible() in scripts/auto-submit.mjs allowed grade C cards (weak keyword match) into live-submission eligibility, contradicting (1) its own pre-existing regression test, which explicitly expects only A/B, and (2) generate-cl.mjs's eligibleFromBoard(), which only auto-generates cover letters for A/B cards. Net effect: a grade-C 'weak fit' posting could get auto-submitted to without ever getting a matching cover letter -- exactly what the readiness/CL quality gate exists to prevent.",
+        "Date Found": "2026-07-22",
+        "Severity": "High",
+        "Title": "auto-submit.mjs isEligible() let grade-C cards through to live-submission eligibility",
+        "Date Resolved": "2026-07-22",
+        "Notes": "Fixed: isEligible() now requires grade A or B (matching every other gate in the codebase). All 55 tests in test/auto-submit-live.test.mjs now pass (was 53/55). Flagging as high priority since it's a real business-risk fix to submission-selection logic, not routine cleanup -- worth a quick look before the next batch commit. Uncommitted."
+      }
+    },
+    {
+      "id": "recPiLmQdZPchpS6V",
+      "createdTime": "2026-07-08T15:33:55.000Z",
+      "fields": {
+        "Status": "Resolved",
+        "Source": "AutoSubmit live run",
+        "Description": "findSubmitOnPage() didn't search inside child iframes, so the Lyft/careerpuck.com Greenhouse embed's submit button was never located.",
+        "Severity": "Medium",
+        "Title": "Lyft/careerpuck.com Greenhouse iframe embed not found by submit selector",
+        "Notes": "findSubmitOnPage() now searches child frames."
+      }
+    },
+    {
+      "id": "recQF8Tfo7THs86YO",
+      "createdTime": "2026-07-08T15:34:33.000Z",
+      "fields": {
+        "Status": "Resolved",
+        "Source": "BUGS.md sweep (B4)",
+        "Description": "ran_at is written with new Date().toISOString() (UTC) but displayed via system locale in the 8am report. If the Cowork VM and the Windows bat run in different timezones, ran_at comparisons are off by several hours.",
+        "Date Found": "2026-06-04",
+        "Severity": "Low",
+        "Title": "B4 — last-refresh.json timezone ambiguity",
+        "Date Resolved": "2026-07-22",
+        "Notes": "RESOLVED -- write-refresh-status.mjs (Kaizen K-2026-06-08-3) already writes ran_at_utc via new Date().toISOString() (always UTC, unambiguous), and its header comment explicitly says 'closes B4'. Verified 2026-07-22: every ran_at/ran_at_utc writer in the repo (auto-submit.mjs, kanban-inject.mjs, linkedin-dm.mjs, write-refresh-status.mjs) uses toISOString(), which is always UTC regardless of host timezone. No further action needed; board was just stale."
+      }
+    },
+    {
+      "id": "recRHyBjV6Dh6qGLi",
+      "createdTime": "2026-07-08T15:34:33.000Z",
+      "fields": {
+        "Status": "Open",
+        "Source": "BUGS.md sweep (r11)",
+        "Description": "data/test-*.json, *-smoke.json, data/screenshots/* pile up from SpeedyApply dev/test cycles with no cleanup policy (mirrors r10).",
+        "Date Found": "2026-06-10",
+        "Severity": "Low",
+        "Title": "r11 — test/smoke data files accumulate with no archival",
+        "Notes": "Owner: Rahil."
+      }
+    },
+    {
+      "id": "recS9hDzdoNfVEQVT",
+      "createdTime": "2026-07-08T15:33:55.000Z",
+      "fields": {
+        "Status": "Escalated-Needs Rahil",
+        "Source": "Part 1 analysis — scripts/grade-jobs.mjs vs scripts/worker-grader.mjs",
+        "Description": "grade-jobs.mjs (Kaizen K-2026-06-08-5, approved 2026-06-11, built 2026-06-15) is not wired into any npm script and has never been called in production. It implements title-regex + location (Dallas/Remote/US) + $130K salary-floor grading, reading a JSON array on stdin — the actual criteria Rahil had approved. Production grader worker-grader.mjs (created 2026-06-21 during a package.json truncation-recovery commit) does pure keyword-count grading (3+ matches=A, 2=B, 1=C, 0=D) against config/sources.yml target_titles — no location or salary check at all.",
+        "Date Found": "2026-07-08",
+        "Severity": "Medium",
+        "Title": "Dead grade-jobs.mjs script — fate undecided",
+        "Notes": "Escalated 2026-07-22 -- moved from Open, no code change made pending your go-ahead per the recommendation below (this is a behavior-changing enhancement requiring a scan-history.tsv schema change, not a drop-in fix). RECOMMENDATION (unchanged): no straight swap-in of grade-jobs.mjs into worker-grader.mjs -- different I/O contracts. Don't delete either -- grade-jobs.mjs is the only place your approved location+salary rubric exists in code. Recommended fix: merge grade-jobs.mjs's location+salary logic into worker-grader.mjs's grading step, but scan-history.tsv needs a schema change first (it currently drops location and never captures salary). Three kanban-import notes files already independently flag this exact gap (Frisco TX/DFW-metro location miss). Needs your approval before implementation."
+      }
+    },
+    {
+      "id": "recT7fO7NRwEAhZyD",
+      "createdTime": "2026-07-22T06:09:09.000Z",
+      "fields": {
+        "Status": "Resolved",
+        "Source": "Dispatch session / form-fill.mjs regression",
+        "Description": "form-fill.mjs couldn't locate/fill form fields inside the Lyft/careerpuck.com Greenhouse iframe embed -- distinct from the earlier submit-button-only iframe fix already tracked on this board -- so field-filling silently failed or filled the wrong (parent) frame.",
+        "Date Found": "2026-07-13",
+        "Severity": "Medium",
+        "Title": "Lyft/careerpuck.com Greenhouse form-fill iframe gap (K-DEFECT-2026-07-13)",
+        "Date Resolved": "2026-07-22",
+        "Notes": "Fixed with findFormFrame() (scripts/form-fill.mjs), which resolves the correct frame (main or embedded iframe) before filling. 9 regression tests passing in test/form-fill-iframe.test.mjs. Verified 2026-07-22: all 9 still pass. Uncommitted."
+      }
+    },
+    {
+      "id": "recTGgIU8hykexqWw",
+      "createdTime": "2026-07-22T06:09:09.000Z",
+      "fields": {
+        "Status": "Escalated-Needs Rahil",
+        "Source": "Coupa cover-letter quality-gate investigation, 2026-07-22",
+        "Description": "While root-causing the Coupa CL quality-gate item, found roughly half of output/*.txt (approx 150 of 308 generated cover letters, dated ~04-30 through ~05-28) have had every alphabetic character stripped out, leaving only a handful of bytes of stray punctuation -- e.g. the Coupa file was 82 bytes of stray commas/periods/dollar signs. No NUL bytes involved (checked with a hex dump), so scripts/fix-nul-bytes.mjs won't repair these -- looks like the same class of corruption as the already-escalated r7 OneDrive sync issue, just landing on generated CL output instead of source files.",
+        "Date Found": "2026-07-22",
+        "Severity": "High",
+        "Title": "output/ cover-letter files: ~150 of 308 silently corrupted (all letters stripped)",
+        "Notes": "Added a defensive fix in readiness-scorer.mjs so corrupted CLs are no longer silently scored/used (see 'Coupa job cover-letter quality gate' card) -- stops new damage but doesn't repair or explain the ~150 existing corrupted files. Needs your call: (1) worth checking if any were actually attached to a submitted application, and (2) whether to let generate-cl.mjs regenerate fresh ones on demand (now forced by the corruption guard) or bulk-regenerate everything now. Tied to the r7 OneDrive root-cause card -- same underlying workflow decision likely fixes both."
+      }
+    },
+    {
+      "id": "recUHpHgIqJICtRRO",
+      "createdTime": "2026-07-22T06:09:09.000Z",
+      "fields": {
+        "Status": "Resolved",
+        "Source": "Dispatch session / auto-submit.mjs regression",
+        "Description": "On Lever-hosted postings (confirmed live: CI&T), an invisible hCaptcha widget attaches to the DOM AFTER the early post-goto settle check already ran clean, so the old single-shot detectCaptchaOnPage() call passed through and the submit click could fire into a blocked form (silent 'unconfirmed' instead of 'requires-human').",
+        "Date Found": "2026-07-21",
+        "Severity": "High",
+        "Title": "CI&T/Lever hCaptcha late-load timing gap in auto-submit.mjs (K-DEFECT-2026-07-21)",
+        "Date Resolved": "2026-07-22",
+        "Notes": "Fixed with pollForCaptcha() (scripts/auto-submit.mjs), which re-checks for a captcha immediately before the submit click with brief polling, catching a widget that attaches a beat late. 6 regression tests passing (describe('pollForCaptcha (CI&T/Lever timing-gap regression)') in test/auto-submit-live.test.mjs). Verified 2026-07-22: all pass, plus the full 71-test suite across test/auto-submit-live.test.mjs + test/auto-submit.test.mjs. Uncommitted."
+      }
+    },
+    {
+      "id": "recY7QWDB80CqK8cf",
+      "createdTime": "2026-07-08T15:34:33.000Z",
+      "fields": {
+        "Status": "Escalated-Needs Rahil",
+        "Source": "BUGS.md sweep (B-12)",
+        "Description": "The Archive table is missing fields present on Active Pipeline (Card ID, Lane, URL, etc.), so archived rows land blank and a warning fires on every archive-stale run.",
+        "Date Found": "2026-07-05",
+        "Severity": "Low",
+        "Title": "B-12 — Airtable Archive table schema missing Active-Pipeline fields",
+        "Notes": "Escalated 2026-07-22 -- investigated: Archive table (tblxzlwcG0hVwvo17) has 9 fields (Tracker #, Date, Company, Role, Grade, Status, Referral Sent, CL Sent, Notes) mirroring the old applications.md layout. Active Pipeline (tbldVU2pHhQjOHjzh) has 8 fields Archive lacks: Card ID, Lane, Platform, URL, Job Description, Keywords, Connection Name, Connection LinkedIn, Has Connection, Warm Referral, Created At, Last Refreshed, Connection Count, Connection Options. archive-stale.mjs already handles this gracefully by design (matches fields by name, leaves unmatched ones blank, logs a warning instead of failing) -- so this is a data-completeness gap, not a broken pipeline. Didn't add the fields myself: this changes your live tracking base and is a real schema decision (do you want full Job Description text + Keywords duplicated onto every archived row forever, or just enough fields to stop the warning, e.g. Card ID/Platform/URL?) rather than a mechanical fix. Two options: (1) add all missing fields to mirror Active Pipeline fully, or (2) add a few key ones and accept the rest as an intentional gap. Your call."
+      }
+    },
+    {
+      "id": "recbbrZvN0WGXi8vY",
+      "createdTime": "2026-07-08T15:33:55.000Z",
+      "fields": {
+        "Status": "Resolved",
+        "Source": "Dispatch session / doctor.mjs preflight",
+        "Description": "doctor.mjs preflight check for the 1am refresh pipeline failed because Playwright's chromium binary wasn't installed in the environment.",
+        "Severity": "Medium",
+        "Title": "Playwright chromium not installed — blocked 1am refresh doctor preflight",
+        "Notes": "Confirmed fixed via doctor output from Rahil."
+      }
+    },
+    {
+      "id": "reccuciBaW3dt2Ggh",
+      "createdTime": "2026-07-08T15:33:55.000Z",
+      "fields": {
+        "Status": "Resolved",
+        "Source": "Dispatch session",
+        "Description": "The Active Pipeline table's 'Connection Options' field was duplicating data already carried in the draft outreach JSON.",
+        "Severity": "Low",
+        "Title": "New-Hot 'Connection Options' field duplicating draft outreach JSON",
+        "Notes": "Deduplicated."
+      }
+    },
+    {
+      "id": "recdgbi8PGLdVrRfX",
+      "createdTime": "2026-07-22T06:09:09.000Z",
+      "fields": {
+        "Status": "Escalated-Needs Rahil",
+        "Source": "Dispatch session 2026-07-22",
+        "Description": "No reports/pulse-daily-*.md have been written since 2026-07-09 -- the scheduled 8am Dispatch health report has been silently failing for 4+ days with no error surfaced.",
+        "Date Found": "2026-07-09",
+        "Severity": "High",
+        "Title": "pulse-daily-report-dispatch (8am Dispatch health report) silently failing 4+ days",
+        "Notes": "Root cause not yet found: agent sessions cannot mount the OneDrive path where this task's SKILL.md lives -- confirmed hard wall, tried multiple mount points, all failed. Rahil needs to paste the SKILL.md contents directly, agent sessions cannot reach C:\\Users\\rahil\\OneDrive\\Documents\\Claude\\Scheduled\\pulse-daily-report-dispatch."
+      }
+    },
+    {
+      "id": "receMBpnWrY3uxA0k",
+      "createdTime": "2026-07-08T15:34:33.000Z",
+      "fields": {
+        "Status": "Resolved",
+        "Source": "BUGS.md sweep (B9)",
+        "Description": "Two consecutive days (06-09, 06-10) of semi-auto test fills against REAL live Anthropic Greenhouse job IDs recorded outcome:\"unknown\" with no post-fill verification — risk of a half-filled 'Test Role' application sitting in a real company's pipeline, or a false negative where the form never actually reached Submit.",
+        "Date Found": "2026-06-10",
+        "Severity": "High",
+        "Title": "B9 — semi-auto outcomes stuck 'unknown' on real live postings",
+        "Date Resolved": "2026-07-22",
+        "Notes": "RESOLVED 2026-07-22: investigated further -- no evidence any real application was submitted for either Anthropic posting (job IDs 5125083008, 5238460008); the 'unknown' outcome reflects the test fill never reaching a real submit action, not a hidden live submission. Cleared as low risk / not an active incident. Prior notes retained: Next action (still worth doing, not urgent) -- add post-fill verification to auto-submit.mjs/SpeedyApply bridge so it writes a real outcome (submitted/not-submitted/error) instead of 'unknown'. Rahil may still want to spot-check email + Anthropic's careers portal for those two job IDs as a final sanity check. Owner: next implementation session (verification-outcome fix)."
+      }
+    },
+    {
+      "id": "rechCgofIZp1N7Z1d",
+      "createdTime": "2026-07-08T15:33:55.000Z",
+      "fields": {
+        "Status": "Resolved",
+        "Source": "career-ops config/profile.yml",
+        "Description": "Credentials for LinkedIn and Workday logins were stored in plaintext inside config/profile.yml, a secret-leak risk if committed or shared.",
+        "Severity": "High",
+        "Title": "LinkedIn/Workday passwords in plaintext in config/profile.yml",
+        "Notes": "Moved to .env."
+      }
+    },
+    {
+      "id": "recjYGUOocEL0Z5eM",
+      "createdTime": "2026-07-08T15:34:33.000Z",
+      "fields": {
+        "Status": "In Progress",
+        "Source": "BUGS.md sweep (B6)",
+        "Description": "The Pulse Engine Kanban runs in-browser but Indeed/Dice MCPs are only callable inside a Claude session, so secondary ingestion must happen on the scheduled-task side and write to a file the Kanban can read.",
+        "Date Found": "2026-06-05",
+        "Severity": "Medium",
+        "Title": "B6 — MCPs only callable from Claude sessions, not browser",
+        "Notes": "Cloudflare Worker integration is live and working (1,780 jobs fetched in K2 verification). The MCP→ingest-runner→json path is defined but not yet live-tested. Owner: Rahil."
+      }
+    },
+    {
+      "id": "reckb4K96scWiDO3k",
+      "createdTime": "2026-07-08T15:33:55.000Z",
+      "fields": {
+        "Status": "Escalated-Needs Rahil",
+        "Source": "career-ops BUGS.md (r7) / Dispatch session 2026-07-06",
+        "Description": "OneDrive cloud-sync races with write completion, corrupting mid-edit content (e.g. package.json, test files). Hit live 3 times in one session and blocked a commit on 2026-07-06.",
+        "Date Found": "2026-06-04",
+        "Severity": "High",
+        "Title": "r7 — OneDrive sync serving stale/truncated file reads to agent sessions",
+        "Notes": "Currently routed around file-by-file (doctor.mjs / safe-edit.mjs guards). Real fix requires a workflow decision: keep routing around it, or move active development to a non-OneDrive-synced clone and push/pull instead. Needs Rahil's call since it changes his day-to-day workflow. Also the root cause behind item B8 and the linkedin-dm/workday-login rebuild above."
+      }
+    },
+    {
+      "id": "reclwBpnAwtOl6YMe",
+      "createdTime": "2026-07-08T15:33:55.000Z",
+      "fields": {
+        "Status": "Escalated-Needs Rahil",
+        "Source": "Manual job scoring, 2026-07-02",
+        "Description": "From 2026-07-02 manual job scoring — this is a best-guess posting match; couldn't fully confirm it's the exact posting Rahil screenshotted.",
+        "Date Found": "2026-07-02",
+        "Severity": "Low",
+        "Title": "Wolters Kluwer job match unconfirmed",
+        "Notes": "Escalated 2026-07-22 -- needs your eyes to confirm this is the exact posting from your 2026-07-02 screenshot; not something I can verify from here. Verify this is the right posting."
+      }
+    },
+    {
+      "id": "recpsdpaMMovZmSxk",
+      "createdTime": "2026-07-08T15:34:33.000Z",
+      "fields": {
+        "Status": "Resolved",
+        "Source": "BUGS.md sweep (B3)",
+        "Description": "dedup-tracker.mjs won't dedupe 'Software Engineer' vs 'Software Engineering' — both reduce to the same token after stop-word removal, but the Math.min(2, smaller) overlap floor blocks single-word matches.",
+        "Date Found": "2026-06-04",
+        "Severity": "Low",
+        "Title": "B3 — dedup-tracker misses single-word title suffix variants",
+        "Date Resolved": "2026-07-22",
+        "Notes": "RESOLVED 2026-07-22 -- role-matcher.mjs roleFuzzyMatch(): lowered the overlap floor to 1 shared word when the shorter (stopword-filtered) title reduces to a single content word, so 'Software Engineer' vs 'Software Engineering' (both reduce to just 'software' once 'engineer'/'engineering' are stripped as role stopwords) now match. Verified manually still correctly rejects unrelated single-word titles (e.g. 'Product Manager' vs 'Program Manager') and stopword-only titles. Uncommitted, no test file existed for role-matcher.mjs so nothing to run/break."
+      }
+    },
+    {
+      "id": "recuP68Q5FxgqBS06",
+      "createdTime": "2026-07-08T15:33:55.000Z",
+      "fields": {
+        "Status": "Resolved",
+        "Source": "Cover-letter quality gate log",
+        "Description": "Generated cover letter for a Coupa posting was missing the company name and scored 0% keyword match, so the quality gate correctly held it back — but it means a real application didn't go out.",
+        "Severity": "Low",
+        "Title": "Coupa job cover-letter quality gate held back a real application",
+        "Date Resolved": "2026-07-22",
+        "Notes": "ROOT CAUSE FOUND 2026-07-22: not a generation-logic bug (company-name lookup was fine) -- readiness-scorer.mjs's findClFileForCard() picked up a STALE, CORRUPTED file from output/ (a past write/sync failure had stripped every letter out of it, leaving ~80 bytes of stray punctuation), and silently scored that garbage as a real cover letter: 0% keywords + no company name, exactly as logged. Broader finding: ~150 of 308 files in output/ show this same letter-stripped corruption -- see new card 'output/ cover-letter files: ~150 of 308 silently corrupted'. Fix applied: findClFileForCard() now runs an isCorruptedCl() sanity check (min length + letter-density) and skips corrupted candidates, falling through to 'no cover letter found' so a fresh one gets regenerated instead of a garbled one being silently scored. Verified: a Coupa-shaped test card now correctly reports score_skipped/'no cover letter found' instead of a bogus 0% score; all 26 tests in test/readiness-scorer.test.mjs still pass. Uncommitted."
+      }
+    },
+    {
+      "id": "recz7SnxxPqlqgEj8",
+      "createdTime": "2026-07-08T15:34:33.000Z",
+      "fields": {
+        "Status": "Resolved",
+        "Source": "BUGS.md sweep (B8)",
+        "Description": "dashboard/job-pulse-kanban.html was missing getGoldBadge, calcGoldScore, isHappyPath, isReferralPath, cardSortTier, buildReferralMessage, autoApplyCard — a truncation event during a Cowork write.",
+        "Date Found": "2026-06-08",
+        "Severity": "High",
+        "Title": "B8 — Kanban HTML missing 7 functions from r7 truncation",
+        "Date Resolved": "2026-07-22",
+        "Notes": "Status synced 2026-07-22 -- this was already fixed and verified per the notes above (7 functions reconstructed, no console errors); board was just stale. Follow-up (diff against original source, add unit tests) is still worth doing but not blocking."
+      }
+    },
+    {
+      "id": "reczbMzBtTh4s4VZg",
+      "createdTime": "2026-07-08T15:34:33.000Z",
+      "fields": {
+        "Status": "Open",
+        "Source": "BUGS.md sweep (B2)",
+        "Description": "scan-linkedin.mjs logs 'authwall — skipping' on the first HTTP 999 and moves on with no delay; an entire session can 999 out on every query.",
+        "Date Found": "2026-06-04",
+        "Severity": "Low",
+        "Title": "B2 — LinkedIn HTTP-999 rate limit has no backoff",
+        "Notes": "Next action: exponential backoff (1s/2s/4s, cap 30s), retry up to 3x per query before skipping. Checked 2026-07-22: scan-linkedin.mjs does not exist anywhere in the current repo (no file, no 'authwall' string match anywhere in scripts/*.mjs) -- it may live in the Cloudflare Worker ingestion side mentioned under B6, or was lost and never rebuilt. Can't safely fix code that isn't here; leaving Open for Rahil to point at the right location. Owner: Rahil."
+      }
+    }
+  ]
+}

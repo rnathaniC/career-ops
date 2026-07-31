@@ -63,6 +63,7 @@ import { fileURLToPath } from 'node:url';
 import { checkLiveness } from './check-job-liveness.mjs';
 import { loadPersonalInfo, PersonalInfoError } from './load-personal-info.mjs';
 import { loadBrowserConfig, BrowserConfigError } from './load-browser-config.mjs';
+import { ensureDebugBrowser } from './ensure-debug-browser.mjs';
 import { getValidSessionPath as getValidWorkdaySessionPath } from './workday-login.mjs';
 import { fillForm, formatUploadDetails } from './form-fill.mjs';
 import { VALID_IDS as CANONICAL_STATE_IDS } from '../gen/states.js';
@@ -895,18 +896,33 @@ function _detectATS(url) {
  *   the generic data/auth-state.json in the default launch branch below —
  *   see workday-login.mjs's getValidSessionPath() for the freshness contract.
  */
-export async function launchBrowserForMode(pw, browserCfg, { headless = false, browserMode = null, debugPort = 9222, url = null } = {}) {
+export async function launchBrowserForMode(pw, browserCfg, { headless = false, browserMode = null, debugPort = 9222, url = null, ensureBrowser = ensureDebugBrowser } = {}) {
   const preferred      = browserCfg?.preferred || 'chromium';
   const effectiveMode  = parseBrowserMode(browserMode, browserCfg);
 
   // ── CDP attach — extensions stay live (SpeedyApply use case) ─────────────────
   if (preferred === 'chromium' && effectiveMode === 'connect') {
+    // Auto-launch the debug browser if the CDP endpoint isn't already up, so the
+    // non-interactive 1am orchestrator (pulse-refresh.mjs) no longer depends on a
+    // human-opened "Terminal A". ensureDebugBrowser reuses the SAME launcher
+    // (scripts/launch-debug-browser.mjs → configured chromium.profile_path), so the
+    // existing logged-in session is preserved. Idempotent: subsequent per-card calls
+    // find the endpoint already up and skip re-launching. (auto-launch fix 2026-07-28)
+    try {
+      await ensureBrowser(debugPort, { log: (m) => console.log(m) });
+    } catch (e) {
+      throw new Error(
+        `Could not auto-launch debug browser on port ${debugPort}.\n` +
+        `  ${e.message}`,
+      );
+    }
     let browser;
     try {
       browser = await pw.chromium.connectOverCDP(`http://localhost:${debugPort}`);
     } catch (e) {
       throw new Error(
         `Could not connect to debug browser on port ${debugPort}.\n` +
+        `  Auto-launch ran but the CDP attach still failed. Try manually:\n` +
         `  Run in Terminal A: node scripts/launch-debug-browser.mjs\n` +
         `  Then re-run auto-submit in Terminal B.`,
       );

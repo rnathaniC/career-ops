@@ -1,0 +1,3942 @@
+{
+  "base": "appYRJX5x9iVXpbbg",
+  "table": "Archive",
+  "tableId": "tblxzlwcG0hVwvo17",
+  "pulledAt": "2026-07-29T02:42:01.018Z",
+  "recordCount": 357,
+  "records": [
+    {
+      "id": "rec10Yiy3usazziiq",
+      "createdTime": "2026-07-08T05:27:48.000Z",
+      "fields": {
+        "Role": "Product Manager, Risk Product Experience",
+        "Company": "Stripe",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "rec1DGdyN6HDFTwIJ",
+      "createdTime": "2026-07-08T05:27:48.000Z",
+      "fields": {
+        "Role": "Sr. Field Technical Program Manager, Forward Deployed Engineering",
+        "Company": "Databricks",
+        "Grade": "B"
+      }
+    },
+    {
+      "id": "rec1YXL4NttiDXFDt",
+      "createdTime": "2026-06-29T05:16:36.000Z",
+      "fields": {
+        "Role": "Group Product Manager - Bring Your Own Cloud",
+        "Notes": "--- CONNECTION REQUEST (207 chars, covers Code Security / BYOC / APM PM II) ---\nHey Dardan, love what Datadog is building across observability and security. I am a Sr. PM and Scrum Master with 13 years in fintech and healthcare and would love to connect as I explore PM roles on your team.\n\n--- INMAIL ---\nSubject: Sr. PM Interest - Datadog Product Team\n\nHey Dardan,\n\nReached out because I have been digging into what Datadog is building and the product depth - from APM to cloud security and BYOC infrastructure - is genuinely impressive, and rare to see at that scale.\n\nI am Rahil Nathani, a Senior PM and Scrum Master with 13 years of experience across Toyota, healthcare, and fintech. I hold a PMP and A-CSM. My background is in leading complex, cross-functional programs in regulated, high-stakes environments where observability, reliability, and tight engineering collaboration were not optional.\n\nI noticed several open roles on your team - including Group PM in Code Security, Bring Your Own Cloud, and PM II on APM. Any of those would be a strong fit given my delivery and product leadership background.\n\nWould love a quick conversation to learn more about what your team is focused on and see if there is a natural fit. Happy to send over my resume or connect however works best.\n\nThanks for the time,\nRahil Nathani\nDallas, TX | PMP | A-CSM",
+        "Company": "Datadog",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "rec1ujJWmpAR6mX5R",
+      "createdTime": "2026-06-18T05:14:30.000Z",
+      "fields": {
+        "Role": "Technical Program Manager, Service Infrastructure",
+        "Notes": "Covered by live-2026-06-12-30. The consolidated referral ask to Shamila leads with Enterprise Servicing and Capital Collections. Not sending a separate message for this posting, flag it if you want it added to the ask.",
+        "Company": "Stripe",
+        "Grade": "B"
+      }
+    },
+    {
+      "id": "rec233eXUDr2ru5dq",
+      "createdTime": "2026-07-16T03:23:37.000Z",
+      "fields": {
+        "Role": "Staff Product Manager, ML Foundations and GenAI",
+        "Company": "Stripe",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "rec29RQOxbd0hXSqX",
+      "createdTime": "2026-06-18T05:14:30.000Z",
+      "fields": {
+        "Role": "Immigration Program Manager",
+        "Notes": "Covered by live-2026-06-12-30. The consolidated referral ask to Shamila leads with Enterprise Servicing and Capital Collections. Not sending a separate message for this posting, flag it if you want it added to the ask.",
+        "Company": "Stripe",
+        "Grade": "B"
+      }
+    },
+    {
+      "id": "rec2EqimHLjFe7lBP",
+      "createdTime": "2026-07-03T05:16:50.000Z",
+      "fields": {
+        "Role": "Staff Product Manager, Core Rider",
+        "Company": "Lyft",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "rec2PyeQK1lNFmhQE",
+      "createdTime": "2026-06-18T05:14:28.000Z",
+      "fields": {
+        "Role": "Delivery Technical Program Manager",
+        "Company": "Ontic",
+        "Grade": "B"
+      }
+    },
+    {
+      "id": "rec2fML5nITKj0rjl",
+      "createdTime": "2026-06-23T05:14:54.000Z",
+      "fields": {
+        "Role": "Product Manager, Local Processor Acquiring",
+        "Company": "Stripe",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "rec34nuuXgwbTe9iI",
+      "createdTime": "2026-06-18T05:14:28.000Z",
+      "fields": {
+        "Role": "[Job-29886] Senior Scrum Master",
+        "Company": "CI&T",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "rec3JeoHlmwj2wBxX",
+      "createdTime": "2026-07-05T05:17:21.000Z",
+      "fields": {
+        "Role": "Senior Product Manager - Okta Identity Governance",
+        "Company": "Okta",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "rec3ODFHG7yIsU9gm",
+      "createdTime": "2026-06-12T04:08:07.000Z",
+      "fields": {
+        "Date": "2026-05-29",
+        "Role": "Process Industrialization   Technical Project Manager R5035233 2",
+        "Notes": "auto-submit re-run 2026-06-02",
+        "Company": "gevernova",
+        "Status": "Blocked",
+        "Tracker #": 134,
+        "Grade": "B"
+      }
+    },
+    {
+      "id": "rec3VLrfPCePc5XjV",
+      "createdTime": "2026-07-22T05:17:55.000Z",
+      "fields": {
+        "Role": "Staff Design Operations Program Manager",
+        "Company": "Mercury",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "rec42Iazuzbd0PFXu",
+      "createdTime": "2026-06-12T04:06:36.000Z",
+      "fields": {
+        "Date": "2026-05-28",
+        "Role": "^Technical Program Manager and Quality Analyst - 6314910",
+        "Notes": "auto-submit re-run 2026-06-01",
+        "Company": "accenture",
+        "Status": "Blocked",
+        "Tracker #": 115,
+        "Grade": "B"
+      }
+    },
+    {
+      "id": "rec49fn7Fxawi8W2r",
+      "createdTime": "2026-06-12T04:06:36.000Z",
+      "fields": {
+        "Date": "2026-05-29",
+        "Role": "Manager   Scrum Master R0922627 1",
+        "Notes": "auto-submit re-run 2026-06-02",
+        "Company": "cvshealth",
+        "Status": "Blocked",
+        "Tracker #": 125,
+        "Grade": "A"
+      }
+    },
+    {
+      "id": "rec4Bni0vZNBZwH5l",
+      "createdTime": "2026-07-03T05:16:50.000Z",
+      "fields": {
+        "Role": "Senior Partner Program Manager - Strategic Initiatives",
+        "Company": "Datadog",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "rec4PxW003kMZDltD",
+      "createdTime": "2026-07-06T05:16:48.000Z",
+      "fields": {
+        "Role": "Technical Program Manager",
+        "Company": "Stripe",
+        "Grade": "B"
+      }
+    },
+    {
+      "id": "rec4Yvv2L1P8OPiOw",
+      "createdTime": "2026-06-12T04:04:47.000Z",
+      "fields": {
+        "Date": "2026-05-07",
+        "Role": "Senior Scrum Master",
+        "Notes": "auto-submit re-run 2026-05-21",
+        "Company": "capitalrx",
+        "Status": "Blocked",
+        "Tracker #": 1,
+        "Grade": "5.0/5"
+      }
+    },
+    {
+      "id": "rec50dWRPpxEMCK1n",
+      "createdTime": "2026-06-12T04:04:47.000Z",
+      "fields": {
+        "Date": "2026-05-21",
+        "Role": "Delivery Manager",
+        "Notes": "bat 6:10am — unverified (no confirm signal check pre-fix)",
+        "Company": "datatonic",
+        "Status": "Submitted",
+        "Tracker #": 77,
+        "Grade": "4.0/5"
+      }
+    },
+    {
+      "id": "rec53H3aKtsXYw1rT",
+      "createdTime": "2026-06-25T05:16:38.000Z",
+      "fields": {
+        "Role": "[Job-29965] Senior Product Manager, Colombia",
+        "Company": "CI&T",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "rec56wycgIgftOMIr",
+      "createdTime": "2026-07-02T05:16:52.000Z",
+      "fields": {
+        "Role": "Product Manager, Enterprise Software",
+        "Company": "Lyft",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "rec58kWe3HpwGpz05",
+      "createdTime": "2026-06-18T05:14:30.000Z",
+      "fields": {
+        "Role": "Senior Principal Technical Program Manager",
+        "Company": "Saviynt",
+        "Grade": "B"
+      }
+    },
+    {
+      "id": "rec5JI3cwp1xvoc78",
+      "createdTime": "2026-06-12T04:08:07.000Z",
+      "fields": {
+        "Date": "2026-06-02",
+        "Role": "XMLNAME  Technical Program Manager and Quality Analyst   6314910 14402699 1",
+        "Notes": "auto-submit",
+        "Company": "accenture",
+        "Status": "Blocked",
+        "Tracker #": 142,
+        "Grade": "B"
+      }
+    },
+    {
+      "id": "rec5KpgdL3CIfZYyC",
+      "createdTime": "2026-07-08T05:27:48.000Z",
+      "fields": {
+        "Role": "Sr. Field Technical Program Manager, Forward Deployed Engineering - Canada",
+        "Company": "Databricks",
+        "Grade": "B"
+      }
+    },
+    {
+      "id": "rec5MCY7KGyn7bBIP",
+      "createdTime": "2026-07-16T03:23:37.000Z",
+      "fields": {
+        "Role": "[Job-30402] Senior Product Manager, Brazil",
+        "Company": "CI&T",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "rec5OsDSMyGGXaud5",
+      "createdTime": "2026-06-18T05:14:31.000Z",
+      "fields": {
+        "Role": "Program Manager, Enterprise Servicing",
+        "Notes": "Hi Shamila, hope you're doing well! I've been keeping an eye on Stripe's openings and a couple really caught my eye, Program Manager on Enterprise Servicing and Operations Program Manager on Capital Collections. Both line up well with my background, 13 years running cross-functional delivery and program management (PMP and Advanced CSM certified), with time in fintech and healthcare. Would you be open to a quick chat about either team, or could you point me to the right person for a referral? Happy to send my resume over. Thanks so much, I really appreciate it.",
+        "Company": "Stripe",
+        "Grade": "B"
+      }
+    },
+    {
+      "id": "rec5TSMRnC8lKmgeH",
+      "createdTime": "2026-06-12T04:08:07.000Z",
+      "fields": {
+        "Date": "2026-06-03",
+        "Role": "Senior Scrum Master (Hybrid)",
+        "Notes": "auto-submit re-run 2026-06-06",
+        "Company": "raytheon",
+        "Status": "Blocked",
+        "Tracker #": 164,
+        "Grade": "A"
+      }
+    },
+    {
+      "id": "rec5eWPsVd6lQXjrP",
+      "createdTime": "2026-06-12T04:04:47.000Z",
+      "fields": {
+        "Date": "2026-05-19",
+        "Role": "Current openings at Edmentum",
+        "Notes": "auto-submit re-run 2026-05-19",
+        "Company": "edmentum",
+        "Status": "Evaluated",
+        "Tracker #": 56,
+        "Grade": "4.0/5"
+      }
+    },
+    {
+      "id": "rec5nclO9pK83eRFh",
+      "createdTime": "2026-06-12T04:08:07.000Z",
+      "fields": {
+        "Date": "2026-06-03",
+        "Role": "Manufacturing Professional Training Lead / Staff Project Manager",
+        "Notes": "auto-submit re-run 2026-06-03",
+        "Company": "northrop grumman",
+        "Status": "Blocked",
+        "Tracker #": 157,
+        "Grade": "B"
+      }
+    },
+    {
+      "id": "rec5tueKTGUfYZdel",
+      "createdTime": "2026-06-12T04:08:54.000Z",
+      "fields": {
+        "Date": "2026-06-05",
+        "Role": "Page not found",
+        "Notes": "auto-submit re-run 2026-06-07",
+        "Company": "app",
+        "Status": "Blocked",
+        "Tracker #": 190,
+        "Grade": "B"
+      }
+    },
+    {
+      "id": "rec67RaSKE3UfGBR5",
+      "createdTime": "2026-07-22T05:17:56.000Z",
+      "fields": {
+        "Role": "Technical Program Manager - Data Center Delivery",
+        "Company": "Lambda Labs",
+        "Grade": "B"
+      }
+    },
+    {
+      "id": "rec6Ayd39QRlAgYQJ",
+      "createdTime": "2026-06-28T05:14:38.000Z",
+      "fields": {
+        "Role": "Principal Product Manager, Diner Engagement",
+        "Company": "OpenTable",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "rec6E54Libj2HJkJq",
+      "createdTime": "2026-06-12T04:04:47.000Z",
+      "fields": {
+        "Date": "2026-05-07",
+        "Role": "Senior Technical Program Manager",
+        "Notes": "auto-submit re-run 2026-05-21",
+        "Company": "humaninterest",
+        "Status": "Blocked",
+        "Tracker #": 7,
+        "Grade": "4.0/5"
+      }
+    },
+    {
+      "id": "rec6LfIcOzgJ09AaI",
+      "createdTime": "2026-06-21T08:02:16.000Z",
+      "fields": {
+        "Role": "Field Technical Program Manager",
+        "Notes": "Hi Denny, hope you're doing well! I noticed Databricks has a couple of open roles right now, Field Technical Program Manager and Program Manager (Product), that line up really well with my background. I've spent the last 13 years leading agile delivery and program management across fintech and healthcare (PMP and Advanced CSM certified), and both of these feel like a strong fit. Would you be open to a quick chat, or could you point me toward the right person for a referral? Happy to send my resume over either way. Thanks so much, really appreciate any help.",
+        "Company": "Databricks",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "rec6PaZjy8Movdoj0",
+      "createdTime": "2026-06-12T04:04:47.000Z",
+      "fields": {
+        "Date": "2026-05-19",
+        "Role": "Unknown Role (TD-12)",
+        "Notes": "auto-submit re-run 2026-05-19",
+        "Company": "mitratech",
+        "Status": "Evaluated",
+        "Tracker #": 46,
+        "Grade": "4.0/5"
+      }
+    },
+    {
+      "id": "rec6yL697SFWHAS7h",
+      "createdTime": "2026-06-18T05:14:31.000Z",
+      "fields": {
+        "Role": "Design Program Manager, AI",
+        "Notes": "Covered by live-2026-06-12-30. The consolidated referral ask to Shamila leads with Enterprise Servicing and Capital Collections. Not sending a separate message for this posting, flag it if you want it added to the ask.",
+        "Company": "Stripe",
+        "Grade": "B"
+      }
+    },
+    {
+      "id": "rec70BAx4U8SPmEIL",
+      "createdTime": "2026-07-22T05:17:55.000Z",
+      "fields": {
+        "Role": "Sr. Product Manager, Core Saving Experience",
+        "Company": "Pinterest",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "rec72FyamPihcavUu",
+      "createdTime": "2026-06-18T05:14:28.000Z",
+      "fields": {
+        "Role": "Operations Program Manager, Capital Collections",
+        "Notes": "Covered by live-2026-06-12-30. Consolidated message to Shamila references this role too (Operations Program Manager, Capital Collections). See that card for the ready to send message.",
+        "Company": "Stripe",
+        "Grade": "B"
+      }
+    },
+    {
+      "id": "rec7GjWj5SDhWl6uf",
+      "createdTime": "2026-06-12T04:04:47.000Z",
+      "fields": {
+        "Date": "2026-05-21",
+        "Role": "Program Manager",
+        "Notes": "no-submit-button (board redirect)",
+        "Company": "ludiaconsulting",
+        "Status": "Blocked",
+        "Tracker #": 68,
+        "Grade": "—"
+      }
+    },
+    {
+      "id": "rec7M5xcQkS45iwVC",
+      "createdTime": "2026-06-12T04:08:54.000Z",
+      "fields": {
+        "Date": "2026-06-05",
+        "Role": "Scaled Agile Product Owner/Scrum Master Coach (Remote)",
+        "Notes": "auto-submit re-run 2026-06-07",
+        "Company": "raytheon",
+        "Status": "Blocked",
+        "Tracker #": 191,
+        "Grade": "A"
+      }
+    },
+    {
+      "id": "rec7XX3XCx141SY63",
+      "createdTime": "2026-07-04T05:16:44.000Z",
+      "fields": {
+        "Role": "Staff Product Manager, AI",
+        "Company": "Brex",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "rec8Y88xuxUlke99x",
+      "createdTime": "2026-06-28T05:14:38.000Z",
+      "fields": {
+        "Role": "Senior Program Manager, Retail Strategy and Operations",
+        "Company": "Toast",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "rec8Yx54B08BLjXOp",
+      "createdTime": "2026-07-13T05:17:45.000Z",
+      "fields": {
+        "Role": "Product Manager, Risk Product Experience",
+        "Notes": "RESTORED 2026-07-08 after archive-stale reaped it (r14 recurrence #4). Original Created At: 2026-07-03. Waiting on Rahil → warm referral via Shamila Zindani Merchant.",
+        "Company": "Stripe",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "rec8ZO6K68CSocIpQ",
+      "createdTime": "2026-06-12T04:04:47.000Z",
+      "fields": {
+        "Date": "2026-05-07",
+        "Role": "Staff Technical Program Manager, Security",
+        "Notes": "auto-submit re-run 2026-05-19",
+        "Company": "gofundme",
+        "Status": "Evaluated",
+        "Tracker #": 6,
+        "Grade": "4.0/5"
+      }
+    },
+    {
+      "id": "rec8jW2XuY7LGkFh9",
+      "createdTime": "2026-06-12T04:04:47.000Z",
+      "fields": {
+        "Date": "2026-05-21",
+        "Role": "Program Manager",
+        "Notes": "404 dead posting",
+        "Company": "coupa",
+        "Status": "Blocked",
+        "Tracker #": 70,
+        "Grade": "—"
+      }
+    },
+    {
+      "id": "rec8l7LFrwej1VpY0",
+      "createdTime": "2026-06-12T04:06:36.000Z",
+      "fields": {
+        "Date": "2026-05-28",
+        "Role": "About Stripe",
+        "Notes": "auto-submit re-run 2026-06-01",
+        "Company": "stripe",
+        "Status": "Blocked",
+        "Tracker #": 100,
+        "Grade": "A"
+      }
+    },
+    {
+      "id": "rec8rN4Uzv2KUQRe5",
+      "createdTime": "2026-06-12T04:08:07.000Z",
+      "fields": {
+        "Date": "2026-06-03",
+        "Role": "Low Latency Infrastructure Senior Program Manager",
+        "Notes": "auto-submit",
+        "Company": "citi",
+        "Status": "Blocked",
+        "Tracker #": 169,
+        "Grade": "A"
+      }
+    },
+    {
+      "id": "rec8rW0zIuIGSt6Ny",
+      "createdTime": "2026-07-09T05:16:00.000Z",
+      "fields": {
+        "Role": "Apprentice Product Manager",
+        "Company": "Pinterest",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "rec8x0D6P5Jy7S3j0",
+      "createdTime": "2026-06-12T04:08:54.000Z",
+      "fields": {
+        "Date": "2026-06-05",
+        "Role": "Senior Technical Product Manager R5042969 3",
+        "Notes": "auto-submit",
+        "Company": "gevernova",
+        "Status": "Blocked",
+        "Tracker #": 186,
+        "Grade": "B"
+      }
+    },
+    {
+      "id": "rec96Z278lqGSAQQQ",
+      "createdTime": "2026-06-12T04:04:47.000Z",
+      "fields": {
+        "Date": "2026-05-14",
+        "Role": "Program Manager",
+        "Notes": "auto-submit re-run 2026-05-21",
+        "Company": "anaplan",
+        "Status": "Blocked",
+        "Tracker #": 33,
+        "Grade": "5.0/5"
+      }
+    },
+    {
+      "id": "rec9EbhpgjYhnALYk",
+      "createdTime": "2026-06-12T04:06:36.000Z",
+      "fields": {
+        "Date": "2026-05-28",
+        "Role": "Senior Principal Systems Engineer - Technical Program Manager (ONSITE)",
+        "Notes": "auto-submit re-run 2026-06-03",
+        "Company": "raytheon",
+        "Status": "Blocked",
+        "Tracker #": 119,
+        "Grade": "B"
+      }
+    },
+    {
+      "id": "rec9MUkBhZ50QLQ14",
+      "createdTime": "2026-06-12T04:04:47.000Z",
+      "fields": {
+        "Date": "2026-05-19",
+        "Role": "Not found 404 error",
+        "Notes": "auto-submit re-run 2026-05-19",
+        "Company": "coupa",
+        "Status": "Evaluated",
+        "Tracker #": 55,
+        "Grade": "4.0/5"
+      }
+    },
+    {
+      "id": "rec9vEunNsIJa7mBT",
+      "createdTime": "2026-06-12T04:04:47.000Z",
+      "fields": {
+        "Date": "2026-05-14",
+        "Role": "Current openings at Ludia Consulting",
+        "Notes": "auto-submit re-run 2026-05-21",
+        "Company": "ludiaconsulting",
+        "Status": "Blocked",
+        "Tracker #": 29,
+        "Grade": "4.0/5"
+      }
+    },
+    {
+      "id": "recA1ydstW3roPHQ3",
+      "createdTime": "2026-06-12T04:06:36.000Z",
+      "fields": {
+        "Date": "2026-05-28",
+        "Role": "Page not found",
+        "Notes": "auto-submit re-run 2026-05-28",
+        "Company": "pinterestcareers",
+        "Status": "Blocked",
+        "Tracker #": 97,
+        "Grade": "A"
+      }
+    },
+    {
+      "id": "recA39MnKR60HuHcl",
+      "createdTime": "2026-06-25T05:16:38.000Z",
+      "fields": {
+        "Role": "Principal Product Manager, IAM Security & Agentic Identity",
+        "Company": "Okta",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "recA9PbxCajroWfC5",
+      "createdTime": "2026-06-18T05:14:30.000Z",
+      "fields": {
+        "Role": "Technical Program Manager, Security",
+        "Company": "Figma",
+        "Grade": "B"
+      }
+    },
+    {
+      "id": "recAB1suiI6fyhleM",
+      "createdTime": "2026-07-07T05:18:31.000Z",
+      "fields": {
+        "Role": "Product Manager II- IDP",
+        "Company": "Datadog",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "recAJG6JH8P79gLMI",
+      "createdTime": "2026-06-12T04:06:36.000Z",
+      "fields": {
+        "Date": "2026-05-23",
+        "Role": "Technical Program Manager",
+        "Company": "motorolasolutions",
+        "Status": "Blocked",
+        "Tracker #": 95,
+        "Grade": "B"
+      }
+    },
+    {
+      "id": "recAXENCwKMG5Km60",
+      "createdTime": "2026-06-12T04:08:07.000Z",
+      "fields": {
+        "Date": "2026-06-02",
+        "Role": "Senior Manager   Digital Product Manager R0840519 1",
+        "Notes": "auto-submit",
+        "Company": "cvshealth",
+        "Status": "Blocked",
+        "Tracker #": 141,
+        "Grade": "A"
+      }
+    },
+    {
+      "id": "recAeaoLG0K70MOfQ",
+      "createdTime": "2026-06-12T04:08:07.000Z",
+      "fields": {
+        "Date": "2026-06-03",
+        "Role": "Senior EHS Program Manager - East Region",
+        "Notes": "auto-submit re-run 2026-06-03",
+        "Company": "medtronic",
+        "Status": "Blocked",
+        "Tracker #": 160,
+        "Grade": "B"
+      }
+    },
+    {
+      "id": "recAzxnnqsIqIfDjO",
+      "createdTime": "2026-06-18T05:14:29.000Z",
+      "fields": {
+        "Role": "Program Manager",
+        "Notes": "Covered by live-2026-06-12-30. The consolidated referral ask to Shamila leads with Enterprise Servicing and Capital Collections. Not sending a separate message for this posting, flag it if you want it added to the ask.",
+        "Company": "Stripe",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "recB1gufDw92ybkp8",
+      "createdTime": "2026-06-12T04:08:54.000Z",
+      "fields": {
+        "Date": "2026-06-05",
+        "Role": "Senior Engineering Program Manager - Quality Core Team Member",
+        "Notes": "auto-submit re-run 2026-06-07",
+        "Company": "medtronic",
+        "Status": "Blocked",
+        "Tracker #": 197,
+        "Grade": "B"
+      }
+    },
+    {
+      "id": "recBBqNdirwG0RqJI",
+      "createdTime": "2026-06-18T05:14:29.000Z",
+      "fields": {
+        "Role": "Principal Project Implementation Delivery Manager",
+        "Company": "Anaplan",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "recBJG7XC0KNPEIU6",
+      "createdTime": "2026-07-04T05:16:44.000Z",
+      "fields": {
+        "Role": "Senior Product Manager",
+        "Company": "Samsara",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "recBe5IToj0MTloqg",
+      "createdTime": "2026-06-12T04:06:36.000Z",
+      "fields": {
+        "Date": "2026-05-28",
+        "Role": "Lead Project Manager",
+        "Notes": "auto-submit re-run 2026-06-05",
+        "Company": "gevernova",
+        "Status": "Blocked",
+        "Tracker #": 112,
+        "Grade": "A"
+      }
+    },
+    {
+      "id": "recBelLrETYogqfTf",
+      "createdTime": "2026-06-12T04:04:47.000Z",
+      "fields": {
+        "Date": "2026-05-19",
+        "Role": "Technical Program Manager",
+        "Notes": "auto-submit re-run 2026-05-21",
+        "Company": "acorns",
+        "Status": "Submitted",
+        "Tracker #": 57,
+        "Grade": "4.0/5"
+      }
+    },
+    {
+      "id": "recBieQ41pHwujUDd",
+      "createdTime": "2026-06-28T05:14:38.000Z",
+      "fields": {
+        "Role": "Senior Technical Program Manager, Infrastructure",
+        "Company": "Lyft",
+        "Grade": "B"
+      }
+    },
+    {
+      "id": "recBlxcSJ6GUcvhvm",
+      "createdTime": "2026-06-12T04:08:54.000Z",
+      "fields": {
+        "Date": "2026-06-05",
+        "Role": "Clinical Technology Product Manager - Interoperability",
+        "Notes": "auto-submit re-run 2026-06-07",
+        "Company": "cvshealth",
+        "Status": "Blocked",
+        "Tracker #": 192,
+        "Grade": "A"
+      }
+    },
+    {
+      "id": "recC36rDyZwKuWfNr",
+      "createdTime": "2026-06-12T04:04:47.000Z",
+      "fields": {
+        "Date": "2026-05-14",
+        "Role": "Project Manager/Scrum Master (She/He/They)",
+        "Notes": "auto-submit re-run 2026-05-19",
+        "Company": "capco",
+        "Status": "Evaluated",
+        "Tracker #": 38,
+        "Grade": "4.0/5"
+      }
+    },
+    {
+      "id": "recCFkrTtikP2e3N7",
+      "createdTime": "2026-06-12T04:08:07.000Z",
+      "fields": {
+        "Date": "2026-05-29",
+        "Role": "Senior Technical Product Manager",
+        "Notes": "auto-submit re-run 2026-06-04",
+        "Company": "gevernova",
+        "Status": "Blocked",
+        "Tracker #": 136,
+        "Grade": "B"
+      }
+    },
+    {
+      "id": "recCIry996XiM0fIF",
+      "createdTime": "2026-06-12T04:08:07.000Z",
+      "fields": {
+        "Date": "2026-06-03",
+        "Role": "Engineering Program Manager Level 3/4",
+        "Notes": "auto-submit re-run 2026-06-07",
+        "Company": "northrop grumman",
+        "Status": "Blocked",
+        "Tracker #": 175,
+        "Grade": "A"
+      }
+    },
+    {
+      "id": "recCQMjtuPtGPDGVt",
+      "createdTime": "2026-07-22T05:17:55.000Z",
+      "fields": {
+        "Role": "Staff Product Manager - Observability",
+        "Company": "Lambda Labs",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "recCbLdUOT9m3uiAJ",
+      "createdTime": "2026-06-12T04:08:54.000Z",
+      "fields": {
+        "Date": "2026-06-05",
+        "Role": "Program Manager West Coast Region - US Remote",
+        "Notes": "auto-submit re-run 2026-06-07",
+        "Company": "motorolasolutions",
+        "Status": "Blocked",
+        "Tracker #": 201,
+        "Grade": "A"
+      }
+    },
+    {
+      "id": "recCnK8nljE9QCLMC",
+      "createdTime": "2026-06-21T08:02:16.000Z",
+      "fields": {
+        "Role": "Staff Product Manager, Business Travel",
+        "Company": "Lyft",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "recCnxPPmMPBP3mdQ",
+      "createdTime": "2026-06-12T04:06:36.000Z",
+      "fields": {
+        "Date": "2026-05-23",
+        "Role": "T-MOBILE CAREERS",
+        "Notes": "auto-submit re-run 2026-06-07",
+        "Company": "tmobile",
+        "Status": "Blocked",
+        "Tracker #": 94,
+        "Grade": "B"
+      }
+    },
+    {
+      "id": "recCtAmPZYDgEBTQy",
+      "createdTime": "2026-06-25T05:16:38.000Z",
+      "fields": {
+        "Role": "Staff Technical Program Manager, SOX Compliance",
+        "Company": "Pinterest",
+        "Grade": "B"
+      }
+    },
+    {
+      "id": "recCzOfVjMcQwUU1j",
+      "createdTime": "2026-06-12T04:06:36.000Z",
+      "fields": {
+        "Date": "2026-05-23",
+        "Role": "Careers",
+        "Notes": "auto-submit re-run 2026-06-01",
+        "Company": "philips",
+        "Status": "Blocked",
+        "Tracker #": 93,
+        "Grade": "B"
+      }
+    },
+    {
+      "id": "recD1g3n9a8gjr364",
+      "createdTime": "2026-06-12T04:06:36.000Z",
+      "fields": {
+        "Date": "2026-05-26",
+        "Role": "Who we are",
+        "Company": "stripe",
+        "Status": "Blocked",
+        "Tracker #": 96,
+        "Grade": "B"
+      }
+    },
+    {
+      "id": "recD9POKqDuZ7ND7J",
+      "createdTime": "2026-07-09T05:16:00.000Z",
+      "fields": {
+        "Role": "Associate Program Manager, Technical Operations",
+        "Company": "Lyft",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "recD9S4UEGk3OpJ1a",
+      "createdTime": "2026-06-12T04:06:36.000Z",
+      "fields": {
+        "Date": "2026-05-28",
+        "Role": "Technical Product Manager, Service Management Platform, Service Catalog & Request",
+        "Notes": "auto-submit re-run 2026-06-02",
+        "Company": "raytheon",
+        "Status": "Blocked",
+        "Tracker #": 98,
+        "Grade": "A"
+      }
+    },
+    {
+      "id": "recDAkRfPWtymZaMm",
+      "createdTime": "2026-07-04T05:16:44.000Z",
+      "fields": {
+        "Role": "Senior Product Manager, Product Platform",
+        "Company": "Okta",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "recDC1REjDl5MSjqO",
+      "createdTime": "2026-06-12T04:08:54.000Z",
+      "fields": {
+        "Date": "2026-06-04",
+        "Role": "Unknown Role",
+        "Notes": "auto-submit",
+        "Company": "elevancehealth",
+        "Status": "Blocked",
+        "Tracker #": 183,
+        "Grade": "A"
+      }
+    },
+    {
+      "id": "recDGmZATp8RRLk0Y",
+      "createdTime": "2026-06-12T04:04:47.000Z",
+      "fields": {
+        "Date": "2026-05-19",
+        "Role": "Unknown Role (TD-12)",
+        "Notes": "auto-submit re-run 2026-05-24",
+        "Company": "stripe",
+        "Status": "Blocked",
+        "Tracker #": 53,
+        "Grade": "5.0/5"
+      }
+    },
+    {
+      "id": "recDMmiJgyT6JG3Sf",
+      "createdTime": "2026-06-12T04:08:07.000Z",
+      "fields": {
+        "Date": "2026-06-03",
+        "Role": "Material Program Manager - McKinney, TX (Hybrid)",
+        "Notes": "auto-submit re-run 2026-06-07",
+        "Company": "raytheon",
+        "Status": "Blocked",
+        "Tracker #": 171,
+        "Grade": "A"
+      }
+    },
+    {
+      "id": "recDSLs5L53xz5MX6",
+      "createdTime": "2026-06-12T04:08:07.000Z",
+      "fields": {
+        "Date": "2026-06-03",
+        "Role": "Sr. Engineering Program Manager (Sphere-360 Catheter Launch & Lifecycle Execution), Mounds View, MN",
+        "Notes": "auto-submit re-run 2026-06-03",
+        "Company": "medtronic",
+        "Status": "Blocked",
+        "Tracker #": 155,
+        "Grade": "A"
+      }
+    },
+    {
+      "id": "recDZ2Bk43RdOkJMM",
+      "createdTime": "2026-07-22T05:17:55.000Z",
+      "fields": {
+        "Role": "Program Manager, Autonomous Partnership Programs",
+        "Company": "Lyft",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "recDZfkZ8xIYd26nB",
+      "createdTime": "2026-07-22T05:17:56.000Z",
+      "fields": {
+        "Role": "Senior Product Manager - AI",
+        "Company": "Delinea",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "recDvGvbe2coRkYpd",
+      "createdTime": "2026-06-18T05:14:30.000Z",
+      "fields": {
+        "Role": "Technical Program Manager, AI Performance",
+        "Company": "Figma",
+        "Grade": "B"
+      }
+    },
+    {
+      "id": "recE9BL6n36hfIWq7",
+      "createdTime": "2026-07-24T05:17:42.000Z",
+      "fields": {
+        "Role": "Principal Product Manager, Enterprise Commerce Platform",
+        "Company": "Twilio",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "recEBttWqNlJMXl7S",
+      "createdTime": "2026-07-22T05:17:56.000Z",
+      "fields": {
+        "Role": "Principal Group Product Manager, B2B (Auth0)",
+        "Company": "Okta",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "recEHD9obIVQrocGB",
+      "createdTime": "2026-06-12T04:08:54.000Z",
+      "fields": {
+        "Date": "2026-06-05",
+        "Role": "Customer Success Program Manager – Neuromodulation",
+        "Notes": "auto-submit re-run 2026-06-07",
+        "Company": "medtronic",
+        "Status": "Blocked",
+        "Tracker #": 196,
+        "Grade": "A"
+      }
+    },
+    {
+      "id": "recEOcFzTWOtHrYE6",
+      "createdTime": "2026-06-18T05:14:29.000Z",
+      "fields": {
+        "Role": "Technical Program Manager II [Remote-US]",
+        "Company": "Quanata",
+        "Grade": "A"
+      }
+    },
+    {
+      "id": "recEpKvW80kkby0rw",
+      "createdTime": "2026-07-03T05:16:50.000Z",
+      "fields": {
+        "Role": "Senior Partner Program Manager - Pricing & Deal Strategy",
+        "Company": "Datadog",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "recEruCP2PVLuEsCu",
+      "createdTime": "2026-06-21T08:02:16.000Z",
+      "fields": {
+        "Role": "[Job - 29592] Technical Program Manager (Short Assignment - 6 months), Plano, Texas (USA)",
+        "Company": "CI&T",
+        "Grade": "B"
+      }
+    },
+    {
+      "id": "recEykKWX1lhBEjHY",
+      "createdTime": "2026-07-05T05:17:21.000Z",
+      "fields": {
+        "Role": "Lead Technology Product Manager",
+        "Notes": "Manually filed by Rahil via job-board screenshot, not auto-scanned. Graded with worker-grader.mjs keyword-count rubric (1 keyword match = C). No LinkedIn connection on file for Wolters Kluwer.",
+        "Company": "Wolters Kluwer",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "recEzu9tUoP0qeGsE",
+      "createdTime": "2026-06-12T04:06:36.000Z",
+      "fields": {
+        "Date": "2026-05-29",
+        "Role": "System Integration Lab Manager - Program Manager 3",
+        "Notes": "auto-submit re-run 2026-06-06",
+        "Company": "northrop grumman",
+        "Status": "Blocked",
+        "Tracker #": 128,
+        "Grade": "B"
+      }
+    },
+    {
+      "id": "recFEjBQy3GvP9DQC",
+      "createdTime": "2026-06-12T04:08:07.000Z",
+      "fields": {
+        "Date": "2026-06-03",
+        "Role": "Senior Product Manager - Pharma Analytics Products",
+        "Notes": "auto-submit re-run 2026-06-07",
+        "Company": "cvshealth",
+        "Status": "Blocked",
+        "Tracker #": 174,
+        "Grade": "A"
+      }
+    },
+    {
+      "id": "recFGWkSXHqpz5RNu",
+      "createdTime": "2026-06-12T04:08:07.000Z",
+      "fields": {
+        "Date": "2026-06-02",
+        "Role": "Senior Manager   Scrum Master R0920783",
+        "Notes": "auto-submit re-run 2026-06-04",
+        "Company": "cvshealth",
+        "Status": "Blocked",
+        "Tracker #": 147,
+        "Grade": "A"
+      }
+    },
+    {
+      "id": "recFbFQRKLeAI2nBw",
+      "createdTime": "2026-06-12T04:08:07.000Z",
+      "fields": {
+        "Date": "2026-06-03",
+        "Role": "Manager   Scrum Master R0918501",
+        "Notes": "auto-submit re-run 2026-06-07",
+        "Company": "cvshealth",
+        "Status": "Blocked",
+        "Tracker #": 172,
+        "Grade": "A"
+      }
+    },
+    {
+      "id": "recFgdiMRqWUcOty3",
+      "createdTime": "2026-06-12T04:06:36.000Z",
+      "fields": {
+        "Date": "2026-05-28",
+        "Role": "Senior Project Manager, Delivery Coordinator",
+        "Notes": "auto-submit",
+        "Company": "humana",
+        "Status": "Blocked",
+        "Tracker #": 116,
+        "Grade": "A"
+      }
+    },
+    {
+      "id": "recFlpyI2dttnKgvI",
+      "createdTime": "2026-07-16T03:23:37.000Z",
+      "fields": {
+        "Role": "Senior Technical Product Manager",
+        "Company": "The Zebra",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "recFsFIRhsCZpvo0k",
+      "createdTime": "2026-06-12T04:04:47.000Z",
+      "fields": {
+        "Date": "2026-05-21",
+        "Role": "Technical Program Manager",
+        "Notes": "bat 6:10am — unverified (no confirm signal check pre-fix)",
+        "Company": "acorns",
+        "Status": "Submitted",
+        "Tracker #": 79,
+        "Grade": "4.0/5"
+      }
+    },
+    {
+      "id": "recFvw0khiRHS9UFQ",
+      "createdTime": "2026-06-12T04:04:47.000Z",
+      "fields": {
+        "Date": "2026-05-21",
+        "Role": "Sr Program Manager Data for Good",
+        "Notes": "bat 6:10am — unverified (no confirm signal check pre-fix)",
+        "Company": "databricks",
+        "Status": "Submitted",
+        "Tracker #": 81,
+        "Grade": "4.5/5"
+      }
+    },
+    {
+      "id": "recG3pO7EYtqbsO5A",
+      "createdTime": "2026-06-12T04:08:07.000Z",
+      "fields": {
+        "Date": "2026-06-03",
+        "Role": "Unknown Role",
+        "Notes": "auto-submit",
+        "Company": "northrop grumman",
+        "Status": "Blocked",
+        "Tracker #": 153,
+        "Grade": "B"
+      }
+    },
+    {
+      "id": "recG55OEV6MInzOT5",
+      "createdTime": "2026-06-12T04:04:47.000Z",
+      "fields": {
+        "Date": "2026-05-21",
+        "Role": "Sr Staff TPM Reliability",
+        "Notes": "bat 6:10am — unverified (no confirm signal check pre-fix)",
+        "Company": "databricks",
+        "Status": "Submitted",
+        "Tracker #": 78,
+        "Grade": "4.5/5"
+      }
+    },
+    {
+      "id": "recGOWMCb2UNjZ5Ui",
+      "createdTime": "2026-06-12T04:08:07.000Z",
+      "fields": {
+        "Date": "2026-06-02",
+        "Role": "Senior Product Manager - Database AI Optimization",
+        "Notes": "auto-submit re-run 2026-06-03",
+        "Company": "datadog",
+        "Status": "Blocked",
+        "Tracker #": 145,
+        "Grade": "B"
+      }
+    },
+    {
+      "id": "recGTmNs8eKatHxIx",
+      "createdTime": "2026-07-22T05:17:55.000Z",
+      "fields": {
+        "Role": "Staff Product Manager - Security",
+        "Company": "Lambda Labs",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "recGToyfNgvkScnvx",
+      "createdTime": "2026-07-14T05:16:22.000Z",
+      "fields": {
+        "Role": "Product Manager II - Security Graph Experience",
+        "Company": "Datadog",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "recGUXq26EE1eXGXH",
+      "createdTime": "2026-06-12T04:06:36.000Z",
+      "fields": {
+        "Date": "2026-05-28",
+        "Role": "Careers at Workday",
+        "Notes": "auto-submit re-run 2026-06-07",
+        "Company": "workday",
+        "Status": "Blocked",
+        "Tracker #": 118,
+        "Grade": "A"
+      }
+    },
+    {
+      "id": "recH1qdLMbHUZZkXx",
+      "createdTime": "2026-06-12T04:06:36.000Z",
+      "fields": {
+        "Date": "2026-05-23",
+        "Role": "Staff Product Manager, Dashboard",
+        "Notes": "auto-submit re-run 2026-05-24",
+        "Company": "stripe",
+        "Status": "Blocked",
+        "Tracker #": 88,
+        "Grade": "A"
+      }
+    },
+    {
+      "id": "recH7OtRmj1wXzH9p",
+      "createdTime": "2026-06-12T04:08:07.000Z",
+      "fields": {
+        "Date": "2026-06-03",
+        "Role": "Lead Program Manager Supply Chain (Minneapolis)",
+        "Notes": "auto-submit re-run 2026-06-03",
+        "Company": "target",
+        "Status": "Blocked",
+        "Tracker #": 163,
+        "Grade": "A"
+      }
+    },
+    {
+      "id": "recHHjuG56JeLenBV",
+      "createdTime": "2026-06-12T04:06:36.000Z",
+      "fields": {
+        "Date": "2026-05-28",
+        "Role": "Senior Manager - Digital Product Manager",
+        "Notes": "auto-submit re-run 2026-06-02",
+        "Company": "cvshealth",
+        "Status": "Blocked",
+        "Tracker #": 111,
+        "Grade": "A"
+      }
+    },
+    {
+      "id": "recHIsOVRZdJOwb4T",
+      "createdTime": "2026-07-22T05:17:55.000Z",
+      "fields": {
+        "Role": "Group Product Manager, Platform (Manager)",
+        "Company": "Lambda Labs",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "recHZiAXKmcCXtfN5",
+      "createdTime": "2026-07-22T05:17:55.000Z",
+      "fields": {
+        "Role": "Senior Product Manager - Platform, Policy, Approval and Inbox",
+        "Company": "Delinea",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "recHZsL7vQNyJxPXy",
+      "createdTime": "2026-06-12T04:08:07.000Z",
+      "fields": {
+        "Date": "2026-06-03",
+        "Role": "Release Train Engineer - Resilient Connectivity Products (Onsite)",
+        "Notes": "auto-submit re-run 2026-06-03",
+        "Company": "raytheon",
+        "Status": "Blocked",
+        "Tracker #": 156,
+        "Grade": "A"
+      }
+    },
+    {
+      "id": "recHp3yg5pAq6JOyg",
+      "createdTime": "2026-06-18T05:14:30.000Z",
+      "fields": {
+        "Role": "Product Manager, Workspaces",
+        "Company": "Notion",
+        "Grade": "B"
+      }
+    },
+    {
+      "id": "recHuoiEK5y4WkjLk",
+      "createdTime": "2026-06-12T04:04:47.000Z",
+      "fields": {
+        "Date": "2026-05-21",
+        "Role": "Sr TPM Professional Services",
+        "Notes": "bat 6:10am — unverified (no confirm signal check pre-fix)",
+        "Company": "databricks",
+        "Status": "Submitted",
+        "Tracker #": 80,
+        "Grade": "4.5/5"
+      }
+    },
+    {
+      "id": "recI6v62vg9SeEYpg",
+      "createdTime": "2026-06-12T04:04:47.000Z",
+      "fields": {
+        "Date": "2026-05-07",
+        "Role": "Senior Technical Program Manager, Product",
+        "Notes": "auto-submit re-run 2026-05-21",
+        "Company": "gleanwork",
+        "Status": "Blocked",
+        "Tracker #": 5,
+        "Grade": "4.0/5"
+      }
+    },
+    {
+      "id": "recIK13J8L0GBX7wz",
+      "createdTime": "2026-07-03T05:16:50.000Z",
+      "fields": {
+        "Role": "Senior Product Manager",
+        "Company": "Samsara",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "recISPMc6oM00B8Yl",
+      "createdTime": "2026-06-18T05:14:30.000Z",
+      "fields": {
+        "Role": "Scrum Master",
+        "Company": "Impiricus",
+        "Grade": "B"
+      }
+    },
+    {
+      "id": "recITKYscXlYMcNjS",
+      "createdTime": "2026-07-07T05:18:31.000Z",
+      "fields": {
+        "Role": "Technical Program Manager Lead, Network Delivery Implementation",
+        "Notes": "Manually filed by Rahil via job-board screenshot, not auto-scanned. Graded with worker-grader.mjs keyword-count rubric (2 keyword matches = B). 12 LinkedIn connections on file at Google, incl. Naeem Charania (Program Manager, Google Search) — a closer titled match than Grace Kang; engine convention uses first list match only, worth a manual look.",
+        "Company": "Google",
+        "Grade": "B"
+      }
+    },
+    {
+      "id": "recIpFVFkf5VFF1Pv",
+      "createdTime": "2026-06-12T04:06:36.000Z",
+      "fields": {
+        "Date": "2026-05-23",
+        "Role": "Commercial Solutions Program Manager",
+        "Notes": "auto-submit re-run 2026-05-24",
+        "Company": "stripe",
+        "Status": "Blocked",
+        "Tracker #": 87,
+        "Grade": "B"
+      }
+    },
+    {
+      "id": "recItuujEFeazCTZ4",
+      "createdTime": "2026-07-24T05:17:43.000Z",
+      "fields": {
+        "Role": "Product Manager, Zero Trust Authentication",
+        "Company": "Okta",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "recJ000zI3zLrTsuS",
+      "createdTime": "2026-06-12T04:08:07.000Z",
+      "fields": {
+        "Date": "2026-06-03",
+        "Role": "Senior PD Program Manager – CST – Memphis, TN or Lafayette, CO (Onsite)",
+        "Notes": "auto-submit re-run 2026-06-07",
+        "Company": "medtronic",
+        "Status": "Blocked",
+        "Tracker #": 179,
+        "Grade": "A"
+      }
+    },
+    {
+      "id": "recJ1a8wqYSREROb9",
+      "createdTime": "2026-07-04T05:16:44.000Z",
+      "fields": {
+        "Role": "Senior Product Manager, AI",
+        "Company": "Brex",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "recJ7SYKn6k1eu03P",
+      "createdTime": "2026-07-16T03:23:37.000Z",
+      "fields": {
+        "Role": "Product Manager",
+        "Company": "Delinea",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "recJQ60CEDzx4SoO6",
+      "createdTime": "2026-06-12T04:04:47.000Z",
+      "fields": {
+        "Date": "2026-05-21",
+        "Role": "Technical Program Manager Risk",
+        "Notes": "TD-19: search URL not listing URL",
+        "Company": "stripe",
+        "Status": "Blocked",
+        "Tracker #": 71,
+        "Grade": "—"
+      }
+    },
+    {
+      "id": "recJRUHB1w5FWVUiu",
+      "createdTime": "2026-06-18T05:14:29.000Z",
+      "fields": {
+        "Role": "Program Manager, GTM Planning",
+        "Notes": "Covered by live-2026-06-12-30. The consolidated referral ask to Shamila leads with Enterprise Servicing and Capital Collections. Not sending a separate message for this posting, flag it if you want it added to the ask.",
+        "Company": "Stripe",
+        "Grade": "B"
+      }
+    },
+    {
+      "id": "recJdZni4B86NDeVf",
+      "createdTime": "2026-06-12T04:06:36.000Z",
+      "fields": {
+        "Date": "2026-05-29",
+        "Role": "Global Trade (GT) Program Management Office (PMO) Learning & Site Lead Program Lead (Remote)",
+        "Notes": "auto-submit re-run 2026-06-03",
+        "Company": "raytheon",
+        "Status": "Blocked",
+        "Tracker #": 130,
+        "Grade": "A"
+      }
+    },
+    {
+      "id": "recK2AHdbNTfLajiX",
+      "createdTime": "2026-07-04T05:16:44.000Z",
+      "fields": {
+        "Role": "Sr. Product Manager",
+        "Company": "Okta",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "recK9dwPk2ndyRi5d",
+      "createdTime": "2026-06-30T13:29:41.000Z",
+      "fields": {
+        "Role": "Coupa Program Manager (Afternoon Shift)",
+        "Company": "Anaplan",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "recKgd33WPx5Fuyn7",
+      "createdTime": "2026-06-12T04:08:07.000Z",
+      "fields": {
+        "Date": "2026-06-03",
+        "Role": "Senior Product Manager",
+        "Notes": "auto-submit re-run 2026-06-07",
+        "Company": "wf",
+        "Status": "Blocked",
+        "Tracker #": 176,
+        "Grade": "A"
+      }
+    },
+    {
+      "id": "recKmKnCmghG60vC1",
+      "createdTime": "2026-06-12T04:06:36.000Z",
+      "fields": {
+        "Date": "2026-05-21",
+        "Role": "Technical Program Manager",
+        "Notes": "bat 6:10am — unverified (no confirm signal check pre-fix)",
+        "Company": "spruceid",
+        "Status": "Submitted",
+        "Tracker #": 83,
+        "Grade": "4.0/5"
+      }
+    },
+    {
+      "id": "recKrWTEWK2aZjAiM",
+      "createdTime": "2026-07-16T03:23:37.000Z",
+      "fields": {
+        "Role": "Staff Product Manager, Issuing",
+        "Company": "Stripe",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "recKsdKwB8T2A2yud",
+      "createdTime": "2026-07-05T05:17:21.000Z",
+      "fields": {
+        "Role": "Product Manager, Intake & Orchestration - 11636",
+        "Company": "Coupa Software",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "recKuThdrc3rsd4vf",
+      "createdTime": "2026-06-12T04:06:36.000Z",
+      "fields": {
+        "Date": "2026-05-29",
+        "Role": "Senior Manager, Cyber Program Manager (Remote)",
+        "Notes": "auto-submit re-run 2026-06-03",
+        "Company": "raytheon",
+        "Status": "Blocked",
+        "Tracker #": 131,
+        "Grade": "A"
+      }
+    },
+    {
+      "id": "recL0NRSFXkL7KD4n",
+      "createdTime": "2026-06-12T04:08:07.000Z",
+      "fields": {
+        "Date": "2026-06-03",
+        "Role": "Engineering Program Manager - Santa Ana, CA",
+        "Notes": "auto-submit re-run 2026-06-06",
+        "Company": "medtronic",
+        "Status": "Blocked",
+        "Tracker #": 167,
+        "Grade": "B"
+      }
+    },
+    {
+      "id": "recLCX0vZejmBxURX",
+      "createdTime": "2026-06-12T04:04:47.000Z",
+      "fields": {
+        "Date": "2026-05-14",
+        "Role": "Senior Scrum Master",
+        "Notes": "auto-submit re-run 2026-05-21",
+        "Company": "anaplan",
+        "Status": "Blocked",
+        "Tracker #": 31,
+        "Grade": "5.0/5"
+      }
+    },
+    {
+      "id": "recLDv8N9qltZAIVb",
+      "createdTime": "2026-06-21T08:02:16.000Z",
+      "fields": {
+        "Role": "Senior Principal Product Manager - Enterprise",
+        "Company": "Toast",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "recLd0648y0ceCqMz",
+      "createdTime": "2026-07-07T05:18:31.000Z",
+      "fields": {
+        "Role": "Technical Program Manager, Link",
+        "Company": "Stripe",
+        "Grade": "B"
+      }
+    },
+    {
+      "id": "recLwamWmzR0dr4g1",
+      "createdTime": "2026-06-26T05:15:06.000Z",
+      "fields": {
+        "Role": "[Job-30043] Data Product Manager, Brazil",
+        "Company": "CI&T",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "recM8BVTjECAqqfPi",
+      "createdTime": "2026-06-12T04:04:47.000Z",
+      "fields": {
+        "Date": "2026-05-19",
+        "Role": "IT Delivery Manager",
+        "Notes": "auto-submit",
+        "Company": "careers",
+        "Status": "Evaluated",
+        "Tracker #": 65,
+        "Grade": "4.0/5"
+      }
+    },
+    {
+      "id": "recM8esBQAXen8VVe",
+      "createdTime": "2026-06-12T04:04:47.000Z",
+      "fields": {
+        "Date": "2026-05-13",
+        "Role": "Senior Principal, Technical Program Management (Research & Development)",
+        "Notes": "auto-submit re-run 2026-05-21",
+        "Company": "twilio",
+        "Status": "Blocked",
+        "Tracker #": 17,
+        "Grade": "5.0/5"
+      }
+    },
+    {
+      "id": "recMDtRcU6Kj3D15b",
+      "createdTime": "2026-06-12T04:04:47.000Z",
+      "fields": {
+        "Date": "2026-05-21",
+        "Role": "PM GTM Strategic Programs",
+        "Notes": "TD-19: search URL not listing URL",
+        "Company": "stripe",
+        "Status": "Blocked",
+        "Tracker #": 75,
+        "Grade": "—"
+      }
+    },
+    {
+      "id": "recMwaKtMQKND9iQH",
+      "createdTime": "2026-06-12T04:06:36.000Z",
+      "fields": {
+        "Date": "2026-05-28",
+        "Role": "Senior Project Manager",
+        "Notes": "auto-submit re-run 2026-06-03",
+        "Company": "motorolasolutions",
+        "Status": "Blocked",
+        "Tracker #": 104,
+        "Grade": "B"
+      }
+    },
+    {
+      "id": "recNBLeiXXqHIGRbg",
+      "createdTime": "2026-06-12T04:04:47.000Z",
+      "fields": {
+        "Date": "2026-05-21",
+        "Role": "Commercial Solutions PM",
+        "Notes": "TD-19: search URL not listing URL",
+        "Company": "stripe",
+        "Status": "Blocked",
+        "Tracker #": 72,
+        "Grade": "—"
+      }
+    },
+    {
+      "id": "recNHw0DCTqxlOel0",
+      "createdTime": "2026-06-12T04:08:07.000Z",
+      "fields": {
+        "Date": "2026-06-03",
+        "Role": "Sr PD Program Manager - EU MDR Leader",
+        "Notes": "auto-submit re-run 2026-06-04",
+        "Company": "medtronic",
+        "Status": "Blocked",
+        "Tracker #": 178,
+        "Grade": "A"
+      }
+    },
+    {
+      "id": "recNP1pDJ2P8CThas",
+      "createdTime": "2026-06-12T04:08:07.000Z",
+      "fields": {
+        "Date": "2026-06-02",
+        "Role": "Senior Technical Project Manager - Tac Comm (Onsite)",
+        "Notes": "auto-submit re-run 2026-06-03",
+        "Company": "raytheon",
+        "Status": "Blocked",
+        "Tracker #": 150,
+        "Grade": "B"
+      }
+    },
+    {
+      "id": "recNQ4Pu0EcRw9uYP",
+      "createdTime": "2026-06-18T05:14:29.000Z",
+      "fields": {
+        "Role": "Project Manager",
+        "Company": "AHEAD",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "recNQFun5E1RiZi19",
+      "createdTime": "2026-06-18T05:14:31.000Z",
+      "fields": {
+        "Role": "Marketing Operations Program Manager, Sold Funnel",
+        "Notes": "Covered by live-2026-06-12-30. The consolidated referral ask to Shamila leads with Enterprise Servicing and Capital Collections. Not sending a separate message for this posting, flag it if you want it added to the ask.",
+        "Company": "Stripe",
+        "Grade": "B"
+      }
+    },
+    {
+      "id": "recNRMmAj5XCR5Ugu",
+      "createdTime": "2026-07-04T05:16:44.000Z",
+      "fields": {
+        "Role": "Business Strategy Analyst/Program Manager - 11634",
+        "Company": "Coupa Software",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "recNZ7ZfvTdzMsjCR",
+      "createdTime": "2026-06-12T04:08:07.000Z",
+      "fields": {
+        "Date": "2026-06-03",
+        "Role": "IT Program Manager",
+        "Notes": "auto-submit re-run 2026-06-04",
+        "Company": "medtronic",
+        "Status": "Blocked",
+        "Tracker #": 159,
+        "Grade": "A"
+      }
+    },
+    {
+      "id": "recO6lts4M7LwrPcC",
+      "createdTime": "2026-06-12T04:04:47.000Z",
+      "fields": {
+        "Date": "2026-05-14",
+        "Role": "Unknown Role",
+        "Notes": "auto-submit re-run 2026-05-21",
+        "Company": "brex",
+        "Status": "Blocked",
+        "Tracker #": 37,
+        "Grade": "4.0/5"
+      }
+    },
+    {
+      "id": "recOPKo7IX2Cu1LsO",
+      "createdTime": "2026-06-12T04:08:07.000Z",
+      "fields": {
+        "Date": "2026-06-03",
+        "Role": "Principal Technical Program Manager - AI",
+        "Notes": "auto-submit re-run 2026-06-03",
+        "Company": "motorolasolutions",
+        "Status": "Blocked",
+        "Tracker #": 161,
+        "Grade": "A"
+      }
+    },
+    {
+      "id": "recOXLpeqdOoFyFnX",
+      "createdTime": "2026-06-12T04:06:36.000Z",
+      "fields": {
+        "Date": "2026-05-23",
+        "Role": "Senior Product Manager",
+        "Notes": "auto-submit re-run 2026-05-26",
+        "Company": "humana",
+        "Status": "Blocked",
+        "Tracker #": 91,
+        "Grade": "B"
+      }
+    },
+    {
+      "id": "recOxnQepVH9IaOJt",
+      "createdTime": "2026-07-22T05:17:56.000Z",
+      "fields": {
+        "Role": "Principal Technical Program Manager, Toast IQ",
+        "Company": "Toast",
+        "Grade": "B"
+      }
+    },
+    {
+      "id": "recPFAO6nwcFEwl0J",
+      "createdTime": "2026-06-12T04:08:07.000Z",
+      "fields": {
+        "Date": "2026-06-03",
+        "Role": "Senior Technical Product Manager - AI Decision Intelligence Platform",
+        "Notes": "auto-submit re-run 2026-06-07",
+        "Company": "cvshealth",
+        "Status": "Blocked",
+        "Tracker #": 173,
+        "Grade": "A"
+      }
+    },
+    {
+      "id": "recPlfJXqrAwpVuw2",
+      "createdTime": "2026-06-12T04:06:36.000Z",
+      "fields": {
+        "Date": "2026-05-28",
+        "Role": "Lead Product Manager, Enabling Platforms",
+        "Notes": "auto-submit re-run 2026-06-01",
+        "Company": "humana",
+        "Status": "Blocked",
+        "Tracker #": 117,
+        "Grade": "A"
+      }
+    },
+    {
+      "id": "recPnXOwudoXPADvf",
+      "createdTime": "2026-07-24T05:17:42.000Z",
+      "fields": {
+        "Role": "Senior Product Manager - Okta Device Access",
+        "Company": "Okta",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "recPyR0f1B2y0PCsO",
+      "createdTime": "2026-06-21T08:02:16.000Z",
+      "fields": {
+        "Role": "Senior Principal Product Manager, Applications",
+        "Company": "Anaplan",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "recQDArMtV13SiCZX",
+      "createdTime": "2026-06-18T05:14:30.000Z",
+      "fields": {
+        "Role": "Program Manager, Third Party Risk",
+        "Notes": "Covered by live-2026-06-12-30. The consolidated referral ask to Shamila leads with Enterprise Servicing and Capital Collections. Not sending a separate message for this posting, flag it if you want it added to the ask.",
+        "Company": "Stripe",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "recQq6stBKDLPXMmz",
+      "createdTime": "2026-06-12T04:06:36.000Z",
+      "fields": {
+        "Date": "2026-05-29",
+        "Role": "AD  Program Mgmt  Medicaid Ops PMO R 417835",
+        "Notes": "auto-submit re-run 2026-06-02",
+        "Company": "humana",
+        "Status": "Blocked",
+        "Tracker #": 132,
+        "Grade": "A"
+      }
+    },
+    {
+      "id": "recQyFTT1krUYEVGn",
+      "createdTime": "2026-06-12T04:08:07.000Z",
+      "fields": {
+        "Date": "2026-05-29",
+        "Role": "Manufacturing Professional Training Lead   Staff Project Manager R10234415",
+        "Notes": "auto-submit re-run 2026-06-02",
+        "Company": "northrop grumman",
+        "Status": "Blocked",
+        "Tracker #": 137,
+        "Grade": "B"
+      }
+    },
+    {
+      "id": "recRCtIAVo7E0bzUA",
+      "createdTime": "2026-07-14T05:16:22.000Z",
+      "fields": {
+        "Role": "Principal Program Manager, Technical Product Learning – Technical Solutions Enablement",
+        "Company": "Datadog",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "recRPzP4MxteFgDbf",
+      "createdTime": "2026-07-09T05:16:00.000Z",
+      "fields": {
+        "Role": "Technical Product Manager",
+        "Company": "Samsara",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "recRnWGwl3AsqX8ET",
+      "createdTime": "2026-06-12T04:04:47.000Z",
+      "fields": {
+        "Date": "2026-05-14",
+        "Role": "Principal Product Manager, Applications FP&A Domain",
+        "Notes": "auto-submit re-run 2026-05-28",
+        "Company": "anaplan",
+        "Status": "Blocked",
+        "Tracker #": 41,
+        "Grade": "4.0/5"
+      }
+    },
+    {
+      "id": "recRzzsh17k2SBln7",
+      "createdTime": "2026-07-13T05:17:45.000Z",
+      "fields": {
+        "Role": "Sr. Field Technical Program Manager, Forward Deployed Engineering",
+        "Notes": "RESTORED 2026-07-08 after archive-stale reaped it (r14 recurrence #4). Original Created At: 2026-07-03. Waiting on Rahil → warm referral via Denny Lee.",
+        "Company": "Databricks",
+        "Grade": "B"
+      }
+    },
+    {
+      "id": "recS6Jkdl88AHoekj",
+      "createdTime": "2026-06-21T08:02:16.000Z",
+      "fields": {
+        "Role": "Program Manager, Product",
+        "Notes": "Covered by live-2026-06-15-05. One consolidated message to Denny Lee covers both Databricks roles, Field Technical Program Manager and this Program Manager, Product role. See that card for the ready to send message.",
+        "Company": "Databricks",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "recS9N9i6MZDCzJfc",
+      "createdTime": "2026-07-04T05:16:44.000Z",
+      "fields": {
+        "Role": "Senior Product Manager",
+        "Company": "Anaplan",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "recSNnQwnTsqAHg0Z",
+      "createdTime": "2026-06-18T05:14:28.000Z",
+      "fields": {
+        "Role": "Staff Product Manager",
+        "Company": "Twilio",
+        "Grade": "B"
+      }
+    },
+    {
+      "id": "recSm5jZ2ZdAyAR1O",
+      "createdTime": "2026-06-12T04:06:36.000Z",
+      "fields": {
+        "Date": "2026-05-23",
+        "Role": "Sr. Program Manager, Data for Good",
+        "Notes": "auto-submit re-run 2026-06-07",
+        "Company": "databricks",
+        "Status": "Blocked",
+        "Tracker #": 86,
+        "Grade": "A"
+      }
+    },
+    {
+      "id": "recSoqUYLJee3PWIa",
+      "createdTime": "2026-07-02T05:16:52.000Z",
+      "fields": {
+        "Role": "Senior Product Manager - Agentic Identity",
+        "Company": "Highspot",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "recT29Qj3CCZD10yq",
+      "createdTime": "2026-06-26T05:15:06.000Z",
+      "fields": {
+        "Role": "Product Manager, Funnel Optimization",
+        "Company": "LendingTree",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "recT39Al7yj38XqMo",
+      "createdTime": "2026-07-24T05:17:42.000Z",
+      "fields": {
+        "Role": "Principal Product Manager - Product Catalog",
+        "Company": "Twilio",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "recThjSxWbA1tb8rj",
+      "createdTime": "2026-06-12T04:06:36.000Z",
+      "fields": {
+        "Date": "2026-05-28",
+        "Role": "Commercial Strategy Program Manager  Global Commercial Office   Remote  USA  R63944 2",
+        "Notes": "auto-submit re-run 2026-06-02",
+        "Company": "medtronic",
+        "Status": "Blocked",
+        "Tracker #": 102,
+        "Grade": "B"
+      }
+    },
+    {
+      "id": "recTiL7by7eeKLtnC",
+      "createdTime": "2026-07-07T05:18:31.000Z",
+      "fields": {
+        "Role": "Project/Program Manager",
+        "Notes": "Manually filed by Rahil via job-board screenshot, not auto-scanned. Graded with worker-grader.mjs keyword-count rubric (1 keyword match = C). 4 LinkedIn connections on file at CG Infinity total (incl. a Principal); Connection Name shows first match per engine convention.",
+        "Company": "CG Infinity",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "recTx2lkBBt7bfvUy",
+      "createdTime": "2026-06-23T05:14:54.000Z",
+      "fields": {
+        "Role": "Product Manager II, AI & Data Security",
+        "Company": "Datadog",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "recUHnFKoyM4k2Y1J",
+      "createdTime": "2026-06-12T04:04:47.000Z",
+      "fields": {
+        "Date": "2026-05-07",
+        "Role": "Senior Program Manager, Dedicated Workplace Teams",
+        "Notes": "auto-submit re-run 2026-05-21",
+        "Company": "springhealth66",
+        "Status": "Blocked",
+        "Tracker #": 3,
+        "Grade": "5.0/5"
+      }
+    },
+    {
+      "id": "recULeHkFQZpFLUoB",
+      "createdTime": "2026-07-09T05:16:00.000Z",
+      "fields": {
+        "Role": "Sr Product Manager - Agentic Intake & Orchestration -11632",
+        "Company": "Coupa Software",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "recUToPqfonQYChDF",
+      "createdTime": "2026-06-12T04:08:07.000Z",
+      "fields": {
+        "Date": "2026-06-03",
+        "Role": "Technical Program Manager R50459",
+        "Notes": "auto-submit",
+        "Company": "motorolasolutions",
+        "Status": "Blocked",
+        "Tracker #": 151,
+        "Grade": "B"
+      }
+    },
+    {
+      "id": "recUaVzqjlFESuCQ9",
+      "createdTime": "2026-06-12T04:06:36.000Z",
+      "fields": {
+        "Date": "2026-05-28",
+        "Role": "Senior Supply Chain Program Manager",
+        "Notes": "auto-submit re-run 2026-06-03",
+        "Company": "medtronic",
+        "Status": "Blocked",
+        "Tracker #": 121,
+        "Grade": "B"
+      }
+    },
+    {
+      "id": "recUd7X4IPPzN3NHV",
+      "createdTime": "2026-07-24T05:17:42.000Z",
+      "fields": {
+        "Role": "Senior Scrum Master",
+        "Company": "AHEAD",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "recUfk9wZcHNXMUQX",
+      "createdTime": "2026-07-11T05:15:14.000Z",
+      "fields": {
+        "Role": "Staff Product Manager, Advertiser Experience",
+        "Company": "Pinterest",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "recUjgGmQC2rt6T2K",
+      "createdTime": "2026-06-12T04:08:07.000Z",
+      "fields": {
+        "Date": "2026-05-29",
+        "Role": "Command Center (title truncated — verify)",
+        "Notes": "row reconstructed 2026-06-01 after file truncation; verify role title",
+        "Company": "motorolasolutions",
+        "Status": "Blocked",
+        "Tracker #": 139,
+        "Grade": "B"
+      }
+    },
+    {
+      "id": "recUz0LYLB1gKeFn9",
+      "createdTime": "2026-06-12T04:06:36.000Z",
+      "fields": {
+        "Date": "2026-05-29",
+        "Role": "Senior Project Manager  Delivery Coordinator R 417099 1",
+        "Notes": "auto-submit re-run 2026-06-02",
+        "Company": "humana",
+        "Status": "Blocked",
+        "Tracker #": 126,
+        "Grade": "A"
+      }
+    },
+    {
+      "id": "recV52r7BQQD73Unb",
+      "createdTime": "2026-06-18T05:14:28.000Z",
+      "fields": {
+        "Role": "Technical Program Manager (TPM)",
+        "Company": "Spruce Systems",
+        "Grade": "B"
+      }
+    },
+    {
+      "id": "recVJPGbf55i8svuP",
+      "createdTime": "2026-06-18T05:14:31.000Z",
+      "fields": {
+        "Role": "Technical Program Manager - Security",
+        "Company": "Outreach",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "recVTcJFKM0E7fBrs",
+      "createdTime": "2026-06-12T04:06:36.000Z",
+      "fields": {
+        "Date": "2026-05-28",
+        "Role": "Sustainment Program Manager",
+        "Notes": "auto-submit re-run 2026-06-02",
+        "Company": "raytheon",
+        "Status": "Blocked",
+        "Tracker #": 107,
+        "Grade": "A"
+      }
+    },
+    {
+      "id": "recVtWvM8BexU6fo4",
+      "createdTime": "2026-06-12T04:06:36.000Z",
+      "fields": {
+        "Date": "2026-05-28",
+        "Role": "Senior Product Manager R 416093",
+        "Notes": "auto-submit re-run 2026-06-02",
+        "Company": "humana",
+        "Status": "Blocked",
+        "Tracker #": 101,
+        "Grade": "B"
+      }
+    },
+    {
+      "id": "recVxBNtsp8qnqSL6",
+      "createdTime": "2026-06-12T04:04:47.000Z",
+      "fields": {
+        "Date": "2026-05-14",
+        "Role": "Product Manager - Apps",
+        "Notes": "auto-submit re-run 2026-05-18",
+        "Company": "capitalrx",
+        "Status": "Evaluated",
+        "Tracker #": 39,
+        "Grade": "4.0/5"
+      }
+    },
+    {
+      "id": "recW036hwufvSYz2a",
+      "createdTime": "2026-06-12T04:08:07.000Z",
+      "fields": {
+        "Date": "2026-06-03",
+        "Role": "Lead AI Product Manager",
+        "Notes": "auto-submit re-run 2026-06-07",
+        "Company": "humana",
+        "Status": "Blocked",
+        "Tracker #": 165,
+        "Grade": "A"
+      }
+    },
+    {
+      "id": "recW1NYUpvUR0wzp2",
+      "createdTime": "2026-06-18T05:14:29.000Z",
+      "fields": {
+        "Role": "Program Manager, Communications",
+        "Company": "Anthropic",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "recWPWVfEdC3oZYNQ",
+      "createdTime": "2026-06-30T13:29:41.000Z",
+      "fields": {
+        "Role": "Partner Program Manager",
+        "Company": "Twilio",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "recWk148jbOkVJ8m5",
+      "createdTime": "2026-07-09T05:16:00.000Z",
+      "fields": {
+        "Role": "Senior Product Manager, Hardware (Stations)",
+        "Company": "Lyft",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "recWvtegSaVCm7soq",
+      "createdTime": "2026-06-12T04:06:36.000Z",
+      "fields": {
+        "Date": "2026-05-23",
+        "Role": "Commercial Strategy Program Manager, Global Commercial Office - Remote (USA)",
+        "Notes": "auto-submit re-run 2026-05-25",
+        "Company": "medtronic",
+        "Status": "Blocked",
+        "Tracker #": 92,
+        "Grade": "B"
+      }
+    },
+    {
+      "id": "recX3fmPOFaLMIwA3",
+      "createdTime": "2026-06-12T04:08:54.000Z",
+      "fields": {
+        "Date": "2026-06-05",
+        "Role": "Senior Project Manager   Combine Cycle Gas Power R5043439 2",
+        "Notes": "auto-submit",
+        "Company": "gevernova",
+        "Status": "Blocked",
+        "Tracker #": 185,
+        "Grade": "B"
+      }
+    },
+    {
+      "id": "recXBHKrENaEtvmnO",
+      "createdTime": "2026-07-13T05:17:45.000Z",
+      "fields": {
+        "Role": "Senior Product Manager - Cloud Infrastructure",
+        "Company": "Okta",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "recXHk8QfEdDRBeQc",
+      "createdTime": "2026-06-18T05:14:30.000Z",
+      "fields": {
+        "Role": "Sr. Technical Program Manager, Professional Services - Financial Services",
+        "Company": "Databricks",
+        "Grade": "A"
+      }
+    },
+    {
+      "id": "recXqDmsIRvcl3UT1",
+      "createdTime": "2026-06-12T04:08:07.000Z",
+      "fields": {
+        "Date": "2026-06-02",
+        "Role": "Value Stream Leader - Program Manager (Hybrid)",
+        "Notes": "auto-submit re-run 2026-06-02",
+        "Company": "raytheon",
+        "Status": "Blocked",
+        "Tracker #": 144,
+        "Grade": "B"
+      }
+    },
+    {
+      "id": "recXw1khyNyKpS3vW",
+      "createdTime": "2026-07-24T05:17:42.000Z",
+      "fields": {
+        "Role": "Staff Technical Program Manager",
+        "Company": "Duolingo",
+        "Grade": "B"
+      }
+    },
+    {
+      "id": "recXzIoCqfzHpRNBh",
+      "createdTime": "2026-07-13T05:17:45.000Z",
+      "fields": {
+        "Role": "Sr. Field Technical Program Manager, Forward Deployed Engineering - Public Sector",
+        "Notes": "RESTORED 2026-07-08 after archive-stale reaped it (r14 recurrence #4). Original Created At: 2026-07-03. Waiting on Rahil → warm referral via Denny Lee.",
+        "Company": "Databricks",
+        "Grade": "B"
+      }
+    },
+    {
+      "id": "recXzUwwxzRxgFNLV",
+      "createdTime": "2026-06-30T13:29:41.000Z",
+      "fields": {
+        "Role": "Technical Program Manager, Professional Services",
+        "Notes": "--- OUTREACH: Denny Lee (TPM Track) ---\nConnection request: Use existing drafted message - confirmed compatible with all TPM roles.\n\nInMail - TPM-optimized variant (use this OR existing if existing is TPM-leaning):\nSubject: TPM Opportunities at Databricks\n\nHey Denny,\n\nReaching out because Databricks keeps coming up in my research and the work you are doing in data and AI at that scale is hard to ignore.\n\nI am Rahil Nathani, a Senior Program Manager and Scrum Master with 13 years of experience across Toyota, healthcare, and fintech. PMP and A-CSM certified. I have spent a lot of that time running complex, cross-functional delivery programs - coordinating engineering, product, and customer-facing teams on timelines that do not have much room for error.\n\nI noticed a few TPM roles open on the Professional Services and Field teams that align well with my background in technical program delivery and external stakeholder engagement.\n\nWould love to grab 20 minutes to learn more about the team and see if there is a fit. Happy to connect however works best.\n\nThanks,\nRahil Nathani\nDallas, TX | PMP | A-CSM",
+        "Company": "Databricks",
+        "Grade": "B"
+      }
+    },
+    {
+      "id": "recY27zha48n3PYxR",
+      "createdTime": "2026-06-12T04:04:47.000Z",
+      "fields": {
+        "Date": "2026-05-21",
+        "Role": "Program Manager",
+        "Notes": "no-submit-button (board redirect)",
+        "Company": "mitratech",
+        "Status": "Blocked",
+        "Tracker #": 67,
+        "Grade": "—"
+      }
+    },
+    {
+      "id": "recYNVrNFwRrhdOUN",
+      "createdTime": "2026-06-18T05:14:28.000Z",
+      "fields": {
+        "Role": "Technical Program Manager, Core Infrastructure",
+        "Company": "Stripe",
+        "Grade": "A"
+      }
+    },
+    {
+      "id": "recYVj9ZwWjqk62sQ",
+      "createdTime": "2026-06-12T04:08:07.000Z",
+      "fields": {
+        "Date": "2026-06-02",
+        "Role": "Stripe Jobs",
+        "Notes": "auto-submit re-run 2026-06-07",
+        "Company": "stripe",
+        "Status": "Blocked",
+        "Tracker #": 148,
+        "Grade": "A"
+      }
+    },
+    {
+      "id": "recYvgU0SouFGT6YT",
+      "createdTime": "2026-06-12T04:06:36.000Z",
+      "fields": {
+        "Date": "2026-05-23",
+        "Role": "Technical Program Manager, Risk",
+        "Notes": "auto-submit",
+        "Company": "stripe",
+        "Status": "Blocked",
+        "Tracker #": 84,
+        "Grade": "B"
+      }
+    },
+    {
+      "id": "recZEQrAMBJd6pVNm",
+      "createdTime": "2026-06-18T05:14:31.000Z",
+      "fields": {
+        "Role": "Technical Program Manager",
+        "Company": "Plaud",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "recZVz0yXDo9Qo6G4",
+      "createdTime": "2026-06-12T04:06:36.000Z",
+      "fields": {
+        "Date": "2026-05-23",
+        "Role": "Current job openings at Databricks",
+        "Notes": "auto-submit re-run 2026-06-07",
+        "Company": "databricks",
+        "Status": "Blocked",
+        "Tracker #": 85,
+        "Grade": "A"
+      }
+    },
+    {
+      "id": "reca12bLPPdwyh7EW",
+      "createdTime": "2026-06-12T04:08:07.000Z",
+      "fields": {
+        "Date": "2026-06-03",
+        "Role": "Low Latency Infrastructure Senior Program Manager 26966413",
+        "Notes": "auto-submit re-run 2026-06-06",
+        "Company": "citi",
+        "Status": "Blocked",
+        "Tracker #": 170,
+        "Grade": "A"
+      }
+    },
+    {
+      "id": "reca2XPQ2NxDXJyCf",
+      "createdTime": "2026-07-02T05:16:52.000Z",
+      "fields": {
+        "Role": "Senior Product Manager - Workforce",
+        "Company": "Delinea",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "recaB5hA8meLzGrsO",
+      "createdTime": "2026-06-18T05:14:30.000Z",
+      "fields": {
+        "Role": "Product Manager",
+        "Company": "Linear",
+        "Grade": "B"
+      }
+    },
+    {
+      "id": "recaP0JwTgf0oUDAM",
+      "createdTime": "2026-07-10T05:16:25.000Z",
+      "fields": {
+        "Role": "Product Manager",
+        "Company": "PAR Technology",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "recaQXUAtTscVtx7w",
+      "createdTime": "2026-06-12T04:08:07.000Z",
+      "fields": {
+        "Date": "2026-06-02",
+        "Role": "Principal Technical Project Manager - Tac Comm (onsite)",
+        "Notes": "auto-submit re-run 2026-06-03",
+        "Company": "raytheon",
+        "Status": "Blocked",
+        "Tracker #": 149,
+        "Grade": "B"
+      }
+    },
+    {
+      "id": "recaU88lQilAkf88D",
+      "createdTime": "2026-07-05T05:17:21.000Z",
+      "fields": {
+        "Role": "Technical Program Manager",
+        "Notes": "Manually filed by Rahil via job-board screenshot, not auto-scanned. Graded with worker-grader.mjs keyword-count rubric (2 keyword matches = B). No LinkedIn connection on file for Leonardo DRS.",
+        "Company": "Leonardo DRS",
+        "Grade": "B"
+      }
+    },
+    {
+      "id": "recaVdJrADHlUEp9z",
+      "createdTime": "2026-07-05T05:17:21.000Z",
+      "fields": {
+        "Role": "Principal Product Manager, Integration Platform - 11637",
+        "Company": "Coupa Software",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "recanlBl30snFqVMG",
+      "createdTime": "2026-06-30T13:29:41.000Z",
+      "fields": {
+        "Role": "Product Manager, EMEA Local Payment Methods",
+        "Notes": "--- CONNECTION REQUEST (231 chars) ---\nHi Shamila, I came across your work at Stripe on EMEA payment methods and was genuinely impressed by the scope. I am a Sr. PM/Scrum Master with 13 years across fintech and healthcare exploring PM roles at Stripe. Would love to connect.\n\n--- INMAIL ---\nSubject: Sr. PM Interest - Stripe EMEA Payments\n\nHi Shamila,\n\nI hope this finds you well. Your work on local payment method coverage across EMEA caught my attention - the complexity of navigating regulatory requirements, local payment schemes, and product delivery at Stripe's scale is a genuinely interesting problem space.\n\nI am Rahil Nathani, a Senior Program Manager and Scrum Master with 13 years of experience across Toyota, healthcare, and fintech. I hold a PMP and A-CSM, and I have led cross-functional programs where regulatory, engineering, and go-to-market stakeholders had to move in sync - which maps closely to what your team is navigating.\n\nI am currently exploring Sr. PM and TPM roles, and the EMEA Local Payment Methods role stood out as a strong fit. I would love to hear your perspective on what makes someone successful in this space and learn more about the team's priorities.\n\nWould you have 20 minutes for a quick conversation? Happy to work around your schedule.\n\nThanks for your time,\nRahil Nathani\nDallas, TX | PMP | A-CSM",
+        "Company": "Stripe",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "recasDZQpHDmgDkWD",
+      "createdTime": "2026-06-25T05:16:38.000Z",
+      "fields": {
+        "Role": "Product Manager II - Application Performance Monitoring",
+        "Company": "Datadog",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "recaw7YdfWsSXfyh9",
+      "createdTime": "2026-06-12T04:08:54.000Z",
+      "fields": {
+        "Date": "2026-06-05",
+        "Role": "Senior Lead Digital Product Manager",
+        "Notes": "auto-submit re-run 2026-06-07",
+        "Company": "wf",
+        "Status": "Blocked",
+        "Tracker #": 195,
+        "Grade": "A"
+      }
+    },
+    {
+      "id": "recaykCPJtr6e1IWS",
+      "createdTime": "2026-06-26T05:15:06.000Z",
+      "fields": {
+        "Role": "Principal Product Manager, IAM Security & Agentic Identity",
+        "Company": "Okta",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "recb6OObIa2VljNpk",
+      "createdTime": "2026-06-18T05:14:31.000Z",
+      "fields": {
+        "Role": "Technical Program Manager, Data Science",
+        "Company": "Figma",
+        "Grade": "B"
+      }
+    },
+    {
+      "id": "recbDwRRY8UckXZmu",
+      "createdTime": "2026-07-22T05:17:56.000Z",
+      "fields": {
+        "Role": "Principal Product Manager, Hardware",
+        "Company": "Lambda Labs",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "recbX9bReUAeXBh4d",
+      "createdTime": "2026-06-12T04:04:47.000Z",
+      "fields": {
+        "Date": "2026-05-14",
+        "Role": "Staff Technical Program Manager",
+        "Notes": "auto-submit re-run 2026-05-21",
+        "Company": "okta",
+        "Status": "Blocked",
+        "Tracker #": 36,
+        "Grade": "4.0/5"
+      }
+    },
+    {
+      "id": "recbizyS1ZwgvWUCK",
+      "createdTime": "2026-06-30T13:29:41.000Z",
+      "fields": {
+        "Role": "Sr. Program Manager, Accenture Business Group",
+        "Notes": "--- OUTREACH: Denny Lee (PM Track) ---\nConnection request: Use existing drafted message - confirmed compatible with PM roles.\n\nInMail - PM-optimized variant (recommend over TPM-leaning existing draft for this card):\nSubject: Sr. PM Opportunities at Databricks\n\nHey Denny,\n\nReaching out because Databricks keeps coming up in my research and the product vision - across the data lakehouse, AI, and partner ecosystem - is genuinely compelling.\n\nI am Rahil Nathani, a Senior Program Manager and Product Manager with 13 years of experience across Toyota, healthcare, and fintech. PMP and A-CSM certified. I have owned product strategy and delivery programs end to end, working closely with engineering, sales, and partners to bring complex products to market.\n\nI noticed several open PM roles - including Sr. Program Manager in the Accenture Business Group - that look like a strong fit. I would love to learn more about the roadmap and hear your take on where the team is headed.\n\nWould you have 20 minutes for a quick chat? Happy to connect however works best.\n\nThanks,\nRahil Nathani\nDallas, TX | PMP | A-CSM",
+        "Company": "Databricks",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "recbmLg4EwAFOfRLp",
+      "createdTime": "2026-07-04T05:16:44.000Z",
+      "fields": {
+        "Role": "Sr. Product Manager",
+        "Company": "Okta",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "recc1GjBSFoHH2nxS",
+      "createdTime": "2026-06-12T04:04:47.000Z",
+      "fields": {
+        "Date": "2026-05-07",
+        "Role": "Senior Technical Program Manager",
+        "Notes": "auto-submit re-run 2026-05-21",
+        "Company": "mercury",
+        "Status": "Blocked",
+        "Tracker #": 4,
+        "Grade": "4.0/5"
+      }
+    },
+    {
+      "id": "recc3NE5Bjf7Hshig",
+      "createdTime": "2026-06-18T05:14:30.000Z",
+      "fields": {
+        "Role": "Digital Customer Success Program Manager",
+        "Company": "Notion",
+        "Grade": "B"
+      }
+    },
+    {
+      "id": "reccFHfNm0yGU1iiz",
+      "createdTime": "2026-06-12T04:08:54.000Z",
+      "fields": {
+        "Date": "2026-06-05",
+        "Role": "Engineering Program Manager Level 3 4 R10231216",
+        "Notes": "auto-submit re-run 2026-06-07",
+        "Company": "northrop grumman",
+        "Status": "Blocked",
+        "Tracker #": 187,
+        "Grade": "A"
+      }
+    },
+    {
+      "id": "reccUyc5dXYY4xVTh",
+      "createdTime": "2026-07-12T05:17:30.000Z",
+      "fields": {
+        "Role": "Senior Product Manager",
+        "Company": "Toast",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "reccVRnlGcIqfeE1w",
+      "createdTime": "2026-06-12T04:08:07.000Z",
+      "fields": {
+        "Date": "2026-06-03",
+        "Role": "Program Manager 3 - Mission Exploitation Operating unit",
+        "Notes": "auto-submit re-run 2026-06-06",
+        "Company": "northrop grumman",
+        "Status": "Blocked",
+        "Tracker #": 166,
+        "Grade": "B"
+      }
+    },
+    {
+      "id": "reccYOh2ir0hhOk11",
+      "createdTime": "2026-06-18T05:14:30.000Z",
+      "fields": {
+        "Role": "Technical Program Manager, Compute",
+        "Company": "Anthropic",
+        "Grade": "A"
+      }
+    },
+    {
+      "id": "reccbDz6E4nkiQV1j",
+      "createdTime": "2026-06-18T05:14:31.000Z",
+      "fields": {
+        "Role": "Operations Program Manager, Managed Operations",
+        "Notes": "Covered by live-2026-06-12-30. The consolidated referral ask to Shamila leads with Enterprise Servicing and Capital Collections. Not sending a separate message for this posting, flag it if you want it added to the ask.",
+        "Company": "Stripe",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "reccxVQMFat4xoEb3",
+      "createdTime": "2026-06-18T05:14:29.000Z",
+      "fields": {
+        "Role": "Technical Program Manager, Identity and Access Management Programs",
+        "Notes": "Covered by live-2026-06-12-30. The consolidated referral ask to Shamila leads with Enterprise Servicing and Capital Collections. Not sending a separate message for this posting, flag it if you want it added to the ask.",
+        "Company": "Stripe",
+        "Grade": "B"
+      }
+    },
+    {
+      "id": "recd2M3DHDVWk0I7K",
+      "createdTime": "2026-06-30T13:29:41.000Z",
+      "fields": {
+        "Role": "Group Product Manager - Privleged Access Management",
+        "Company": "Okta",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "recd8TcKlwE1bWCRC",
+      "createdTime": "2026-06-28T05:14:38.000Z",
+      "fields": {
+        "Role": "Associate Program Manager, Venue Operations",
+        "Company": "Lyft",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "recdjZItGerewynzy",
+      "createdTime": "2026-06-12T04:06:36.000Z",
+      "fields": {
+        "Date": "2026-05-29",
+        "Role": "We care about your privacy",
+        "Notes": "auto-submit re-run 2026-06-07",
+        "Company": "johnson & johnson",
+        "Status": "Blocked",
+        "Tracker #": 127,
+        "Grade": "B"
+      }
+    },
+    {
+      "id": "recdp0dQsuQKFS6Ct",
+      "createdTime": "2026-06-18T05:14:28.000Z",
+      "fields": {
+        "Role": "Release Train Engineer (Remote - US)",
+        "Company": "ICF",
+        "Grade": "A"
+      }
+    },
+    {
+      "id": "recdy02Itr36Rr8x9",
+      "createdTime": "2026-06-12T04:08:07.000Z",
+      "fields": {
+        "Date": "2026-06-03",
+        "Role": "Product Manager – Digital Measurement",
+        "Notes": "auto-submit re-run 2026-06-06",
+        "Company": "target",
+        "Status": "Blocked",
+        "Tracker #": 168,
+        "Grade": "A"
+      }
+    },
+    {
+      "id": "rece7SrNaTkYtKWLy",
+      "createdTime": "2026-07-13T05:17:45.000Z",
+      "fields": {
+        "Role": "Product Manager, Code",
+        "Company": "Figma",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "receaZiYUFwGbZ6U1",
+      "createdTime": "2026-06-12T04:06:36.000Z",
+      "fields": {
+        "Date": "2026-05-28",
+        "Role": "Senior Project Manager - Supply Chain",
+        "Notes": "auto-submit re-run 2026-06-07",
+        "Company": "gevernova",
+        "Status": "Blocked",
+        "Tracker #": 113,
+        "Grade": "A"
+      }
+    },
+    {
+      "id": "recec7WDlxE11v31X",
+      "createdTime": "2026-06-12T04:08:07.000Z",
+      "fields": {
+        "Date": "2026-06-03",
+        "Role": "Nuclear Project Manager (On-Site)",
+        "Notes": "auto-submit re-run 2026-06-07",
+        "Company": "gevernova",
+        "Status": "Blocked",
+        "Tracker #": 181,
+        "Grade": "B"
+      }
+    },
+    {
+      "id": "recequeTeQ8zPPVVT",
+      "createdTime": "2026-06-12T04:08:54.000Z",
+      "fields": {
+        "Date": "2026-06-05",
+        "Role": "Staff Product Manager, Cards Monetization",
+        "Notes": "auto-submit re-run 2026-06-07",
+        "Company": "stripe",
+        "Status": "Blocked",
+        "Tracker #": 189,
+        "Grade": "A"
+      }
+    },
+    {
+      "id": "receroH4cCQO0W5dE",
+      "createdTime": "2026-06-12T04:08:54.000Z",
+      "fields": {
+        "Date": "2026-06-05",
+        "Role": "Global Service & Repair Program Manager - Mounds View, MN",
+        "Notes": "auto-submit re-run 2026-06-07",
+        "Company": "medtronic",
+        "Status": "Blocked",
+        "Tracker #": 199,
+        "Grade": "B"
+      }
+    },
+    {
+      "id": "recf6NS7RP55LBuuf",
+      "createdTime": "2026-06-30T13:29:41.000Z",
+      "fields": {
+        "Role": "Principal Product Manager, Diner Engagement",
+        "Company": "OpenTable",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "recfCQsfy5beaHbDw",
+      "createdTime": "2026-06-12T04:04:47.000Z",
+      "fields": {
+        "Date": "2026-05-21",
+        "Role": "Program Manager Go To Market",
+        "Notes": "TD-19: search URL not listing URL",
+        "Company": "stripe",
+        "Status": "Blocked",
+        "Tracker #": 74,
+        "Grade": "—"
+      }
+    },
+    {
+      "id": "recfFPVXg3JGKGquU",
+      "createdTime": "2026-06-21T08:02:16.000Z",
+      "fields": {
+        "Role": "Program Manager, Agentic Commerce Go-to-Market",
+        "Company": "Stripe",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "recffn3VdzaUDJdoi",
+      "createdTime": "2026-07-22T05:17:56.000Z",
+      "fields": {
+        "Role": "Staff Product Manager",
+        "Company": "Pinterest",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "recfrdUjwYfPsfuBj",
+      "createdTime": "2026-06-18T05:14:31.000Z",
+      "fields": {
+        "Role": "Program Manager, Risk Ops Enablement",
+        "Notes": "Covered by live-2026-06-12-30. The consolidated referral ask to Shamila leads with Enterprise Servicing and Capital Collections. Not sending a separate message for this posting, flag it if you want it added to the ask.",
+        "Company": "Stripe",
+        "Grade": "B"
+      }
+    },
+    {
+      "id": "recfuBQ5T0Eh0IY8N",
+      "createdTime": "2026-06-28T05:14:38.000Z",
+      "fields": {
+        "Role": "Senior Business Technology Product Manager- Supply Chain",
+        "Company": "Samsara",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "recgzfUGOleAj50fX",
+      "createdTime": "2026-07-24T05:17:42.000Z",
+      "fields": {
+        "Role": "Sr Product Manager",
+        "Company": "Human Interest",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "rech4ltG8STODqj3c",
+      "createdTime": "2026-06-12T04:04:47.000Z",
+      "fields": {
+        "Date": "2026-05-21",
+        "Role": "Program Manager",
+        "Notes": "no-submit-button (board redirect)",
+        "Company": "capitalrx",
+        "Status": "Blocked",
+        "Tracker #": 69,
+        "Grade": "—"
+      }
+    },
+    {
+      "id": "rechUDOaoSMQ6Vc1s",
+      "createdTime": "2026-07-22T05:17:56.000Z",
+      "fields": {
+        "Role": "Principal Group Product Manager, B2B (Auth0)",
+        "Company": "Okta",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "rechXHse9EIOGjP1w",
+      "createdTime": "2026-06-12T04:04:47.000Z",
+      "fields": {
+        "Date": "2026-05-14",
+        "Role": "Principal Product Manager, Configuration Platform - Remote",
+        "Notes": "auto-submit re-run 2026-05-19",
+        "Company": "careers",
+        "Status": "Evaluated",
+        "Tracker #": 42,
+        "Grade": "4.0/5"
+      }
+    },
+    {
+      "id": "rechb9mG6vvQ0Vsvs",
+      "createdTime": "2026-06-12T04:06:36.000Z",
+      "fields": {
+        "Date": "2026-05-29",
+        "Role": "Sr Principal Information Systems Project Manager – NK Release Mgr (26-254)",
+        "Notes": "auto-submit re-run 2026-06-03",
+        "Company": "northrop grumman",
+        "Status": "Blocked",
+        "Tracker #": 122,
+        "Grade": "A"
+      }
+    },
+    {
+      "id": "rechdjK7Pq8BP6Dcb",
+      "createdTime": "2026-06-30T13:29:41.000Z",
+      "fields": {
+        "Role": "Social & Brand Program Manager",
+        "Company": "Anaplan",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "rechioEI6vap7ackf",
+      "createdTime": "2026-06-12T04:06:36.000Z",
+      "fields": {
+        "Date": "2026-05-28",
+        "Role": "Senior Associate, Technical Delivery Project Manager",
+        "Notes": "auto-submit re-run 2026-06-03",
+        "Company": "pwc",
+        "Status": "Blocked",
+        "Tracker #": 120,
+        "Grade": "B"
+      }
+    },
+    {
+      "id": "rechwDCejsqWNoiKZ",
+      "createdTime": "2026-06-12T04:06:36.000Z",
+      "fields": {
+        "Date": "2026-05-29",
+        "Role": "Program Manager 2 - 18584",
+        "Notes": "auto-submit re-run 2026-06-06",
+        "Company": "northrop grumman",
+        "Status": "Blocked",
+        "Tracker #": 123,
+        "Grade": "A"
+      }
+    },
+    {
+      "id": "rechyuWFWSVXY8tKR",
+      "createdTime": "2026-06-23T05:14:54.000Z",
+      "fields": {
+        "Role": "Product Manager, Global Marketplaces",
+        "Company": "Stripe",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "recig6El0cwzR7wwl",
+      "createdTime": "2026-06-12T04:08:07.000Z",
+      "fields": {
+        "Date": "2026-06-03",
+        "Role": "Program Manager I",
+        "Notes": "auto-submit re-run 2026-06-07",
+        "Company": "northrop grumman",
+        "Status": "Blocked",
+        "Tracker #": 182,
+        "Grade": "B"
+      }
+    },
+    {
+      "id": "reciiYHHZyjFzzu0E",
+      "createdTime": "2026-06-18T05:14:31.000Z",
+      "fields": {
+        "Role": "Technical Program Manager, Quality and Reliability",
+        "Company": "Harvey",
+        "Grade": "B"
+      }
+    },
+    {
+      "id": "recijxIOeDtf5fhYz",
+      "createdTime": "2026-06-12T04:06:36.000Z",
+      "fields": {
+        "Date": "2026-05-23",
+        "Role": "Program Manager, GTM Strategic Programs",
+        "Notes": "auto-submit re-run 2026-05-24",
+        "Company": "stripe",
+        "Status": "Blocked",
+        "Tracker #": 90,
+        "Grade": "B"
+      }
+    },
+    {
+      "id": "recipPmRPol63hYsT",
+      "createdTime": "2026-07-24T05:17:42.000Z",
+      "fields": {
+        "Role": "Senior Technical Program Manager, Services Tools & Diagnostics",
+        "Company": "Twilio",
+        "Grade": "B"
+      }
+    },
+    {
+      "id": "recjYMztpahrI0Zz7",
+      "createdTime": "2026-06-12T04:08:54.000Z",
+      "fields": {
+        "Date": "2026-06-06",
+        "Role": "Scrum Master / Agile Coach; Remote",
+        "Notes": "auto-submit re-run 2026-06-07",
+        "Company": "raytheon",
+        "Status": "Blocked",
+        "Tracker #": 202,
+        "Grade": "A"
+      }
+    },
+    {
+      "id": "recjZB4wpATUnUdDM",
+      "createdTime": "2026-06-12T04:04:47.000Z",
+      "fields": {
+        "Date": "2026-05-14",
+        "Role": "Agile Program Manager",
+        "Notes": "auto-submit re-run 2026-05-21",
+        "Company": "forgeglobal",
+        "Status": "Blocked",
+        "Tracker #": 30,
+        "Grade": "4.0/5"
+      }
+    },
+    {
+      "id": "recjcDrCibXEznLVF",
+      "createdTime": "2026-06-18T05:14:30.000Z",
+      "fields": {
+        "Role": "Product Manager, Ecosystem Risk",
+        "Company": "Stripe",
+        "Grade": "B"
+      }
+    },
+    {
+      "id": "recjhlkaFblJTmJvY",
+      "createdTime": "2026-06-18T05:14:29.000Z",
+      "fields": {
+        "Role": "Principal Product Manager",
+        "Company": "Twilio",
+        "Grade": "B"
+      }
+    },
+    {
+      "id": "recjkgaOxcj7GGL6N",
+      "createdTime": "2026-06-12T04:08:07.000Z",
+      "fields": {
+        "Date": "2026-06-02",
+        "Role": "Associate Director, Product Manager - Workforce Adaptive Planning",
+        "Notes": "auto-submit re-run 2026-06-06",
+        "Company": "raytheon",
+        "Status": "Blocked",
+        "Tracker #": 146,
+        "Grade": "A"
+      }
+    },
+    {
+      "id": "recjye6ZMIQWn00Y0",
+      "createdTime": "2026-06-29T05:16:36.000Z",
+      "fields": {
+        "Role": "Sr. Field Technical Program Manager",
+        "Notes": "--- OUTREACH: Denny Lee (TPM Track) ---\nConnection request: Use existing drafted message - confirmed compatible with all TPM roles.\n\nInMail - TPM-optimized variant (use this OR existing if existing is TPM-leaning):\nSubject: TPM Opportunities at Databricks\n\nHey Denny,\n\nReaching out because Databricks keeps coming up in my research and the work you are doing in data and AI at that scale is hard to ignore.\n\nI am Rahil Nathani, a Senior Program Manager and Scrum Master with 13 years of experience across Toyota, healthcare, and fintech. PMP and A-CSM certified. I have spent a lot of that time running complex, cross-functional delivery programs - coordinating engineering, product, and customer-facing teams on timelines that do not have much room for error.\n\nI noticed a few TPM roles open on the Professional Services and Field teams that align well with my background in technical program delivery and external stakeholder engagement.\n\nWould love to grab 20 minutes to learn more about the team and see if there is a fit. Happy to connect however works best.\n\nThanks,\nRahil Nathani\nDallas, TX | PMP | A-CSM",
+        "Company": "Databricks",
+        "Grade": "B"
+      }
+    },
+    {
+      "id": "reck0tnoW4JG75JZw",
+      "createdTime": "2026-06-12T04:08:54.000Z",
+      "fields": {
+        "Date": "2026-06-05",
+        "Role": "Senior Project Manager – Advanced Nuclear (U.S. Remote Eligible)",
+        "Notes": "auto-submit re-run 2026-06-07",
+        "Company": "gevernova",
+        "Status": "Blocked",
+        "Tracker #": 193,
+        "Grade": "A"
+      }
+    },
+    {
+      "id": "reckh5c1iyd9qdlc5",
+      "createdTime": "2026-06-28T05:14:38.000Z",
+      "fields": {
+        "Role": "Senior Product Manager (Private Dining Discovery)",
+        "Company": "OpenTable",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "reckiEEbpmTKw951t",
+      "createdTime": "2026-06-25T05:16:38.000Z",
+      "fields": {
+        "Role": "People Solutions Program Manager",
+        "Company": "Stripe",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "reckive1N2lr4Lweq",
+      "createdTime": "2026-06-12T04:08:07.000Z",
+      "fields": {
+        "Date": "2026-06-03",
+        "Role": "Command Center Solutions and Services - Southeast Program Manager",
+        "Notes": "auto-submit re-run 2026-06-03",
+        "Company": "motorolasolutions",
+        "Status": "Blocked",
+        "Tracker #": 154,
+        "Grade": "A"
+      }
+    },
+    {
+      "id": "recklPY6BdVD1jxvc",
+      "createdTime": "2026-06-12T04:04:47.000Z",
+      "fields": {
+        "Date": "2026-05-19",
+        "Role": "Technical Program Manager TPM",
+        "Notes": "auto-submit re-run 2026-05-19",
+        "Company": "spruceid",
+        "Status": "Applied",
+        "Tracker #": 59,
+        "Grade": "4.0/5"
+      }
+    },
+    {
+      "id": "recl0L6M5qIrdEt8K",
+      "createdTime": "2026-06-12T04:08:07.000Z",
+      "fields": {
+        "Date": "2026-06-02",
+        "Role": "Lead Product Manager  Enabling Platforms R 417101",
+        "Notes": "auto-submit",
+        "Company": "humana",
+        "Status": "Blocked",
+        "Tracker #": 143,
+        "Grade": "A"
+      }
+    },
+    {
+      "id": "reclL9NKc98Urr7pb",
+      "createdTime": "2026-06-29T05:16:36.000Z",
+      "fields": {
+        "Role": "Sr Product Manager, Employee Experience",
+        "Notes": "--- OUTREACH: Denny Lee (PM Track) ---\nConnection request: Use existing drafted message - confirmed compatible with PM roles.\n\nInMail - PM-optimized variant (recommend over TPM-leaning existing draft for this card):\nSubject: Sr. PM Opportunities at Databricks\n\nHey Denny,\n\nReaching out because Databricks keeps coming up in my research and the product vision - across the data lakehouse, AI, and partner ecosystem - is genuinely compelling.\n\nI am Rahil Nathani, a Senior Program Manager and Product Manager with 13 years of experience across Toyota, healthcare, and fintech. PMP and A-CSM certified. I have owned product strategy and delivery programs end to end, working closely with engineering, sales, and partners to bring complex products to market.\n\nI noticed several open PM roles - including Sr. Product Manager, Employee Experience - that look like a strong fit. I would love to learn more about the roadmap and hear your take on where the team is headed.\n\nWould you have 20 minutes for a quick chat? Happy to connect however works best.\n\nThanks,\nRahil Nathani\nDallas, TX | PMP | A-CSM",
+        "Company": "Databricks",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "reclTJNnFMAkTTri9",
+      "createdTime": "2026-06-12T04:08:07.000Z",
+      "fields": {
+        "Date": "2026-05-29",
+        "Role": "Senior Project Manager - Combine Cycle Gas Power",
+        "Notes": "auto-submit re-run 2026-06-04",
+        "Company": "gevernova",
+        "Status": "Blocked",
+        "Tracker #": 135,
+        "Grade": "B"
+      }
+    },
+    {
+      "id": "recldXgk3AV6U7s2D",
+      "createdTime": "2026-06-12T04:04:47.000Z",
+      "fields": {
+        "Date": "2026-05-14",
+        "Role": "Sr. Staff Technical Program Manager - Reliability",
+        "Notes": "auto-submit re-run 2026-06-07",
+        "Company": "databricks",
+        "Status": "Blocked",
+        "Tracker #": 44,
+        "Grade": "5.0/5"
+      }
+    },
+    {
+      "id": "reclgt1CBUdu5eFKz",
+      "createdTime": "2026-07-13T05:17:45.000Z",
+      "fields": {
+        "Role": "Technical Program Manager, Bridge",
+        "Company": "Stripe",
+        "Grade": "B"
+      }
+    },
+    {
+      "id": "reclmIYJ0kSZWiEkI",
+      "createdTime": "2026-06-12T04:08:54.000Z",
+      "fields": {
+        "Date": "2026-06-05",
+        "Role": "Sr Program Manager – Global MDR Program Lead",
+        "Notes": "auto-submit re-run 2026-06-07",
+        "Company": "medtronic",
+        "Status": "Blocked",
+        "Tracker #": 188,
+        "Grade": "A"
+      }
+    },
+    {
+      "id": "reclnP1KuavqaRE6T",
+      "createdTime": "2026-06-12T04:08:54.000Z",
+      "fields": {
+        "Date": "2026-06-05",
+        "Role": "Org Development Program Manager",
+        "Notes": "auto-submit re-run 2026-06-07",
+        "Company": "medtronic",
+        "Status": "Blocked",
+        "Tracker #": 198,
+        "Grade": "A"
+      }
+    },
+    {
+      "id": "reclolSyUxc8Eusdg",
+      "createdTime": "2026-06-18T05:14:30.000Z",
+      "fields": {
+        "Role": "Technical Program Manager, Cloud Inference",
+        "Company": "Anthropic",
+        "Grade": "A"
+      }
+    },
+    {
+      "id": "recmScAesGBeyfxXT",
+      "createdTime": "2026-06-18T05:14:31.000Z",
+      "fields": {
+        "Role": "Technical Program Manager, Extensibility Programs",
+        "Notes": "Covered by live-2026-06-12-30. The consolidated referral ask to Shamila leads with Enterprise Servicing and Capital Collections. Not sending a separate message for this posting, flag it if you want it added to the ask.",
+        "Company": "Stripe",
+        "Grade": "B"
+      }
+    },
+    {
+      "id": "recmf1Vnxnvn7JXXb",
+      "createdTime": "2026-06-12T04:06:36.000Z",
+      "fields": {
+        "Date": "2026-05-28",
+        "Role": "Manager - Scrum Master",
+        "Notes": "auto-submit re-run 2026-05-28",
+        "Company": "cvshealth",
+        "Status": "Blocked",
+        "Tracker #": 99,
+        "Grade": "A"
+      }
+    },
+    {
+      "id": "recmkfbc83btXGTCP",
+      "createdTime": "2026-07-12T05:17:30.000Z",
+      "fields": {
+        "Role": "[Job-85699] Senior Product Manager (living in Brazil + advanced German language skills)",
+        "Company": "CI&T",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "recn88ERzap6dAXhW",
+      "createdTime": "2026-06-29T05:16:36.000Z",
+      "fields": {
+        "Role": "Field Technical Program Manager",
+        "Notes": "--- OUTREACH: Denny Lee (TPM Track) ---\nConnection request: Use existing drafted message - confirmed compatible with all TPM roles.\n\nInMail - TPM-optimized variant (use this OR existing if existing is TPM-leaning):\nSubject: TPM Opportunities at Databricks\n\nHey Denny,\n\nReaching out because Databricks keeps coming up in my research and the work you are doing in data and AI at that scale is hard to ignore.\n\nI am Rahil Nathani, a Senior Program Manager and Scrum Master with 13 years of experience across Toyota, healthcare, and fintech. PMP and A-CSM certified. I have spent a lot of that time running complex, cross-functional delivery programs - coordinating engineering, product, and customer-facing teams on timelines that do not have much room for error.\n\nI noticed a few TPM roles open on the Professional Services and Field teams that align well with my background in technical program delivery and external stakeholder engagement.\n\nWould love to grab 20 minutes to learn more about the team and see if there is a fit. Happy to connect however works best.\n\nThanks,\nRahil Nathani\nDallas, TX | PMP | A-CSM",
+        "Company": "Databricks",
+        "Grade": "B"
+      }
+    },
+    {
+      "id": "recnFB5fiTpG331Rw",
+      "createdTime": "2026-06-12T04:08:54.000Z",
+      "fields": {
+        "Date": "2026-06-05",
+        "Role": "Program Manager 1",
+        "Notes": "auto-submit re-run 2026-06-07",
+        "Company": "northrop grumman",
+        "Status": "Blocked",
+        "Tracker #": 194,
+        "Grade": "B"
+      }
+    },
+    {
+      "id": "recnd4n5rM8DQBUtX",
+      "createdTime": "2026-06-12T04:04:47.000Z",
+      "fields": {
+        "Date": "2026-05-14",
+        "Role": "Technical Program Manager, Security",
+        "Notes": "auto-submit re-run 2026-05-21",
+        "Company": "figma",
+        "Status": "Blocked",
+        "Tracker #": 35,
+        "Grade": "4.0/5"
+      }
+    },
+    {
+      "id": "recnjpvRQQechmjdK",
+      "createdTime": "2026-07-08T05:27:48.000Z",
+      "fields": {
+        "Role": "Sr. Field Technical Program Manager, Forward Deployed Engineering - Public Sector",
+        "Company": "Databricks",
+        "Grade": "B"
+      }
+    },
+    {
+      "id": "recnjvsIIULA9gPJy",
+      "createdTime": "2026-06-12T04:06:36.000Z",
+      "fields": {
+        "Date": "2026-05-28",
+        "Role": "Systems Engineer II, Scrum Master - AN/TPY-2 Team Maverick",
+        "Notes": "auto-submit re-run 2026-06-02",
+        "Company": "raytheon",
+        "Status": "Blocked",
+        "Tracker #": 109,
+        "Grade": "B"
+      }
+    },
+    {
+      "id": "recnqJqqxBfusnV5x",
+      "createdTime": "2026-06-18T05:14:28.000Z",
+      "fields": {
+        "Role": "Regulatory Reporting Program Manager, Stablecoin",
+        "Notes": "Covered by live-2026-06-12-30. The consolidated referral ask to Shamila leads with Enterprise Servicing and Capital Collections. Not sending a separate message for this posting, flag it if you want it added to the ask.",
+        "Company": "Stripe",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "recns63mIH1unKfn0",
+      "createdTime": "2026-06-25T05:16:38.000Z",
+      "fields": {
+        "Role": "Senior Product Manager - Business Lending",
+        "Company": "Mercury",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "recnzNl1ymTLxFHXN",
+      "createdTime": "2026-06-26T05:15:06.000Z",
+      "fields": {
+        "Role": "Senior Product Manager, Data Platform",
+        "Company": "Okta",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "recoRLZCn6ToTN3HW",
+      "createdTime": "2026-07-13T05:17:45.000Z",
+      "fields": {
+        "Role": "Technical Program Manager, Money-as-a-Service",
+        "Company": "Stripe",
+        "Grade": "B"
+      }
+    },
+    {
+      "id": "recoqb1PKT20VY2Do",
+      "createdTime": "2026-06-18T05:14:31.000Z",
+      "fields": {
+        "Role": "Product Manager, AI Governance and Admin Experience",
+        "Company": "Notion",
+        "Grade": "B"
+      }
+    },
+    {
+      "id": "recp9Ob35PnSgtqMd",
+      "createdTime": "2026-07-11T05:15:14.000Z",
+      "fields": {
+        "Role": "Senior Staff Technical Program Manager, Rider Loyalty",
+        "Company": "Lyft",
+        "Grade": "B"
+      }
+    },
+    {
+      "id": "recpGln4KcBBhaKD4",
+      "createdTime": "2026-06-18T05:14:30.000Z",
+      "fields": {
+        "Role": "Program Manager, Solutions Architecture (GTM Transformation)",
+        "Notes": "Covered by live-2026-06-12-30. The consolidated referral ask to Shamila leads with Enterprise Servicing and Capital Collections. Not sending a separate message for this posting, flag it if you want it added to the ask.",
+        "Company": "Stripe",
+        "Grade": "B"
+      }
+    },
+    {
+      "id": "recpPF10RRsg5dbwM",
+      "createdTime": "2026-06-12T04:08:07.000Z",
+      "fields": {
+        "Date": "2026-06-03",
+        "Role": "Federal Project Manager",
+        "Notes": "auto-submit re-run 2026-06-04",
+        "Company": "motorolasolutions",
+        "Status": "Blocked",
+        "Tracker #": 162,
+        "Grade": "B"
+      }
+    },
+    {
+      "id": "recppLhz1lOrVuMVH",
+      "createdTime": "2026-06-12T04:04:47.000Z",
+      "fields": {
+        "Date": "2026-05-19",
+        "Role": "Technical Program Manager",
+        "Notes": "auto-submit re-run 2026-05-21",
+        "Company": "scoutspace",
+        "Status": "Blocked",
+        "Tracker #": 54,
+        "Grade": "4.0/5"
+      }
+    },
+    {
+      "id": "recq3SHq56o1ITF46",
+      "createdTime": "2026-06-12T04:06:36.000Z",
+      "fields": {
+        "Date": "2026-05-28",
+        "Role": "Senior Systems Engineer, Scrum Master - AN/TPY-2 Team Maverick",
+        "Notes": "auto-submit re-run 2026-06-03",
+        "Company": "raytheon",
+        "Status": "Blocked",
+        "Tracker #": 108,
+        "Grade": "A"
+      }
+    },
+    {
+      "id": "recqDqYQWJuh80Rma",
+      "createdTime": "2026-06-29T05:16:36.000Z",
+      "fields": {
+        "Role": "Staff Product Manager, Agentic AI Applications",
+        "Notes": "--- OUTREACH: Denny Lee (PM Track) ---\nConnection request: Use existing drafted message - confirmed compatible with PM roles.\n\nInMail - PM-optimized variant (recommend over TPM-leaning existing draft for this card):\nSubject: Staff PM / Agentic AI at Databricks\n\nHey Denny,\n\nReaching out because the Staff PM, Agentic AI Applications role at Databricks caught my attention - the intersection of AI orchestration and enterprise product delivery is exactly the kind of problem space I have been working toward.\n\nI am Rahil Nathani, a Senior Program Manager and Product Manager with 13 years of experience across Toyota, healthcare, and fintech. PMP and A-CSM certified. I have led AI-adjacent product and delivery programs with cross-functional engineering and data science teams, and I bring a structured approach to defining roadmaps in ambiguous, fast-moving spaces.\n\nWould love to learn more about what you are building and whether my background could be a fit. Happy to connect however works best.\n\nThanks,\nRahil Nathani\nDallas, TX | PMP | A-CSM",
+        "Company": "Databricks",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "recqDzqeBqga8NyxV",
+      "createdTime": "2026-06-28T05:14:38.000Z",
+      "fields": {
+        "Role": "Senior Product Manager - UI Platform",
+        "Company": "Okta",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "recqa856tAfWSkRMM",
+      "createdTime": "2026-06-12T04:04:47.000Z",
+      "fields": {
+        "Date": "2026-05-07",
+        "Role": "Technical Project Manager III",
+        "Notes": "auto-submit",
+        "Company": "mitratech",
+        "Status": "Evaluated",
+        "Tracker #": 8,
+        "Grade": "4.0/5"
+      }
+    },
+    {
+      "id": "recqkHqH6M8lnz1at",
+      "createdTime": "2026-06-12T04:04:47.000Z",
+      "fields": {
+        "Date": "2026-05-21",
+        "Role": "Technical Program Manager Research",
+        "Notes": "bat 6:10am — unverified (no confirm signal check pre-fix)",
+        "Company": "deepgram",
+        "Status": "Submitted",
+        "Tracker #": 82,
+        "Grade": "4.0/5"
+      }
+    },
+    {
+      "id": "recqzk5V2OE8vGOZF",
+      "createdTime": "2026-07-11T05:15:14.000Z",
+      "fields": {
+        "Role": "Senior Product Manager",
+        "Company": "LendingTree",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "recr11Hhn3bCzTvwM",
+      "createdTime": "2026-07-22T05:17:55.000Z",
+      "fields": {
+        "Role": "Senior Program Manager, Disaster Recovery",
+        "Company": "Twilio",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "recr2Ik4PJ0CeQeJt",
+      "createdTime": "2026-06-21T08:02:16.000Z",
+      "fields": {
+        "Role": "Product Manager, CMS",
+        "Company": "Figma",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "recr2Odyv5KQAOusB",
+      "createdTime": "2026-06-18T05:14:31.000Z",
+      "fields": {
+        "Role": "Head of Talent Management Programs and PMO",
+        "Company": "Duolingo",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "recr77f4Xz4aW8DPM",
+      "createdTime": "2026-06-18T05:14:28.000Z",
+      "fields": {
+        "Role": "Technical Program Manager - AI Transformation",
+        "Company": "Mulligan Funding",
+        "Grade": "B"
+      }
+    },
+    {
+      "id": "recrOoLGVw5oyJA2W",
+      "createdTime": "2026-06-18T05:14:30.000Z",
+      "fields": {
+        "Role": "Program Manager, Security Business Enablement",
+        "Notes": "Covered by live-2026-06-12-30. The consolidated referral ask to Shamila leads with Enterprise Servicing and Capital Collections. Not sending a separate message for this posting, flag it if you want it added to the ask.",
+        "Company": "Stripe",
+        "Grade": "B"
+      }
+    },
+    {
+      "id": "recrQjBt0m0Qj6iDz",
+      "createdTime": "2026-06-12T04:06:36.000Z",
+      "fields": {
+        "Date": "2026-05-23",
+        "Role": "Program Manager, Go To Market",
+        "Notes": "auto-submit re-run 2026-05-24",
+        "Company": "stripe",
+        "Status": "Blocked",
+        "Tracker #": 89,
+        "Grade": "B"
+      }
+    },
+    {
+      "id": "recrZC7QhRsJ7bbaa",
+      "createdTime": "2026-06-12T04:08:07.000Z",
+      "fields": {
+        "Date": "2026-05-29",
+        "Role": "Staff Technical Product Manager",
+        "Notes": "auto-submit re-run 2026-06-03",
+        "Company": "geaerospace",
+        "Status": "Blocked",
+        "Tracker #": 133,
+        "Grade": "B"
+      }
+    },
+    {
+      "id": "recrafM54MHV4OOCA",
+      "createdTime": "2026-06-25T05:16:38.000Z",
+      "fields": {
+        "Role": "Senior Program Manager, Growth Enablement",
+        "Company": "Toast",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "recrckSC9UdYOEGRj",
+      "createdTime": "2026-06-12T04:08:07.000Z",
+      "fields": {
+        "Date": "2026-06-03",
+        "Role": "Careers at Elevance Health",
+        "Notes": "auto-submit re-run 2026-06-07",
+        "Company": "elevancehealth",
+        "Status": "Blocked",
+        "Tracker #": 152,
+        "Grade": "B"
+      }
+    },
+    {
+      "id": "recrhY8mni3ZrKfQi",
+      "createdTime": "2026-06-12T04:04:47.000Z",
+      "fields": {
+        "Date": "2026-05-21",
+        "Role": "Staff TPM",
+        "Notes": "legal/consent fields unresolved",
+        "Company": "okta",
+        "Status": "Blocked",
+        "Tracker #": 76,
+        "Grade": "—"
+      }
+    },
+    {
+      "id": "recrpUAS0UinF6HBR",
+      "createdTime": "2026-06-12T04:04:47.000Z",
+      "fields": {
+        "Date": "2026-05-13",
+        "Role": "Delivery Manager",
+        "Notes": "auto-submit re-run 2026-05-21",
+        "Company": "datatonic",
+        "Status": "Submitted",
+        "Tracker #": 18,
+        "Grade": "4.0/5"
+      }
+    },
+    {
+      "id": "recs4XCfKLrrQ1QjC",
+      "createdTime": "2026-06-12T04:08:54.000Z",
+      "fields": {
+        "Date": "2026-06-05",
+        "Role": "Sr Product Manager - Product Detail Page (PDP) Experience",
+        "Notes": "auto-submit re-run 2026-06-07",
+        "Company": "target",
+        "Status": "Blocked",
+        "Tracker #": 200,
+        "Grade": "A"
+      }
+    },
+    {
+      "id": "recs6Iiu0XL57SeBN",
+      "createdTime": "2026-06-12T04:04:47.000Z",
+      "fields": {
+        "Date": "2026-05-19",
+        "Role": "Current openings at Judi Health",
+        "Notes": "auto-submit re-run 2026-05-21",
+        "Company": "capitalrx",
+        "Status": "Blocked",
+        "Tracker #": 48,
+        "Grade": "4.0/5"
+      }
+    },
+    {
+      "id": "recsBCzEH5b5C2IqV",
+      "createdTime": "2026-06-18T05:14:29.000Z",
+      "fields": {
+        "Role": "Principal Product Manager, POS Ordering",
+        "Company": "Toast",
+        "Grade": "B"
+      }
+    },
+    {
+      "id": "recsd79Qbwah57UJN",
+      "createdTime": "2026-06-18T05:14:30.000Z",
+      "fields": {
+        "Role": "Commercial Solutions Program Manager",
+        "Notes": "Covered by live-2026-06-12-30. The consolidated referral ask to Shamila leads with Enterprise Servicing and Capital Collections. Not sending a separate message for this posting, flag it if you want it added to the ask.",
+        "Company": "Stripe",
+        "Grade": "B"
+      }
+    },
+    {
+      "id": "recstkZL1My2zPVcb",
+      "createdTime": "2026-06-12T04:04:47.000Z",
+      "fields": {
+        "Date": "2026-05-19",
+        "Role": "Sr. Program Manager Data for Good",
+        "Notes": "confirmed-blocked — no confirmation email received 2026-05-26",
+        "Company": "databricks",
+        "Status": "Blocked",
+        "Tracker #": 51,
+        "Grade": "5.0/5"
+      }
+    },
+    {
+      "id": "rect1lHp3GnqRxRZ9",
+      "createdTime": "2026-06-12T04:06:36.000Z",
+      "fields": {
+        "Date": "2026-05-28",
+        "Role": "Product Manager, Terminal Device Expansion",
+        "Notes": "auto-submit re-run 2026-06-07",
+        "Company": "stripe",
+        "Status": "Blocked",
+        "Tracker #": 105,
+        "Grade": "A"
+      }
+    },
+    {
+      "id": "rectSgUxGHnhYYVF7",
+      "createdTime": "2026-06-12T04:04:47.000Z",
+      "fields": {
+        "Date": "2026-05-14",
+        "Role": "Senior Product Manager - Banking Foundations",
+        "Notes": "auto-submit re-run 2026-05-21",
+        "Company": "mercury",
+        "Status": "Blocked",
+        "Tracker #": 40,
+        "Grade": "4.0/5"
+      }
+    },
+    {
+      "id": "rectjQh2oKPX7Qngq",
+      "createdTime": "2026-06-18T05:14:30.000Z",
+      "fields": {
+        "Role": "Technical Program Manager, Infrastructure",
+        "Company": "Figma",
+        "Grade": "B"
+      }
+    },
+    {
+      "id": "rectyMtXKwXjqulIO",
+      "createdTime": "2026-06-12T04:08:07.000Z",
+      "fields": {
+        "Date": "2026-06-03",
+        "Role": "Program Manager",
+        "Notes": "auto-submit",
+        "Company": "abbott",
+        "Status": "Blocked",
+        "Tracker #": 177,
+        "Grade": "A"
+      }
+    },
+    {
+      "id": "recu3d0VeN5YA54Ek",
+      "createdTime": "2026-06-12T04:08:54.000Z",
+      "fields": {
+        "Date": "2026-06-06",
+        "Role": "Digital Product Manager Branch and ATM",
+        "Notes": "auto-submit re-run 2026-06-07",
+        "Company": "wf",
+        "Status": "Blocked",
+        "Tracker #": 203,
+        "Grade": "B"
+      }
+    },
+    {
+      "id": "recu64OgDX15ntBv3",
+      "createdTime": "2026-07-24T05:17:42.000Z",
+      "fields": {
+        "Role": "Senior Product Manager - Activation",
+        "Company": "Mercury",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "recuNR7lrlQskMSkF",
+      "createdTime": "2026-07-22T05:17:55.000Z",
+      "fields": {
+        "Role": "Sr. Project & Program Manager",
+        "Company": "Pinterest",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "recuTiSSWLY77mxQB",
+      "createdTime": "2026-06-12T04:08:07.000Z",
+      "fields": {
+        "Date": "2026-06-03",
+        "Role": "Principal CIDO IT Program Manager",
+        "Notes": "auto-submit re-run 2026-06-03",
+        "Company": "northrop grumman",
+        "Status": "Blocked",
+        "Tracker #": 158,
+        "Grade": "A"
+      }
+    },
+    {
+      "id": "recubtP5TG1pXtm7Y",
+      "createdTime": "2026-06-12T04:04:47.000Z",
+      "fields": {
+        "Date": "2026-05-21",
+        "Role": "Staff PM Dashboard",
+        "Notes": "TD-19: search URL not listing URL",
+        "Company": "stripe",
+        "Status": "Blocked",
+        "Tracker #": 73,
+        "Grade": "—"
+      }
+    },
+    {
+      "id": "recuu55zv6FfNx3Pi",
+      "createdTime": "2026-07-24T05:17:42.000Z",
+      "fields": {
+        "Role": "Senior Product Manager - AI Gateway",
+        "Company": "Delinea",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "recv3TGVYNagnvZ45",
+      "createdTime": "2026-06-12T04:06:36.000Z",
+      "fields": {
+        "Date": "2026-05-28",
+        "Role": "Manager   Scrum Master R0916455 1",
+        "Notes": "auto-submit re-run 2026-06-02",
+        "Company": "cvshealth",
+        "Status": "Blocked",
+        "Tracker #": 103,
+        "Grade": "A"
+      }
+    },
+    {
+      "id": "recvTQrnsKwFfzGx6",
+      "createdTime": "2026-06-12T04:08:07.000Z",
+      "fields": {
+        "Date": "2026-05-29",
+        "Role": "Principal/Sr Principal Agile Coach- 18856",
+        "Notes": "auto-submit re-run 2026-06-03",
+        "Company": "northrop grumman",
+        "Status": "Blocked",
+        "Tracker #": 138,
+        "Grade": "A"
+      }
+    },
+    {
+      "id": "recvXPDhiUc79gzse",
+      "createdTime": "2026-07-13T05:17:45.000Z",
+      "fields": {
+        "Role": "Senior Product Manager - Delinea Desktop Client",
+        "Company": "Delinea",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "recvc5F8gXvXcEyq0",
+      "createdTime": "2026-06-18T05:14:28.000Z",
+      "fields": {
+        "Role": "Staff Program Manager Brand Campaigns",
+        "Company": "Duolingo",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "recvjlVxb5ouBXkLB",
+      "createdTime": "2026-07-05T05:17:21.000Z",
+      "fields": {
+        "Role": "Sr Product Manager, T-Platform",
+        "Notes": "Manually filed by Rahil via job-board screenshot, not auto-scanned. Graded with worker-grader.mjs keyword-count rubric (1 keyword match = C). No LinkedIn connection on file for T-Mobile. Note: title regex/keyword logic doesn't check location — Frisco TX is DFW metro but engine's separate grade-jobs.mjs location filter (unused in this pipeline) would've missed it.",
+        "Company": "T-Mobile",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "recvt9SJn97Kt0X5S",
+      "createdTime": "2026-06-21T08:02:16.000Z",
+      "fields": {
+        "Role": "Enablement Program Manager, APAC",
+        "Company": "Okta",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "recw4F8FJew4SSorP",
+      "createdTime": "2026-06-12T04:06:36.000Z",
+      "fields": {
+        "Date": "2026-05-28",
+        "Role": "Staff Product Manager, Identity & Access Management",
+        "Notes": "auto-submit",
+        "Company": "gofundme",
+        "Status": "Blocked",
+        "Tracker #": 110,
+        "Grade": "A"
+      }
+    },
+    {
+      "id": "recw7Fr9KMsUKbOIH",
+      "createdTime": "2026-07-22T05:17:55.000Z",
+      "fields": {
+        "Role": "Staff Product Manager - Billing",
+        "Company": "Lambda Labs",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "recw7KCcVGf8sUQMO",
+      "createdTime": "2026-06-29T05:16:36.000Z",
+      "fields": {
+        "Role": "Group Product Manager - Code Security",
+        "Notes": "--- CONNECTION REQUEST (207 chars, covers Code Security / BYOC / APM PM II) ---\nHey Dardan, love what Datadog is building across observability and security. I am a Sr. PM and Scrum Master with 13 years in fintech and healthcare and would love to connect as I explore PM roles on your team.\n\n--- INMAIL ---\nSubject: Sr. PM Interest - Datadog Product Team\n\nHey Dardan,\n\nReached out because I have been digging into what Datadog is building and the product depth - from APM to cloud security and BYOC infrastructure - is genuinely impressive, and rare to see at that scale.\n\nI am Rahil Nathani, a Senior PM and Scrum Master with 13 years of experience across Toyota, healthcare, and fintech. I hold a PMP and A-CSM. My background is in leading complex, cross-functional programs in regulated, high-stakes environments where observability, reliability, and tight engineering collaboration were not optional.\n\nI noticed several open roles on your team - including Group PM in Code Security, Bring Your Own Cloud, and PM II on APM. Any of those would be a strong fit given my delivery and product leadership background.\n\nWould love a quick conversation to learn more about what your team is focused on and see if there is a natural fit. Happy to send over my resume or connect however works best.\n\nThanks for the time,\nRahil Nathani\nDallas, TX | PMP | A-CSM",
+        "Company": "Datadog",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "recwK6Jd5ia3ZmdAx",
+      "createdTime": "2026-07-03T05:16:50.000Z",
+      "fields": {
+        "Role": "Senior Product Manager - Agent Integrations",
+        "Company": "Datadog",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "recwNxn43D8HL2yUs",
+      "createdTime": "2026-06-12T04:06:36.000Z",
+      "fields": {
+        "Date": "2026-05-29",
+        "Role": "Scrum Master Level 3 or 4",
+        "Notes": "auto-submit re-run 2026-06-03",
+        "Company": "northrop grumman",
+        "Status": "Blocked",
+        "Tracker #": 124,
+        "Grade": "A"
+      }
+    },
+    {
+      "id": "recwV2qNb4bcu9QMO",
+      "createdTime": "2026-06-18T05:14:29.000Z",
+      "fields": {
+        "Role": "Program Manager, Voice of the Customer",
+        "Company": "Figma",
+        "Grade": "B"
+      }
+    },
+    {
+      "id": "recwqjHBymi85Ii4M",
+      "createdTime": "2026-06-30T13:29:41.000Z",
+      "fields": {
+        "Role": "Product Manager II - Application Performance Monitoring",
+        "Notes": "--- CONNECTION REQUEST (207 chars, covers Code Security / BYOC / APM PM II) ---\nHey Dardan, love what Datadog is building across observability and security. I am a Sr. PM and Scrum Master with 13 years in fintech and healthcare and would love to connect as I explore PM roles on your team.\n\n--- INMAIL ---\nSubject: Sr. PM Interest - Datadog Product Team\n\nHey Dardan,\n\nReached out because I have been digging into what Datadog is building and the product depth - from APM to cloud security and BYOC infrastructure - is genuinely impressive, and rare to see at that scale.\n\nI am Rahil Nathani, a Senior PM and Scrum Master with 13 years of experience across Toyota, healthcare, and fintech. I hold a PMP and A-CSM. My background is in leading complex, cross-functional programs in regulated, high-stakes environments where observability, reliability, and tight engineering collaboration were not optional.\n\nI noticed several open roles on your team - including Group PM in Code Security, Bring Your Own Cloud, and PM II on APM. Any of those would be a strong fit given my delivery and product leadership background.\n\nWould love a quick conversation to learn more about what your team is focused on and see if there is a natural fit. Happy to send over my resume or connect however works best.\n\nThanks for the time,\nRahil Nathani\nDallas, TX | PMP | A-CSM",
+        "Company": "Datadog",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "recwyoidLvc1b5eqI",
+      "createdTime": "2026-06-12T04:04:47.000Z",
+      "fields": {
+        "Date": "2026-05-21",
+        "Role": "Program Manager",
+        "Notes": "no-submit-button (board redirect)",
+        "Company": "gofundme",
+        "Status": "Blocked",
+        "Tracker #": 66,
+        "Grade": "—"
+      }
+    },
+    {
+      "id": "recxPg7T9YhPjdHy3",
+      "createdTime": "2026-06-12T04:08:07.000Z",
+      "fields": {
+        "Date": "2026-06-02",
+        "Role": "Senior Product Manager - AI",
+        "Notes": "auto-submit re-run 2026-06-02",
+        "Company": "gevernova",
+        "Status": "Blocked",
+        "Tracker #": 140,
+        "Grade": "B"
+      }
+    },
+    {
+      "id": "recxit69SIVT0RoEl",
+      "createdTime": "2026-06-21T08:02:16.000Z",
+      "fields": {
+        "Role": "Program Manager, Delivery Innovation and Strategic Programs",
+        "Company": "Okta",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "recxp1nzeT9zih7sn",
+      "createdTime": "2026-07-24T05:17:42.000Z",
+      "fields": {
+        "Role": "Senior Program Manager, Engineering",
+        "Company": "Okta",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "recy3B2vLQviQeeKM",
+      "createdTime": "2026-06-12T04:06:36.000Z",
+      "fields": {
+        "Date": "2026-05-28",
+        "Role": "Excal Ib Engineering Services Program Manager",
+        "Notes": "auto-submit re-run 2026-06-03",
+        "Company": "raytheon",
+        "Status": "Blocked",
+        "Tracker #": 106,
+        "Grade": "A"
+      }
+    },
+    {
+      "id": "recyJum0xT5S8RaRZ",
+      "createdTime": "2026-06-12T04:06:36.000Z",
+      "fields": {
+        "Date": "2026-05-29",
+        "Role": "Material Program Manager - AMRAAM",
+        "Notes": "auto-submit re-run 2026-06-02",
+        "Company": "raytheon",
+        "Status": "Blocked",
+        "Tracker #": 129,
+        "Grade": "A"
+      }
+    },
+    {
+      "id": "recyMu06zJTwcnY32",
+      "createdTime": "2026-07-03T05:16:50.000Z",
+      "fields": {
+        "Role": "Group Product Manager, Cloud Security",
+        "Company": "Datadog",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "recyOQ0S5OrgYv8pP",
+      "createdTime": "2026-07-05T05:17:21.000Z",
+      "fields": {
+        "Role": "Senior Product Manager, AI",
+        "Company": "Brex",
+        "Grade": "C"
+      }
+    },
+    {
+      "id": "recyebSmOUuk3KlrE",
+      "createdTime": "2026-06-18T05:14:30.000Z",
+      "fields": {
+        "Role": "Technical Program Manager",
+        "Company": "Ramp",
+        "Grade": "B"
+      }
+    },
+    {
+      "id": "recyhjnp82wUeatFt",
+      "createdTime": "2026-06-12T04:06:36.000Z",
+      "fields": {
+        "Date": "2026-05-28",
+        "Role": "Sr. Program Manager- Integrated Business Planning (IBP) COE – Supply",
+        "Notes": "auto-submit re-run 2026-06-03",
+        "Company": "medtronic",
+        "Status": "Blocked",
+        "Tracker #": 114,
+        "Grade": "A"
+      }
+    },
+    {
+      "id": "recykcOTAQxrw6Xs2",
+      "createdTime": "2026-06-12T04:04:47.000Z",
+      "fields": {
+        "Date": "2026-05-19",
+        "Role": "Technical Program Manager Research",
+        "Notes": "auto-submit re-run 2026-05-19",
+        "Company": "deepgram",
+        "Status": "Applied",
+        "Tracker #": 58,
+        "Grade": "4.0/5"
+      }
+    },
+    {
+      "id": "recz9iTwIZaRj46ra",
+      "createdTime": "2026-06-18T05:14:30.000Z",
+      "fields": {
+        "Role": "Employee Experience Program Manager (Onboarding + Adoption)",
+        "Company": "Notion",
+        "Grade": "B"
+      }
+    },
+    {
+      "id": "reczDpY9F5bZgmaBc",
+      "createdTime": "2026-06-12T04:08:07.000Z",
+      "fields": {
+        "Date": "2026-06-03",
+        "Role": "Scrum Master, Vice President",
+        "Notes": "auto-submit re-run 2026-06-07",
+        "Company": "citi",
+        "Status": "Blocked",
+        "Tracker #": 180,
+        "Grade": "A"
+      }
+    },
+    {
+      "id": "reczEGZE6F7IFPn5o",
+      "createdTime": "2026-07-13T05:17:45.000Z",
+      "fields": {
+        "Role": "Sr. Field Technical Program Manager, Forward Deployed Engineering - Canada",
+        "Notes": "RESTORED 2026-07-08 after archive-stale reaped it (r14 recurrence #4). Original Created At: 2026-07-03. Waiting on Rahil → warm referral via Denny Lee.",
+        "Company": "Databricks",
+        "Grade": "B"
+      }
+    },
+    {
+      "id": "reczW1lmoLcfecrUQ",
+      "createdTime": "2026-06-12T04:08:54.000Z",
+      "fields": {
+        "Date": "2026-06-04",
+        "Role": "Program Manager, R&D",
+        "Notes": "auto-submit re-run 2026-06-07",
+        "Company": "abbott",
+        "Status": "Blocked",
+        "Tracker #": 184,
+        "Grade": "A"
+      }
+    }
+  ]
+}

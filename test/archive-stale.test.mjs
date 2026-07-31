@@ -235,58 +235,88 @@ describe('run', () => {
     assert.equal(res.error, PAT_MISSING_MSG);
   });
 
-  test('New-Fresh card past 33h threshold is archived in --apply mode (create then delete)', async () => {
+  test('New-Fresh card past 33h threshold is archived in --apply mode (local ledger, then delete)', async () => {
     const dataDir = freshDir();
     const rec = makeRecord('rec1', { cardId: 'card-1', lane: 'New-Fresh', createdAt: '2026-06-14T00:00:00.000Z' }); // 34h before "now"
-    const metaBody = { tables: [{ id: ARCHIVE_TABLE_ID, fields: [{ name: 'Card ID', id: 'fldArchCardId' }, { name: 'Company', id: 'fldArchCompany' }, { name: 'Role', id: 'fldArchRole' }, { name: 'Lane', id: 'fldArchLane' }, { name: 'Created At', id: 'fldArchCreatedAt' }, { name: 'Notes', id: 'fldArchNotes' }] }] };
+    const ledgerPath = path.join(dataDir, 'archive-ledger.json');
 
-    let createCalled = false;
+    let postCalled = false;
     let deleteCalled = false;
     const fetchImpl = makeFetch([
       { match: (url, opts) => (!opts?.method || opts.method === 'GET') && url.includes(ACTIVE_TABLE_ID), respond: () => jsonRes({ records: [rec] }) },
-      { match: (url) => url.includes('/meta/bases/'), respond: () => jsonRes(metaBody) },
-      { match: (url, opts) => opts?.method === 'POST' && url.includes(ARCHIVE_TABLE_ID), respond: (_url, opts) => { createCalled = true; const body = JSON.parse(opts.body); return jsonRes({ records: body.records.map((r, i) => ({ id: `archRec${i}`, fields: r.fields })) }); } },
+      { match: (url, opts) => opts?.method === 'POST', respond: () => { postCalled = true; return jsonRes({ records: [] }); } },
       { match: (url, opts) => opts?.method === 'DELETE' && url.includes(ACTIVE_TABLE_ID), respond: () => { deleteCalled = true; return jsonRes({ records: [{ id: 'rec1' }] }); } },
     ]);
 
     const res = await run({
       pat: 'fake-pat', dataDir, dateStr: '2026-06-16', now: new Date('2026-06-16T10:00:00.000Z'),
-      fetchImpl, baseId: BASE_ID, activeTableId: ACTIVE_TABLE_ID, archiveTableId: ARCHIVE_TABLE_ID, apply: true,
+      fetchImpl, baseId: BASE_ID, activeTableId: ACTIVE_TABLE_ID, archiveTableId: ARCHIVE_TABLE_ID, ledgerPath, apply: true,
     });
 
     assert.equal(res.ok, true);
     assert.equal(res.dry_run, false);
     assert.equal(res.archived.length, 1);
     assert.equal(res.archived[0].cardId, 'card-1');
-    assert.equal(createCalled, true, 'archive create must be called');
-    assert.equal(deleteCalled, true, 'delete from Active Pipeline must be called after create succeeds');
+    assert.equal(postCalled, false, 'history must NOT be POSTed to any Airtable table — it goes to the local ledger');
+    assert.equal(deleteCalled, true, 'delete from Active Pipeline must run after the ledger write succeeds');
+
+    // The card must be durably recorded in the local append-only ledger.
+    const ledger = JSON.parse(fs.readFileSync(ledgerPath, 'utf8'));
+    assert.equal(ledger.length, 1);
+    assert.equal(ledger[0].card_id, 'card-1');
+    assert.equal(ledger[0].fields['Company'], 'Acme');
+    assert.equal(ledger[0].source, 'active-pipeline');
 
     const written = JSON.parse(fs.readFileSync(path.join(dataDir, 'archive-run-2026-06-16.json'), 'utf8'));
     assert.equal(written.archived.length, 1);
     assert.equal(written.dry_run, false);
   });
 
-  test('New-Hot card past 99h threshold is archived', async () => {
+  test('New-Hot card past 99h threshold is archived to the ledger', async () => {
     const dataDir = freshDir();
     const rec = makeRecord('rec1', { cardId: 'card-2', lane: 'New-Hot', createdAt: '2026-06-12T00:00:00.000Z' }); // 101h before "now"
-    const metaBody = { tables: [{ id: ARCHIVE_TABLE_ID, fields: [{ name: 'Card ID', id: 'fldArchCardId' }, { name: 'Company', id: 'fldArchCompany' }, { name: 'Role', id: 'fldArchRole' }, { name: 'Lane', id: 'fldArchLane' }, { name: 'Created At', id: 'fldArchCreatedAt' }, { name: 'Notes', id: 'fldArchNotes' }] }] };
+    const ledgerPath = path.join(dataDir, 'archive-ledger.json');
 
     const fetchImpl = makeFetch([
       { match: (url, opts) => (!opts?.method || opts.method === 'GET') && url.includes(ACTIVE_TABLE_ID), respond: () => jsonRes({ records: [rec] }) },
-      { match: (url) => url.includes('/meta/bases/'), respond: () => jsonRes(metaBody) },
-      { match: (url, opts) => opts?.method === 'POST' && url.includes(ARCHIVE_TABLE_ID), respond: (_url, opts) => { const body = JSON.parse(opts.body); return jsonRes({ records: body.records.map((r, i) => ({ id: `archRec${i}`, fields: r.fields })) }); } },
       { match: (url, opts) => opts?.method === 'DELETE' && url.includes(ACTIVE_TABLE_ID), respond: () => jsonRes({ records: [{ id: 'rec1' }] }) },
     ]);
 
     const res = await run({
       pat: 'fake-pat', dataDir, dateStr: '2026-06-16', now: new Date('2026-06-16T05:00:00.000Z'),
-      fetchImpl, baseId: BASE_ID, activeTableId: ACTIVE_TABLE_ID, archiveTableId: ARCHIVE_TABLE_ID, apply: true,
+      fetchImpl, baseId: BASE_ID, activeTableId: ACTIVE_TABLE_ID, archiveTableId: ARCHIVE_TABLE_ID, ledgerPath, apply: true,
     });
 
     assert.equal(res.ok, true);
     assert.equal(res.archived.length, 1);
     assert.equal(res.archived[0].cardId, 'card-2');
     assert.equal(res.archived[0].lane, 'New-Hot');
+    const ledger = JSON.parse(fs.readFileSync(ledgerPath, 'utf8'));
+    assert.equal(ledger.length, 1);
+    assert.equal(ledger[0].card_id, 'card-2');
+    assert.equal(ledger[0].lane, 'New-Hot');
+  });
+
+  test('ledger is append-only — a second archive run keeps prior entries', async () => {
+    const dataDir = freshDir();
+    const ledgerPath = path.join(dataDir, 'archive-ledger.json');
+    fs.writeFileSync(ledgerPath, JSON.stringify([{ card_id: 'old-card', source: 'legacy-archive-table' }], null, 2));
+    const rec = makeRecord('rec1', { cardId: 'card-1', lane: 'New-Fresh', createdAt: '2026-06-14T00:00:00.000Z' });
+
+    const fetchImpl = makeFetch([
+      { match: (url, opts) => (!opts?.method || opts.method === 'GET') && url.includes(ACTIVE_TABLE_ID), respond: () => jsonRes({ records: [rec] }) },
+      { match: (url, opts) => opts?.method === 'DELETE' && url.includes(ACTIVE_TABLE_ID), respond: () => jsonRes({ records: [{ id: 'rec1' }] }) },
+    ]);
+
+    await run({
+      pat: 'fake-pat', dataDir, dateStr: '2026-06-16', now: new Date('2026-06-16T10:00:00.000Z'),
+      fetchImpl, baseId: BASE_ID, activeTableId: ACTIVE_TABLE_ID, archiveTableId: ARCHIVE_TABLE_ID, ledgerPath, apply: true,
+    });
+
+    const ledger = JSON.parse(fs.readFileSync(ledgerPath, 'utf8'));
+    assert.equal(ledger.length, 2, 'pre-existing ledger entry must be preserved, new one appended');
+    assert.equal(ledger[0].card_id, 'old-card');
+    assert.equal(ledger[1].card_id, 'card-1');
   });
 
   test('card under threshold is not archived', async () => {
@@ -406,73 +436,54 @@ describe('run', () => {
     assert.ok(res.notes.some((n) => n.includes('No previous-day snapshot')));
   });
 
-  test('Archive table schema mismatch: unmapped fields are logged but archiving still proceeds', async () => {
+  test('ledger write failure (corrupt ledger): delete is never called, error is reported, no data loss', async () => {
     const dataDir = freshDir();
     const rec = makeRecord('rec1', { cardId: 'card-1', lane: 'New-Fresh', createdAt: '2026-06-14T00:00:00.000Z' });
-    // Archive table only has Card ID + Company — Role/Lane/Created At/Notes are unmapped.
-    const metaBody = { tables: [{ id: ARCHIVE_TABLE_ID, fields: [{ name: 'Card ID', id: 'fldArchCardId' }, { name: 'Company', id: 'fldArchCompany' }] }] };
-
-    const fetchImpl = makeFetch([
-      { match: (url, opts) => (!opts?.method || opts.method === 'GET') && url.includes(ACTIVE_TABLE_ID), respond: () => jsonRes({ records: [rec] }) },
-      { match: (url) => url.includes('/meta/bases/'), respond: () => jsonRes(metaBody) },
-      { match: (url, opts) => opts?.method === 'POST' && url.includes(ARCHIVE_TABLE_ID), respond: (_url, opts) => { const body = JSON.parse(opts.body); return jsonRes({ records: body.records.map((r, i) => ({ id: `archRec${i}`, fields: r.fields })) }); } },
-      { match: (url, opts) => opts?.method === 'DELETE' && url.includes(ACTIVE_TABLE_ID), respond: () => jsonRes({ records: [{ id: 'rec1' }] }) },
-    ]);
-
-    const res = await run({
-      pat: 'fake-pat', dataDir, dateStr: '2026-06-16', now: new Date('2026-06-16T10:00:00.000Z'),
-      fetchImpl, baseId: BASE_ID, activeTableId: ACTIVE_TABLE_ID, archiveTableId: ARCHIVE_TABLE_ID, apply: true,
-    });
-
-    assert.equal(res.ok, true);
-    assert.equal(res.archived.length, 1, 'archiving still completes despite a partial field map');
-    assert.ok(res.errors.some((e) => e.includes('Role') && e.includes('Lane')), 'unmapped field names should be reported in errors');
-  });
-
-  test('archive create failure: delete is never called, error is reported', async () => {
-    const dataDir = freshDir();
-    const rec = makeRecord('rec1', { cardId: 'card-1', lane: 'New-Fresh', createdAt: '2026-06-14T00:00:00.000Z' });
-    const metaBody = { tables: [{ id: ARCHIVE_TABLE_ID, fields: [{ name: 'Card ID', id: 'fldArchCardId' }] }] };
+    const ledgerPath = path.join(dataDir, 'archive-ledger.json');
+    // Corrupt existing ledger (not a JSON array) — appendArchiveLedger must refuse to clobber it.
+    fs.writeFileSync(ledgerPath, '{ this is not a json array');
 
     let deleteCalled = false;
     const fetchImpl = makeFetch([
       { match: (url, opts) => (!opts?.method || opts.method === 'GET') && url.includes(ACTIVE_TABLE_ID), respond: () => jsonRes({ records: [rec] }) },
-      { match: (url) => url.includes('/meta/bases/'), respond: () => jsonRes(metaBody) },
-      { match: (url, opts) => opts?.method === 'POST' && url.includes(ARCHIVE_TABLE_ID), respond: () => jsonRes({ error: 'INVALID_REQUEST' }, { ok: false, status: 422, statusText: 'Unprocessable' }) },
       { match: (url, opts) => opts?.method === 'DELETE' && url.includes(ACTIVE_TABLE_ID), respond: () => { deleteCalled = true; return jsonRes({ records: [] }); } },
     ]);
 
     const res = await run({
       pat: 'fake-pat', dataDir, dateStr: '2026-06-16', now: new Date('2026-06-16T10:00:00.000Z'),
-      fetchImpl, baseId: BASE_ID, activeTableId: ACTIVE_TABLE_ID, archiveTableId: ARCHIVE_TABLE_ID, apply: true,
+      fetchImpl, baseId: BASE_ID, activeTableId: ACTIVE_TABLE_ID, archiveTableId: ARCHIVE_TABLE_ID, ledgerPath, apply: true,
     });
 
     assert.equal(res.ok, true);
-    assert.equal(res.archived.length, 0, 'a card whose archive-create failed must not be reported as archived');
-    assert.equal(deleteCalled, false, 'delete must never run if create failed — no data loss');
-    assert.ok(res.errors.some((e) => e.includes('Archive create failed')));
+    assert.equal(res.archived.length, 0, 'a card whose ledger write failed must not be reported as archived');
+    assert.equal(deleteCalled, false, 'delete must never run if the ledger write failed — no data loss');
+    assert.ok(res.errors.some((e) => e.includes('ledger write failed')));
+    // Corrupt ledger must be left untouched, never overwritten.
+    assert.equal(fs.readFileSync(ledgerPath, 'utf8'), '{ this is not a json array');
   });
 
-  test('archive create succeeds but delete fails: card is in both tables, flagged for manual cleanup', async () => {
+  test('ledger append succeeds but delete fails: card stays in Active, re-archived next run (no data loss)', async () => {
     const dataDir = freshDir();
     const rec = makeRecord('rec1', { cardId: 'card-1', lane: 'New-Fresh', createdAt: '2026-06-14T00:00:00.000Z' });
-    const metaBody = { tables: [{ id: ARCHIVE_TABLE_ID, fields: [{ name: 'Card ID', id: 'fldArchCardId' }] }] };
+    const ledgerPath = path.join(dataDir, 'archive-ledger.json');
 
     const fetchImpl = makeFetch([
       { match: (url, opts) => (!opts?.method || opts.method === 'GET') && url.includes(ACTIVE_TABLE_ID), respond: () => jsonRes({ records: [rec] }) },
-      { match: (url) => url.includes('/meta/bases/'), respond: () => jsonRes(metaBody) },
-      { match: (url, opts) => opts?.method === 'POST' && url.includes(ARCHIVE_TABLE_ID), respond: (_url, opts) => { const body = JSON.parse(opts.body); return jsonRes({ records: body.records.map((r, i) => ({ id: `archRec${i}`, fields: r.fields })) }); } },
       { match: (url, opts) => opts?.method === 'DELETE' && url.includes(ACTIVE_TABLE_ID), respond: () => jsonRes({ error: 'INVALID_REQUEST' }, { ok: false, status: 500, statusText: 'Server Error' }) },
     ]);
 
     const res = await run({
       pat: 'fake-pat', dataDir, dateStr: '2026-06-16', now: new Date('2026-06-16T10:00:00.000Z'),
-      fetchImpl, baseId: BASE_ID, activeTableId: ACTIVE_TABLE_ID, archiveTableId: ARCHIVE_TABLE_ID, apply: true,
+      fetchImpl, baseId: BASE_ID, activeTableId: ACTIVE_TABLE_ID, archiveTableId: ARCHIVE_TABLE_ID, ledgerPath, apply: true,
     });
 
     assert.equal(res.ok, true);
-    assert.equal(res.archived.length, 0, 'not reported as cleanly archived since delete failed');
-    assert.ok(res.errors.some((e) => e.includes('manual cleanup')));
+    assert.equal(res.archived.length, 0, 'not reported as cleanly archived since the delete failed');
+    assert.ok(res.errors.some((e) => e.includes('re-archived next run')));
+    // The card is safe in the ledger even though the delete failed.
+    const ledger = JSON.parse(fs.readFileSync(ledgerPath, 'utf8'));
+    assert.equal(ledger.length, 1);
+    assert.equal(ledger[0].card_id, 'card-1');
   });
 
   test('writes data/archive-run-{date}.json with the documented shape', async () => {
@@ -496,8 +507,11 @@ describe('archive-stale CLI', () => {
     const dataDir = freshDir();
     const env = { ...process.env };
     delete env.AIRTABLE_PAT;
+    // Run from a temp cwd (dataDir) that has no .env, so dotenv can't silently
+    // reload AIRTABLE_PAT from the repo's real .env and mask the missing-PAT path.
+    const script = path.join(ROOT, 'scripts', 'archive-stale.mjs');
     assert.throws(() => {
-      execSync(`node scripts/archive-stale.mjs --dry-run --data "${dataDir}"`, { cwd: ROOT, encoding: 'utf8', stdio: 'pipe', env });
+      execSync(`node "${script}" --dry-run --data "${dataDir}"`, { cwd: dataDir, encoding: 'utf8', stdio: 'pipe', env });
     }, (err) => {
       assert.equal(err.status, 1);
       assert.match(err.stderr.toString(), /AIRTABLE_PAT/);
