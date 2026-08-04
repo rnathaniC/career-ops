@@ -219,6 +219,239 @@ export function collectFlags(refresh, dispatch, cadence, referral) {
   return { techDebt, actions, kaizen };
 }
 
+// ── auto-submit outcome scorecard (pure) ─────────────────────────
+// THE STORY: every 1 AM auto-submit run journals per-card outcomes into
+// data/live-runs-YYYY-MM-DD.json. We want a running scoreboard: how many
+// applications actually CONFIRMED vs got blocked, errored, or need a human.
+//
+// LANDMINE (the whole reason this code is careful): the string "confirmed" is a
+// substring of "unconfirmed". A naive `status.includes('confirmed')` therefore
+// counts every UNCONFIRMED card as a success — a prior quick analysis did exactly
+// this and reported 10 confirmed when the truth is ZERO. We classify by EXACT,
+// normalized token equality (a lookup table), never substring, so 'unconfirmed'
+// can never leak into 'confirmed'.
+export const AUTO_SUBMIT_CATEGORIES = [
+  'confirmed',
+  'error',
+  'blocked',
+  'requires-human',
+  'unconfirmed',
+  'unknown',
+  'skipped',
+];
+
+const AUTO_SUBMIT_LABELS = {
+  confirmed: 'Confirmed / submitted',
+  error: 'Error',
+  blocked: 'Blocked',
+  'requires-human': 'Requires-human',
+  unconfirmed: 'Unconfirmed',
+  unknown: 'Unknown',
+  skipped: 'Skipped',
+};
+
+// Exact, normalized aliases → canonical category. Keys are already normalized
+// (lowercased, spaces/underscores → hyphens). Anything not present → 'unknown'.
+const OUTCOME_ALIASES = {
+  confirmed: 'confirmed',
+  submitted: 'confirmed',
+  success: 'confirmed',
+  'submit-confirmed': 'confirmed',
+  error: 'error',
+  errored: 'error',
+  failed: 'error',
+  failure: 'error',
+  blocked: 'blocked',
+  'form-blocked': 'blocked',
+  'requires-human': 'requires-human',
+  'needs-human': 'requires-human',
+  manual: 'requires-human',
+  unconfirmed: 'unconfirmed',
+  skipped: 'skipped',
+  skip: 'skipped',
+};
+
+function emptyTally() {
+  const t = {};
+  for (const c of AUTO_SUBMIT_CATEGORIES) t[c] = 0;
+  return t;
+}
+
+// Normalize a raw outcome string to exactly one canonical category. EXACT match
+// only — 'unconfirmed' → 'unconfirmed', never 'confirmed'.
+export function normalizeOutcome(raw) {
+  if (raw === undefined || raw === null) return 'unknown';
+  const key = String(raw).trim().toLowerCase().replace(/[\s_]+/g, '-');
+  if (!key) return 'unknown';
+  return OUTCOME_ALIASES[key] ?? 'unknown';
+}
+
+// A result item's outcome may live under 'outcome', 'result', or 'status'.
+function itemOutcome(it) {
+  if (!it || typeof it !== 'object') return undefined;
+  return it.outcome ?? it.result ?? it.status;
+}
+
+// Flatten a parsed live-runs file into leaf result items. Handles the three
+// observed shapes: a bare array of items, an object with a `results` array, and
+// an array of run-wrappers that each nest their own `results` array. We only
+// count leaf objects that actually look like a card result (have an outcome key
+// or an id/url) so run-wrapper metadata never inflates the attempt count.
+export function flattenLiveRun(parsed) {
+  const items = [];
+  const visit = (node) => {
+    if (Array.isArray(node)) {
+      for (const n of node) visit(n);
+      return;
+    }
+    if (node && typeof node === 'object') {
+      if (Array.isArray(node.results)) {
+        for (const n of node.results) visit(n);
+        return;
+      }
+      if (
+        node.outcome !== undefined ||
+        node.result !== undefined ||
+        node.status !== undefined ||
+        node.id !== undefined ||
+        node.url !== undefined
+      ) {
+        items.push(node);
+      }
+    }
+  };
+  visit(parsed);
+  return items;
+}
+
+// Pure aggregator. runFiles: [{ file, date, data, readError }]. Splits every
+// result into TODAY (file date === reportDate) vs the RUNNING total across all
+// files, and computes raw + adjusted confirmed-success rates.
+//   raw      = confirmed / all attempts
+//   adjusted = confirmed / (attempts excluding skipped + requires-human)
+// We exclude BOTH skipped (dup-guards, never real submissions) and
+// requires-human (captcha/manual hand-offs the bot can't own) from the adjusted
+// denominator, so it reflects only attempts the automation could truly close.
+export function summarizeLiveRuns(runFiles, reportDate) {
+  const today = emptyTally();
+  const running = emptyTally();
+  let filesRead = 0;
+  let filesUnreadable = 0;
+  let itemsToday = 0;
+  let itemsRunning = 0;
+
+  for (const rf of runFiles || []) {
+    if (!rf || rf.readError || rf.data == null) {
+      filesUnreadable += 1;
+      continue;
+    }
+    filesRead += 1;
+    const isToday = rf.date === reportDate;
+    for (const it of flattenLiveRun(rf.data)) {
+      const cat = normalizeOutcome(itemOutcome(it));
+      running[cat] += 1;
+      itemsRunning += 1;
+      if (isToday) {
+        today[cat] += 1;
+        itemsToday += 1;
+      }
+    }
+  }
+
+  const rate = (confirmed, denom) => (denom > 0 ? Number(((confirmed / denom) * 100).toFixed(1)) : null);
+  const rAdjDenom = itemsRunning - running.skipped - running['requires-human'];
+  const tAdjDenom = itemsToday - today.skipped - today['requires-human'];
+
+  return {
+    reportDate,
+    today,
+    running,
+    totals: { today: itemsToday, running: itemsRunning },
+    filesRead,
+    filesUnreadable,
+    rates: {
+      running: {
+        raw: rate(running.confirmed, itemsRunning),
+        rawDenom: itemsRunning,
+        adjusted: rate(running.confirmed, rAdjDenom),
+        adjustedDenom: rAdjDenom,
+      },
+      today: {
+        raw: rate(today.confirmed, itemsToday),
+        rawDenom: itemsToday,
+        adjusted: rate(today.confirmed, tAdjDenom),
+        adjustedDenom: tAdjDenom,
+      },
+    },
+  };
+}
+
+// Side-effectful reader: glob data/live-runs-*.json, read each safely, tag its
+// date (from the filename), and hand the lot to the pure aggregator. Degrades
+// loudly — a missing dir or unreadable file becomes a zero/unreadable count,
+// never a crash.
+export function computeAutoSubmitScorecard(dataDir, reportDate) {
+  let names = [];
+  try {
+    names = readdirSync(dataDir)
+      .filter((f) => /^live-runs-.*\.json$/.test(f))
+      .sort();
+  } catch {
+    names = [];
+  }
+  const runFiles = names.map((name) => {
+    const r = readJsonSafe(path.join(dataDir, name));
+    const m = name.match(/^live-runs-(\d{4}-\d{2}-\d{2})/);
+    return {
+      file: name,
+      date: m ? m[1] : null,
+      data: r.ok ? r.data : null,
+      readError: r.ok ? null : r.error,
+    };
+  });
+  return summarizeLiveRuns(runFiles, reportDate);
+}
+
+// Render the scorecard as markdown lines that slot into the report body.
+export function renderAutoSubmitScorecard(sc) {
+  const out = [];
+  out.push('## Auto-Submit Scorecard');
+  out.push('');
+  if (sc.filesRead === 0) {
+    out.push('> ⚠️ No readable `data/live-runs-*.json` files found — scorecard shows zeros (degraded, not silent).');
+    out.push('');
+  }
+  if (sc.filesUnreadable > 0) {
+    out.push(`> ⚠️ ${sc.filesUnreadable} live-runs file(s) were unreadable and skipped.`);
+    out.push('');
+  }
+  out.push(
+    "Auto-submit outcomes classified per result item (exact/normalized match — `unconfirmed` is never counted as `confirmed`). **Today** = results in today's live-runs file (0 if none); **Running total** = every `data/live-runs-*.json` since inception.",
+  );
+  out.push('');
+  out.push('| Outcome | Today | Running total |');
+  out.push('| --- | ---: | ---: |');
+  for (const cat of AUTO_SUBMIT_CATEGORIES) {
+    out.push(`| ${AUTO_SUBMIT_LABELS[cat]} | ${sc.today[cat]} | ${sc.running[cat]} |`);
+  }
+  out.push(`| **Total attempts** | **${sc.totals.today}** | **${sc.totals.running}** |`);
+  out.push('');
+  const pct = (v) => (v == null ? 'n/a' : `${v.toFixed(1)}%`);
+  const r = sc.rates.running;
+  out.push('**Confirmed success rate (running, since inception):**');
+  out.push('');
+  out.push(
+    `- Raw: ${r.raw == null ? 'n/a (no attempts yet)' : pct(r.raw)} — ${sc.running.confirmed} confirmed / ${r.rawDenom} total attempts.`,
+  );
+  out.push(
+    `- Adjusted: ${r.adjusted == null ? 'n/a (no genuine attempts yet)' : pct(r.adjusted)} — ${sc.running.confirmed} confirmed / ${r.adjustedDenom} genuine attempts (excludes ${sc.running.skipped} skipped + ${sc.running['requires-human']} requires-human).`,
+  );
+  out.push('');
+  out.push(`_Files read: ${sc.filesRead} · unreadable: ${sc.filesUnreadable}._`);
+  out.push('');
+  return out;
+}
+
 // ── markdown builder (pure) ──────────────────────────────────────
 function line(v) {
   return v === undefined || v === null ? '—' : v;
@@ -285,6 +518,10 @@ export function buildReport(ctx) {
   }
   if (!refresh && !ingest && !Array.isArray(submitQueue)) out.push('- ⚠️ No submission telemetry available.');
   out.push('');
+
+  // 2b. Auto-Submit Scorecard — per-card outcome tally (today vs since inception).
+  const autoSubmit = ctx.autoSubmit || summarizeLiveRuns([], date);
+  for (const l of renderAutoSubmitScorecard(autoSubmit)) out.push(l);
 
   // 3. Referral queue
   out.push('## Referral queue');
@@ -356,6 +593,8 @@ export function generate(opts = {}) {
   const refPath = newestReferralQueue(dataDir);
   const referral = load(refPath ? path.basename(refPath) : 'referral-queue-*.json', refPath);
 
+  const autoSubmit = computeAutoSubmitScorecard(dataDir, date);
+
   const markdown = buildReport({
     date,
     now,
@@ -366,6 +605,7 @@ export function generate(opts = {}) {
     ingest,
     dispatch,
     sourceStatus,
+    autoSubmit,
   });
 
   if (!existsSync(outDir)) mkdirSync(outDir, { recursive: true });

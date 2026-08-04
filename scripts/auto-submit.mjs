@@ -5,6 +5,10 @@
  * MODES (mutually exclusive, default = dry-run):
  *   --dry-run     Analysis only. No browser, no submissions.
  *   --semi-auto   Fills form in visible Chromium, stops before submit. YOU click.
+ *   --park-ready  No browser. Gates eligible cards on readiness, then moves each
+ *                 passing card to the Airtable "Submit Ready" lane for Rahil's
+ *                 manual final Submit click. This is the auto-fill-to-submit-ready
+ *                 model — the honest answer to the reCAPTCHA submit-gate ceiling.
  *   --live        Full automation. ALL THREE safety locks required.
  *
  * SAFETY LOCKS FOR --live (BOTH REQUIRED to arm live mode):
@@ -68,6 +72,10 @@ import { getValidSessionPath as getValidWorkdaySessionPath } from './workday-log
 import { fillForm, formatUploadDetails } from './form-fill.mjs';
 import { VALID_IDS as CANONICAL_STATE_IDS } from '../gen/states.js';
 import { scoreCard, saveReadinessScore } from './readiness-scorer.mjs';
+import {
+  BASE_ID, ACTIVE_TABLE_ID, ACTIVE_FIELD_IDS, CARD_ID_FIELD, LAST_REFRESHED_FIELD,
+  PAT_MISSING_MSG, airtableListAll, airtablePatchBatch,
+} from './airtable-sync.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname  = path.dirname(__filename);
@@ -103,8 +111,15 @@ const CARD_IDS          = CARD_IDS_ARG
   ? new Set(CARD_IDS_ARG.split(',').map((s) => s.trim()).filter(Boolean))
   : null;
 const SEMI_AUTO         = process.argv.includes('--semi-auto');
-const LIVE              = process.argv.includes('--live') && !SEMI_AUTO;
-const DRY_RUN           = !LIVE && !SEMI_AUTO;
+// --park-ready (2026-08-02): non-browser staging mode. Applies the SAME eligibility
+// + readiness gates as live, then moves each passing card's Airtable Lane to
+// "Submit Ready" instead of attempting an automated submit click (which reCAPTCHA
+// bot-detection silently blocks — the confirmed 0% ceiling). Rahil does the final
+// human Submit click from the Submit Ready lane. Warm-referral/New-Hot cards are
+// never in the eligible set, so they are untouched.
+const PARK_READY        = process.argv.includes('--park-ready') && !SEMI_AUTO;
+const LIVE              = process.argv.includes('--live') && !SEMI_AUTO && !PARK_READY;
+const DRY_RUN           = !LIVE && !SEMI_AUTO && !PARK_READY;
 // null = auto-determine from browser config (firefox → true, chromium → false)
 const USE_EXTENSION_ARG = process.argv.includes('--no-extension-autofill') ? false
   : process.argv.includes('--use-extension-autofill') ? true
@@ -115,6 +130,15 @@ const REPORT            = process.argv.includes('--report');
 const ALLOW_TIER        = argVal('--allow-tier');
 const RAW_LIMIT         = parseInt(argVal('--limit') ?? '5', 10);
 const LIMIT             = isNaN(RAW_LIMIT) ? 5 : RAW_LIMIT;
+// B-24 fix (2026-08-02): the post-click confirmation wait was hardcoded to 60s,
+// but the sandbox executor kills any command at 45s. The browser was therefore
+// torn down mid-wait on EVERY successful click, so a real submission could never
+// report anything but UNCONFIRMED — manufacturing confirmation debt that then had
+// to be reconciled by hand from Rahil's inbox. Making it configurable lets a
+// sandbox run pass --confirm-timeout 25000 and finish inside its own window.
+// Default stays 60000 so Windows/host runs are unchanged.
+const RAW_CONFIRM_MS    = parseInt(argVal('--confirm-timeout') ?? '60000', 10);
+const CONFIRM_TIMEOUT_MS = isNaN(RAW_CONFIRM_MS) || RAW_CONFIRM_MS < 1000 ? 60000 : RAW_CONFIRM_MS;
 const DATE_STAMP        = new Date().toISOString().slice(0, 10);
 const LIVE_DAILY_CAP    = 5;
 
@@ -1170,6 +1194,77 @@ async function runSemiAuto(cards, pw, personal, browserCfg, useExtension, browse
   return results;
 }
 
+// ── Park-ready mode (auto-fill-to-submit-ready staging) ───────────────────────
+// Moves eligible, readiness-passing cards into the Airtable "Submit Ready" lane so
+// Rahil can run an interactive fill+submit and click the final button himself. No
+// browser, no submit click — this is the honest answer to the reCAPTCHA ceiling:
+// the engine stages, the human fires the last shot. Exported for unit testing.
+export async function parkCardsToSubmitReady(cards, {
+  patImpl = process.env.AIRTABLE_PAT,
+  listImpl = airtableListAll,
+  patchImpl = airtablePatchBatch,
+  cvText = null,
+  scoreImpl = scoreCard,
+  gateImpl = readinessGate,
+  now = () => new Date().toISOString(),
+} = {}) {
+  const results = [];
+  if (!patImpl) {
+    console.error(`[park-ready] AIRTABLE_PAT not set — cannot stage cards. ${PAT_MISSING_MSG}`);
+    return { parked: 0, skipped: cards.length, results: cards.map((c) => ({ id: c.id, status: 'skipped', reason: 'no-pat' })) };
+  }
+
+  let records = [];
+  try {
+    records = await listImpl({ pat: patImpl, baseId: BASE_ID, tableId: ACTIVE_TABLE_ID });
+  } catch (e) {
+    console.error(`[park-ready] Airtable list failed: ${e.message}`);
+    return { parked: 0, skipped: cards.length, results: cards.map((c) => ({ id: c.id, status: 'skipped', reason: 'airtable-list-failed' })) };
+  }
+  const recIdByCardId = new Map(records.map((r) => [r.fields?.[CARD_ID_FIELD], r.id]));
+
+  const toPatch = [];
+  for (const card of cards) {
+    // Readiness gate — identical band rule to live (>=60 or CL-gated). No CL here
+    // (staging only), so the readinessGate CL branch never attaches one.
+    const readiness = await scoreImpl(card, { resumeText: cvText, clText: null });
+    if (!readiness.score_skipped) {
+      saveReadinessScore(card.id, readiness.total, readiness.grade);
+      const gate = gateImpl(readiness.total, false);
+      if (gate.action === 'skip') {
+        console.log(`[park-ready] SKIP ${card.company} — ${readiness.total}/100 (${gate.reason})`);
+        results.push({ id: card.id, company: card.company, status: 'skipped', reason: gate.reason, readiness_total: readiness.total });
+        continue;
+      }
+    }
+    const recId = recIdByCardId.get(card.id);
+    if (!recId) {
+      console.log(`[park-ready] SKIP ${card.company} — no Airtable record for card id ${card.id}`);
+      results.push({ id: card.id, company: card.company, status: 'skipped', reason: 'no-airtable-record' });
+      continue;
+    }
+    toPatch.push({
+      id: recId,
+      fields: {
+        [ACTIVE_FIELD_IDS['Lane']]: 'Submit Ready',
+        [LAST_REFRESHED_FIELD]: now(),
+      },
+    });
+    console.log(`[park-ready] → Submit Ready: ${card.company} — ${String(card.role).slice(0, 50)}`);
+    results.push({ id: card.id, company: card.company, role: card.role, status: 'submit-ready' });
+  }
+
+  if (toPatch.length) {
+    try {
+      await patchImpl({ pat: patImpl, baseId: BASE_ID, tableId: ACTIVE_TABLE_ID, records: toPatch });
+    } catch (e) {
+      console.error(`[park-ready] Airtable PATCH failed: ${e.message}`);
+      return { parked: 0, skipped: cards.length, error: e.message, results };
+    }
+  }
+  return { parked: toPatch.length, skipped: results.filter((r) => r.status === 'skipped').length, results };
+}
+
 // ── Live mode ─────────────────────────────────────────────────────────────────
 
 function appendSubmitQueue(card, ats, ssPath) {
@@ -1425,7 +1520,7 @@ async function runLive(cards, pw, allowTier, personal, browserCfg, useExtension,
           });
         } else { throw clickErr; }
       }
-      console.log('  Clicked submit. Waiting for confirmation (60s)...');
+      console.log(`  Clicked submit. Waiting for confirmation (${Math.round(CONFIRM_TIMEOUT_MS / 1000)}s)...`);
 
       // "Last push" confirmation. SpeedyApply fills to the 1-yard line; the engine
       // clicks submit and only counts it APPLIED on a real success signal — either an
@@ -1436,8 +1531,8 @@ async function runLive(cards, pw, allowTier, personal, browserCfg, useExtension,
       const CONFIRM_URL  = /confirmation|thank[-_ ]?you|submitted|success|applied|complete/i;
       try {
         await Promise.race([
-          page.waitForURL((url) => String(url) !== card.url && CONFIRM_URL.test(String(url)), { timeout: 60000 }),
-          page.getByText(CONFIRM_TEXT).first().waitFor({ state: 'visible', timeout: 60000 }),
+          page.waitForURL((url) => String(url) !== card.url && CONFIRM_URL.test(String(url)), { timeout: CONFIRM_TIMEOUT_MS }),
+          page.getByText(CONFIRM_TEXT).first().waitFor({ state: 'visible', timeout: CONFIRM_TIMEOUT_MS }),
         ]);
         confirmed_flag = true;
       } catch (e) {
@@ -1502,7 +1597,7 @@ async function runLive(cards, pw, allowTier, personal, browserCfg, useExtension,
 // ── Main ──────────────────────────────────────────────────────────────────────
 
 async function main() {
-  const modeLabel = LIVE ? 'LIVE' : SEMI_AUTO ? 'SEMI-AUTO' : 'DRY-RUN';
+  const modeLabel = LIVE ? 'LIVE' : SEMI_AUTO ? 'SEMI-AUTO' : PARK_READY ? 'PARK-READY' : 'DRY-RUN';
   console.log(`[auto-submit] mode=${modeLabel} limit=${LIMIT}`);
 
   // Load eligible cards — JSON path takes priority over HTML kanban
@@ -1567,6 +1662,18 @@ async function main() {
   }
 
   const toProcess = eligible.slice(0, LIMIT);
+
+  // ── Park-ready ───────────────────────────────────────────────────────────────
+  // Non-browser staging: gate on readiness, then move passing cards to the Airtable
+  // "Submit Ready" lane. Runs before any browser/Playwright setup.
+  if (PARK_READY) {
+    const cvText = loadCvTextForScoring();
+    const { parked, skipped, results } = await parkCardsToSubmitReady(toProcess, { cvText });
+    const outPath = path.join(ROOT, 'data', `park-ready-${DATE_STAMP}.json`);
+    writeJSON(outPath, { ran_at: new Date().toISOString(), mode: 'park-ready', parked, skipped, results });
+    console.log(`\n[auto-submit] PARK-READY: ${parked} card(s) → Submit Ready, ${skipped} skipped. Written → ${path.relative(ROOT, outPath)}`);
+    process.exit(0);
+  }
 
   // Load CL index once (warnings only — missing index is not fatal)
   const clIdx = loadClIndex(CL_INDEX_ARG);

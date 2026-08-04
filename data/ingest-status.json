@@ -1,14 +1,15 @@
 {
-  "ran_at_utc": "2026-07-29T02:34:43.866Z",
-  "source": "C:\\Users\\rahil\\career-ops\\data\\kanban-import-2026-07-29.json",
+  "ran_at_utc": "2026-08-04T01:07:02.763Z",
+  "source": "C:\\Users\\rahil\\career-ops\\data\\kanban-import-2026-08-04.json",
   "grades": [
     "A",
     "B"
   ],
-  "considered": 37,
-  "graded": 9,
-  "fresh": 2,
-  "referral_held": 7,
-  "added": 0,
-  "dry_run": false
+  "considered": 51,
+  "graded": 13,
+  "fresh": 5,
+  "referral_held": 8,
+  "added": 2,
+  "queue_size_after": 18,
+  "backup": "C:\\Users\\rahil\\career-ops\\data\\submit-queue.json.bak-1785805622759"
 }

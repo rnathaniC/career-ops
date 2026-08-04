@@ -92,10 +92,37 @@ export function titleDisqualifiers(title) {
   return out;
 }
 
-export function gradeJob(title, keywords) {
+/**
+ * B-17d fix (2026-08-02, K-0724-1): screen the posting's LOCATION field, not just
+ * its title. Recurrences of B-17 all shared one shape — the title was clean and
+ * the geography lived only in the location ("Coupa | TPM, Security & GRC |
+ * Bogota, Colombia" graded B twice, once as Pune on 2026-07-24). Title-only
+ * screening is structurally blind to those, so they reached auto-submit
+ * eligibility and had to be hand-downgraded every time.
+ *
+ * Deliberately asymmetric: a foreign token disqualifies ONLY when the location
+ * carries no US/remote token. Multi-site postings like "New York; London" keep
+ * their grade, because a US-based option genuinely exists — hard-D'ing those
+ * would trade a false positive for a false negative and quietly shrink the funnel.
+ *
+ * @param {string} location Raw location string from scan-history.tsv (may be '')
+ * @returns {string[]} disqualifiers found (empty = clean or unknown)
+ */
+export function locationDisqualifiers(location) {
+  const loc = String(location || '').trim();
+  if (!loc) return []; // pre-B-17d history rows: unknown, never disqualify
+  if (US_LOCATION_OK.test(loc)) return []; // a US/remote option exists
+  const out = [];
+  const foreign = loc.replace(/new mexico/ig, '').match(FOREIGN_TITLE_RE);
+  if (foreign) out.push(`foreign-location-field:${foreign[1].toLowerCase()}`);
+  if (BR_STATE_SUFFIX_RE.test(loc)) out.push('foreign-location-field:br-state-suffix');
+  return out;
+}
+
+export function gradeJob(title, keywords, location = '') {
   const lower   = String(title || '').toLowerCase();
   const matched = keywords.filter((k) => lower.includes(String(k).toLowerCase()));
-  const disqualifiers = titleDisqualifiers(title);
+  const disqualifiers = [...titleDisqualifiers(title), ...locationDisqualifiers(location)];
   if (disqualifiers.length > 0) {
     return { grade: 'D', keywords_matched: matched, disqualifiers };
   }
@@ -109,16 +136,20 @@ export function gradeJob(title, keywords) {
 
 /**
  * Parse data/scan-history.tsv into entry objects.
- * TSV header: url\tfirst_seen\tportal\ttitle\tcompany\tstatus
+ * TSV header: url\tfirst_seen\tportal\ttitle\tcompany\tstatus[\tlocation]
+ *
+ * B-17d (2026-08-02): `location` is a 7th column added by scan.mjs. Rows written
+ * before that change have only 6 columns and yield location === '', which is
+ * treated as "unknown" and disqualifies nothing — so old history stays valid.
  * @param {string} filePath
- * @returns {Array<{url, first_seen, portal, title, company, status}>}
+ * @returns {Array<{url, first_seen, portal, title, company, status, location}>}
  */
 export function parseScanHistory(filePath) {
   if (!existsSync(filePath)) return [];
   const lines = readFileSync(filePath, 'utf8').split('\n').filter(Boolean);
   if (lines.length <= 1) return [];
   return lines.slice(1).map((line) => {
-    const [url, first_seen, portal, title, company, status] = line.split('\t');
+    const [url, first_seen, portal, title, company, status, location] = line.split('\t');
     return {
       url:        (url        || '').trim(),
       first_seen: (first_seen || '').trim(),
@@ -126,6 +157,7 @@ export function parseScanHistory(filePath) {
       title:      (title      || '').trim(),
       company:    (company    || '').trim(),
       status:     (status     || '').trim(),
+      location:   (location   || '').trim(),
     };
   }).filter((e) => e.url && e.title);
 }
@@ -207,11 +239,12 @@ async function main() {
   }
 
   const graded = recent.map((e) => {
-    const { grade, keywords_matched, disqualifiers } = gradeJob(e.title, keywords);
+    const { grade, keywords_matched, disqualifiers } = gradeJob(e.title, keywords, e.location);
     return {
       company:          e.company,
       role:             e.title,
       grade,
+      location:         e.location || '',
       platform:         normalizePlatform(e.portal),
       url:              e.url,
       jd_snippet:       null,

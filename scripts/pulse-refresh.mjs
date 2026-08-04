@@ -179,6 +179,25 @@ async function npm(script, { capture = false, args = [], step } = {}) {
 }
 
 /**
+ * Windows-hardened step runner: spawns `node` DIRECTLY on a repo script instead
+ * of going through `npm run`. The npm -> cmd.exe -> npm.cmd -> node chain
+ * intermittently aborts on Windows with exit 3221226505 (0xC0000409,
+ * STATUS_STACK_BUFFER_OVERRUN), which surfaced as a spurious "Airtable pull
+ * failed" even though the pull itself is healthy (it PULLed fine in isolation).
+ * Direct `node script.mjs` spawns — already used for write-refresh-status and
+ * airtable-map without issue — do not hit that abort, so the Airtable sync steps
+ * use this path. Same { ok, stdout, stderr, status } shape as npm().
+ */
+async function nodeScript(relScript, scriptArgs = [], { step } = {}) {
+  const stepTag = step ?? relScript;
+  const localPath = join(...relScript.split('/'));
+  log(`→ node ${relScript}${scriptArgs.length ? ' ' + scriptArgs.join(' ') : ''}`);
+  const result = await teeSpawn('node', [localPath, ...scriptArgs], { step: stepTag });
+  if (!result.ok) warn(`node ${relScript} exited ${result.status ?? 'null'}`);
+  return result;
+}
+
+/**
  * Persist run state to data/last-refresh.json via the atomic writer
  * (scripts/write-refresh-status.mjs). Maps the orchestrator summary into the
  * board's known shape and pipes it on stdin. Best-effort: never throws.
@@ -258,7 +277,7 @@ if (!connSync.ok) {
 // against whatever kanban-import file already exists locally.
 
 log('Step -0.5 — Airtable pull (airtable-sync.mjs --pull)');
-const airtablePull = await npm('airtable:pull', { step: 'step-0.5' });
+const airtablePull = await nodeScript('scripts/airtable-sync.mjs', ['--pull'], { step: 'step-0.5' });
 summary.airtable_sync.pull.exit = airtablePull.status;
 if (!airtablePull.ok) {
   warn(`Airtable pull exited ${airtablePull.status} — continuing against existing local data`);
@@ -622,35 +641,42 @@ if (freshIds.length > 0) {
 // If Lane Branch failed or found zero New-Fresh cards, this step is skipped
 // entirely rather than falling back to an unfiltered run — see Step 4.6 above.
 
+// Step 5 rewired 2026-08-02 (approved by Rahil, Product Owner): the nightly run no
+// longer attempts an automated submit CLICK. Live-clicking Greenhouse/Lever/Ashby
+// submit buttons is silently blocked by reCAPTCHA bot-detection (the confirmed 0%
+// ceiling — a human click passes, an automated one does not), and the 1am pipeline
+// cannot leave a filled browser open for Rahil to click hours later anyway. Instead
+// it STAGES eligible New-Fresh cards into the Airtable "Submit Ready" lane (same
+// readiness/grade/cap gates), where Rahil runs an interactive fill and clicks Submit
+// himself. Warm-referral/New-Hot cards were never in the eligible set — untouched.
 if (!laneBranch.ok || freshIds.length === 0) {
   const reason = !laneBranch.ok ? 'Lane Branch failed' : 'no New-Fresh cards this run';
-  log(`Step 5 — AutoSubmit live: SKIPPED (${reason})`);
+  log(`Step 5 — AutoSubmit park-ready: SKIPPED (${reason})`);
   summary.autosubmit.skipped = true;
-  summary.notes.push(`AutoSubmit:live skipped — ${reason}.`);
+  summary.notes.push(`AutoSubmit park-ready skipped — ${reason}.`);
 } else {
-  log(`Step 5 — AutoSubmit live (TD-01 fix: npm run auto-submit:live --card-ids <${freshIds.length} New-Fresh card(s)>)`);
-  const autoSubmit = await npm('auto-submit:live', { capture: true, args: ['--card-ids', freshIds.join(',')], step: 'step-5' });
+  log(`Step 5 — AutoSubmit park-ready (npm run auto-submit:park --card-ids <${freshIds.length} New-Fresh card(s)> → Submit Ready lane)`);
+  const autoSubmit = await npm('auto-submit:park', { capture: true, args: ['--card-ids', freshIds.join(',')], step: 'step-5' });
   summary.autosubmit.exit = autoSubmit.status;
-  // TD-01: record the TRUE number of cards auto-submit actually processed,
-  // not a hardcoded 1. Post-filter eligible count is "<n> (requested <m>)";
-  // fall back to "<n> eligible cards found" for unfiltered runs.
+  // Record the TRUE number of cards processed: prefer the park-ready summary line
+  // ("<n> card(s) → Submit Ready"), then the --card-ids filter line, then the
+  // "<n> eligible cards found" fallback.
   {
     const out = autoSubmit.stdout || '';
+    const mPark   = out.match(/(\d+)\s+card\(s\)\s*→\s*Submit Ready/i);
     const mFilter = out.match(/(\d+)\s*\(requested/);
     const mFound  = out.match(/(\d+)\s+eligible\s+cards?\s+found/i);
-    summary.autosubmit.attempted = mFilter ? Number(mFilter[1]) : (mFound ? Number(mFound[1]) : 0);
+    summary.autosubmit.attempted = mPark ? Number(mPark[1]) : mFilter ? Number(mFilter[1]) : (mFound ? Number(mFound[1]) : 0);
   }
-  // Exit codes: 0=clean · 1=fatal · 2=captcha/human-required · 3=form-blocked/dead
-  // There is NO exit code 4. The prior "4=deferred" in SKILL.md was incorrect.
+  // park-ready exit codes: 0=staged cleanly · 1=fatal (bad kanban / eligibility load)
   if (autoSubmit.status === 1) {
     summary.autosubmit.result = 'fatal';
-    summary.notes.push('AutoSubmit fatal exit (1). Check safety locks and kanban file.');
-  } else if (autoSubmit.status === 2) {
-    summary.autosubmit.result = 'captcha-blocked';
-  } else if (autoSubmit.status === 3) {
-    summary.autosubmit.result = 'form-blocked';
+    summary.notes.push('AutoSubmit park-ready fatal exit (1). Check kanban source and eligibility load.');
   } else if (autoSubmit.ok) {
-    summary.autosubmit.result = 'clean';
+    summary.autosubmit.result = 'staged';
+    if (summary.autosubmit.attempted > 0) {
+      summary.notes.push(`${summary.autosubmit.attempted} card(s) staged to Submit Ready — awaiting Rahil's final Submit click.`);
+    }
   }
 }
 
@@ -703,7 +729,7 @@ if (snap.status === 0 && snap.stdout?.length) {
 // the pipeline's exit code.
 
 log('Step 9 — Airtable push (airtable-sync.mjs --push)');
-const airtablePush = await npm('airtable:push', { step: 'step-9' });
+const airtablePush = await nodeScript('scripts/airtable-sync.mjs', ['--push'], { step: 'step-9' });
 summary.airtable_sync.push.exit = airtablePush.status;
 if (!airtablePush.ok) {
   warn(`Airtable push exited ${airtablePush.status} — local changes were not synced back this run`);

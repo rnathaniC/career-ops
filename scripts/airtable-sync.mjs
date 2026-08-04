@@ -100,9 +100,13 @@ export const CONFLICT_CHECK_FIELD_NAMES = Object.keys(ACTIVE_FIELD_IDS).filter((
 // values as the option name string in both directions, not the option ID.
 export const LANE_CHOICE_IDS = {
   'New-Hot': 'selxxpMgvOd53LfMM', 'New-Fresh': 'selrDS5gcvgundDFs',
-  'Blocked': 'seld0VnKtx0QfPKU1', 'Applied': 'seldP0DjSPBNtLQ3V',
+  'Blocked': 'seld0VnKtx0QfPKU1', 'Submit Ready': 'sel4EsHp3vQIYyKTh', 'Applied': 'seldP0DjSPBNtLQ3V',
 };
-export const COLUMN_TO_LANE_NAME = { 'new-hot': 'New-Hot', 'new-fresh': 'New-Fresh', 'blocked': 'Blocked', 'applied': 'Applied' };
+// "Submit Ready" (added 2026-08-02): auto-fill-to-submit-ready lane. The engine
+// fills the application completely (real resume attached) and parks the card here;
+// Rahil makes the final human Submit click (passes the reCAPTCHA gate that blocks
+// automated clicks), after which the card moves to Applied.
+export const COLUMN_TO_LANE_NAME = { 'new-hot': 'New-Hot', 'new-fresh': 'New-Fresh', 'blocked': 'Blocked', 'submit-ready': 'Submit Ready', 'applied': 'Applied' };
 export const LANE_NAME_TO_COLUMN = Object.fromEntries(Object.entries(COLUMN_TO_LANE_NAME).map(([k, v]) => [v, k]));
 
 export const PAT_MISSING_MSG =

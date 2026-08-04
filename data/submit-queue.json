@@ -223,5 +223,90 @@
     "hasConnection": false,
     "isWarmReferral": false,
     "connectionName": ""
+  },
+  {
+    "company": "Pinterest",
+    "role": "Staff Technical Program Manager",
+    "url": "https://www.pinterestcareers.com/jobs/?gh_jid=8067933",
+    "ats": "greenhouse",
+    "grade": "B",
+    "status": "queued",
+    "queued_at": "2026-08-02T05:19:47.592Z",
+    "source_id": "live-2026-08-02-001",
+    "keywords": [
+      "Program Manager",
+      "Technical Program Manager"
+    ],
+    "hasConnection": false,
+    "isWarmReferral": false,
+    "connectionName": ""
+  },
+  {
+    "company": "Lyft",
+    "role": "Senior Technical Program Manager, AI Transformation",
+    "url": "https://app.careerpuck.com/job-board/lyft/job/8657510002?gh_jid=8657510002",
+    "ats": "greenhouse",
+    "grade": "B",
+    "status": "queued",
+    "queued_at": "2026-08-02T05:19:47.592Z",
+    "source_id": "live-2026-08-02-002",
+    "keywords": [
+      "Program Manager",
+      "Technical Program Manager"
+    ],
+    "hasConnection": false,
+    "isWarmReferral": false,
+    "connectionName": ""
+  },
+  {
+    "company": "Okta",
+    "role": "Principal Technical Program Manager, Engineering",
+    "url": "https://www.okta.com/company/careers/opportunity/8069537?gh_jid=8069537",
+    "ats": "greenhouse",
+    "grade": "B",
+    "status": "queued",
+    "queued_at": "2026-08-02T05:19:47.592Z",
+    "source_id": "live-2026-08-02-011",
+    "keywords": [
+      "Program Manager",
+      "Technical Program Manager"
+    ],
+    "hasConnection": false,
+    "isWarmReferral": false,
+    "connectionName": ""
+  },
+  {
+    "company": "Lyft",
+    "role": "Senior Technical Program Manager, AI Transformation",
+    "url": "https://app.careerpuck.com/job-board/lyft/job/8657258002?gh_jid=8657258002",
+    "ats": "greenhouse",
+    "grade": "B",
+    "status": "queued",
+    "queued_at": "2026-08-04T01:07:02.758Z",
+    "source_id": "live-2026-08-04-001",
+    "keywords": [
+      "Program Manager",
+      "Technical Program Manager"
+    ],
+    "hasConnection": false,
+    "isWarmReferral": false,
+    "connectionName": ""
+  },
+  {
+    "company": "Pinterest",
+    "role": "Staff Technical Program Manager",
+    "url": "https://www.pinterestcareers.com/jobs/?gh_jid=7494650",
+    "ats": "greenhouse",
+    "grade": "B",
+    "status": "queued",
+    "queued_at": "2026-08-04T01:07:02.759Z",
+    "source_id": "live-2026-08-04-002",
+    "keywords": [
+      "Program Manager",
+      "Technical Program Manager"
+    ],
+    "hasConnection": false,
+    "isWarmReferral": false,
+    "connectionName": ""
   }
 ]

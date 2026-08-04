@@ -217,13 +217,25 @@ function appendToPipeline(offers) {
 }
 
 function appendToScanHistory(offers, date) {
-  // Ensure file + header exist
+  // B-17d fix (2026-08-02, K-0724-1): persist `location` as a 7th column.
+  // The scanner has always known each posting's location (it prints it in the
+  // "New offers" block) but never wrote it down, so worker-grader.mjs could only
+  // screen the TITLE for geography. That let postings whose foreign location
+  // lives ONLY in the location field — "Coupa | TPM Security & GRC | Bogota,
+  // Colombia" — grade B and become auto-submit eligible. Writing the column here
+  // is the upstream half of the fix; the grader reads it downstream.
+  //
+  // Backward compatible: rows written before this change have 6 columns and the
+  // parser yields location === '' for them, which disqualifies nothing.
   if (!existsSync(SCAN_HISTORY_PATH)) {
-    writeFileSync(SCAN_HISTORY_PATH, 'url\tfirst_seen\tportal\ttitle\tcompany\tstatus\n', 'utf-8');
+    writeFileSync(SCAN_HISTORY_PATH, 'url\tfirst_seen\tportal\ttitle\tcompany\tstatus\tlocation\n', 'utf-8');
   }
 
+  // Tabs/newlines inside a location string would shift every downstream column.
+  const clean = (v) => String(v ?? '').replace(/[\t\r\n]+/g, ' ').trim();
+
   const lines = offers.map(o =>
-    `${o.url}\t${date}\t${o.source}\t${o.title}\t${o.company}\tadded`
+    `${o.url}\t${date}\t${o.source}\t${o.title}\t${o.company}\tadded\t${clean(o.location)}`
   ).join('\n') + '\n';
 
   appendFileSync(SCAN_HISTORY_PATH, lines, 'utf-8');

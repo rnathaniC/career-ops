@@ -32,6 +32,7 @@
     "referral-queue": "node scripts/referral-queue.mjs",
     "score:dry-run": "node scripts/readiness-scorer.mjs --dry-run",
     "auto-submit:live": "node scripts/auto-submit.mjs --kanban-json data/board-state.json --live --allow-tier lower",
+    "auto-submit:park": "node scripts/auto-submit.mjs --kanban-json data/board-state.json --park-ready",
     "export-auth": "node scripts/export-auth-state.mjs",
     "ingest:dry": "node scripts/ingest-runner.mjs --dry-run",
     "auto-submit": "node scripts/auto-submit.mjs --kanban dashboard/job-pulse-kanban.html",
@@ -43,6 +44,8 @@
     "connections:sync": "node scripts/sync-connections.mjs",
     "pulse:refresh": "node scripts/pulse-refresh.mjs",
     "pulse:daily-report": "node scripts/daily-health-report.mjs",
+    "board:snapshot": "node scripts/render-board-snapshot.mjs",
+    "email:report": "node scripts/email-report.mjs",
     "cadence:mark": "node scripts/cadence-mark.mjs",
     "workday:login": "node scripts/workday-login.mjs",
     "workday:sessions": "node scripts/workday-login.mjs --list",
@@ -69,6 +72,7 @@
     "@google/generative-ai": "^0.24.1",
     "dotenv": "^17.0.0",
     "js-yaml": "^4.1.1",
+    "nodemailer": "^6.9.14",
     "playwright": "1.61.0"
   }
 }

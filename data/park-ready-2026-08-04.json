@@ -1,0 +1,23 @@
+{
+  "ran_at": "2026-08-04T01:07:06.181Z",
+  "mode": "park-ready",
+  "parked": 0,
+  "skipped": 3,
+  "results": [
+    {
+      "id": "live-2026-08-02-001",
+      "status": "skipped",
+      "reason": "no-pat"
+    },
+    {
+      "id": "live-2026-08-04-001",
+      "status": "skipped",
+      "reason": "no-pat"
+    },
+    {
+      "id": "live-2026-08-04-002",
+      "status": "skipped",
+      "reason": "no-pat"
+    }
+  ]
+}

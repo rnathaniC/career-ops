@@ -22,6 +22,12 @@ import {
   generate,
   newestReferralQueue,
   hoursSince,
+  normalizeOutcome,
+  flattenLiveRun,
+  summarizeLiveRuns,
+  renderAutoSubmitScorecard,
+  computeAutoSubmitScorecard,
+  AUTO_SUBMIT_CATEGORIES,
 } from '../scripts/daily-health-report.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -262,5 +268,174 @@ describe('newestReferralQueue', () => {
     const empty = fs.mkdtempSync(path.join(tmpdir(), 'career-ops-rq-empty-'));
     assert.equal(newestReferralQueue(empty), null);
     fs.rmSync(empty, { recursive: true, force: true });
+  });
+});
+
+// ── Auto-Submit Scorecard ────────────────────────────────────────
+// Guards THE landmine: "confirmed" is a substring of "unconfirmed". A naive
+// includes() classifier reported 10 confirmed when the truth was 0. These tests
+// pin exact/normalized classification and the today-vs-running split.
+describe('normalizeOutcome — exact match, never substring', () => {
+  test("'unconfirmed' classifies as unconfirmed, NOT confirmed", () => {
+    assert.equal(normalizeOutcome('unconfirmed'), 'unconfirmed');
+    assert.notEqual(normalizeOutcome('unconfirmed'), 'confirmed');
+  });
+
+  test('confirmed and its aliases map to confirmed', () => {
+    for (const v of ['confirmed', 'submitted', 'SUCCESS', ' Confirmed ']) {
+      assert.equal(normalizeOutcome(v), 'confirmed');
+    }
+  });
+
+  test('each canonical category is recognized', () => {
+    assert.equal(normalizeOutcome('error'), 'error');
+    assert.equal(normalizeOutcome('blocked'), 'blocked');
+    assert.equal(normalizeOutcome('requires-human'), 'requires-human');
+    assert.equal(normalizeOutcome('requires_human'), 'requires-human'); // underscore normalized
+    assert.equal(normalizeOutcome('skipped'), 'skipped');
+  });
+
+  test('missing / garbage / null → unknown (never throws)', () => {
+    assert.equal(normalizeOutcome(undefined), 'unknown');
+    assert.equal(normalizeOutcome(null), 'unknown');
+    assert.equal(normalizeOutcome(''), 'unknown');
+    assert.equal(normalizeOutcome('banana'), 'unknown');
+  });
+});
+
+describe('flattenLiveRun — handles the three observed shapes', () => {
+  test('object with results array', () => {
+    const items = flattenLiveRun({ ran_at: 'x', results: [{ status: 'error' }, { status: 'blocked' }] });
+    assert.equal(items.length, 2);
+  });
+
+  test('bare array of result items', () => {
+    const items = flattenLiveRun([{ status: 'unconfirmed' }, { status: 'skipped' }]);
+    assert.equal(items.length, 2);
+  });
+
+  test('array of run-wrappers that each nest their own results (no wrapper double-count)', () => {
+    const items = flattenLiveRun([
+      { ran_at: 'a', confirmed: 0, results: [{ status: 'requires-human' }] },
+      { ran_at: 'b', confirmed: 0, results: [{ status: 'unconfirmed' }] },
+    ]);
+    // Two leaf results, NOT four (the two wrapper objects must not be counted).
+    assert.equal(items.length, 2);
+  });
+});
+
+describe('summarizeLiveRuns — classification, today/running split, rates', () => {
+  const reportDate = '2026-08-02';
+  const runFiles = [
+    // Historical file: 1 confirmed does NOT exist here — only unconfirmed + skipped.
+    { file: 'live-runs-2026-07-17.json', date: '2026-07-17', data: { results: [
+      { status: 'unconfirmed' }, { status: 'skipped' }, { status: 'skipped' },
+    ] } },
+    { file: 'live-runs-2026-07-20.json', date: '2026-07-20', data: { results: [
+      { status: 'error' }, { status: 'requires-human' },
+    ] } },
+    // Today's file.
+    { file: 'live-runs-2026-08-02.json', date: '2026-08-02', data: { results: [
+      { status: 'blocked' }, { status: 'unconfirmed' }, { status: 'requires-human' },
+    ] } },
+    // An unreadable file must be counted as unreadable, never crash.
+    { file: 'live-runs-2026-08-01.json', date: '2026-08-01', data: null, readError: 'missing' },
+  ];
+
+  test('an unconfirmed outcome is NEVER counted as confirmed (0 confirmed everywhere)', () => {
+    const sc = summarizeLiveRuns(runFiles, reportDate);
+    assert.equal(sc.running.confirmed, 0, 'zero confirmed across all files');
+    assert.equal(sc.today.confirmed, 0, 'zero confirmed today');
+    // There ARE unconfirmed cards — they must land in the unconfirmed bucket.
+    assert.equal(sc.running.unconfirmed, 2);
+    assert.equal(sc.today.unconfirmed, 1);
+  });
+
+  test('per-category running totals are correct', () => {
+    const sc = summarizeLiveRuns(runFiles, reportDate);
+    assert.equal(sc.running.error, 1);
+    assert.equal(sc.running.blocked, 1);
+    assert.equal(sc.running['requires-human'], 2);
+    assert.equal(sc.running.skipped, 2);
+    assert.equal(sc.running.unknown, 0);
+    assert.equal(sc.totals.running, 8); // 3 + 2 + 3 leaf items across readable files
+  });
+
+  test('today column reflects ONLY the report-date file', () => {
+    const sc = summarizeLiveRuns(runFiles, reportDate);
+    assert.equal(sc.totals.today, 3);
+    assert.equal(sc.today.blocked, 1);
+    assert.equal(sc.today['requires-human'], 1);
+    assert.equal(sc.today.error, 0); // error was a historical day, not today
+    // Today's counts must never exceed the running totals.
+    for (const cat of AUTO_SUBMIT_CATEGORIES) {
+      assert.ok(sc.today[cat] <= sc.running[cat], `today.${cat} <= running.${cat}`);
+    }
+  });
+
+  test('unreadable file is tallied as unreadable, not as an attempt', () => {
+    const sc = summarizeLiveRuns(runFiles, reportDate);
+    assert.equal(sc.filesRead, 3);
+    assert.equal(sc.filesUnreadable, 1);
+  });
+
+  test('raw and adjusted rates are 0.0% when confirmed is 0', () => {
+    const sc = summarizeLiveRuns(runFiles, reportDate);
+    // raw = 0 / 8 = 0.0
+    assert.equal(sc.rates.running.raw, 0);
+    assert.equal(sc.rates.running.rawDenom, 8);
+    // adjusted denom excludes skipped(2) + requires-human(2) = 8 - 4 = 4
+    assert.equal(sc.rates.running.adjustedDenom, 4);
+    assert.equal(sc.rates.running.adjusted, 0);
+  });
+
+  test('a genuinely confirmed card DOES move the rate (classifier is not stuck at zero)', () => {
+    const withWin = [
+      { file: 'live-runs-2026-08-02.json', date: '2026-08-02', data: { results: [
+        { status: 'confirmed' }, { status: 'unconfirmed' },
+      ] } },
+    ];
+    const sc = summarizeLiveRuns(withWin, reportDate);
+    assert.equal(sc.running.confirmed, 1);
+    assert.equal(sc.running.unconfirmed, 1);
+    assert.equal(sc.rates.running.raw, 50); // 1 of 2
+  });
+
+  test('empty input degrades to zeros with no genuine attempts (no throw, no NaN)', () => {
+    const sc = summarizeLiveRuns([], reportDate);
+    assert.equal(sc.totals.running, 0);
+    assert.equal(sc.rates.running.raw, null); // 0/0 → null, rendered as n/a
+    assert.equal(sc.rates.running.adjusted, null);
+  });
+});
+
+describe('renderAutoSubmitScorecard', () => {
+  test('renders a table with all categories and a zero-confirmed rate line', () => {
+    const sc = summarizeLiveRuns([
+      { file: 'live-runs-2026-08-02.json', date: '2026-08-02', data: { results: [{ status: 'unconfirmed' }] } },
+    ], '2026-08-02');
+    const md = renderAutoSubmitScorecard(sc).join('\n');
+    assert.ok(md.includes('## Auto-Submit Scorecard'));
+    assert.ok(md.includes('| Confirmed / submitted | 0 | 0 |'));
+    assert.ok(/Raw: 0\.0% — 0 confirmed \/ 1 total attempts/.test(md));
+    assert.ok(md.includes('| Unconfirmed | 1 | 1 |'));
+  });
+
+  test('empty data renders the degraded note, not a silent blank', () => {
+    const md = renderAutoSubmitScorecard(summarizeLiveRuns([], '2026-08-02')).join('\n');
+    assert.ok(md.includes('No readable'));
+    assert.ok(md.includes('Total attempts'));
+  });
+});
+
+describe('computeAutoSubmitScorecard — real repo data reads 0 confirmed', () => {
+  test('the live data/ directory has zero confirmed submissions', () => {
+    // The repo's real live-runs history is the ground truth the task pins:
+    // ZERO confirmed across the corpus. If a substring bug ever regresses this,
+    // confirmed jumps and this test fails loudly.
+    const dataDir = path.join(__dirname, '..', 'data');
+    const sc = computeAutoSubmitScorecard(dataDir, '2026-08-02');
+    assert.equal(sc.running.confirmed, 0, 'real corpus must show ZERO confirmed');
+    assert.ok(sc.totals.running > 0, 'and must actually be reading attempts');
   });
 });
