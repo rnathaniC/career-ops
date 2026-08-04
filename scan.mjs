@@ -69,7 +69,32 @@ function detectApi(company) {
     };
   }
 
+  // Workday CXS API. Entries carry an explicit `api` field pointing at the
+  // /wday/cxs/{tenant}/{site}/jobs endpoint (see portals.yml). `base` is the
+  // public careers URL used to turn each posting's externalPath into a real
+  // apply URL; derive it from the api endpoint if careers_url is absent.
+  const wdApi = company.api && /myworkdayjobs\.com\/wday\/cxs\//.test(company.api) ? company.api : null;
+  const wdFromCareers = /myworkdayjobs\.com/.test(url) ? url : null;
+  if (wdApi || wdFromCareers) {
+    const api = wdApi || deriveWorkdayApi(url);
+    return { type: 'workday', url: api, base: company.careers_url || deriveWorkdayBase(api) };
+  }
+
   return null;
+}
+
+/** From a CXS api url, derive the public careers base (origin + /{site}). */
+function deriveWorkdayBase(apiUrl) {
+  const m = apiUrl.match(/^(https:\/\/[^/]+)\/wday\/cxs\/[^/]+\/([^/]+)\/jobs/);
+  return m ? `${m[1]}/${m[2]}` : apiUrl;
+}
+
+/** From a public careers url ({origin}/{site}), derive the CXS jobs endpoint. */
+function deriveWorkdayApi(careersUrl) {
+  const m = careersUrl.match(/^(https:\/\/([^.]+)\.[^/]+)\/([^/?#]+)/);
+  if (!m) return careersUrl;
+  const [, origin, tenant, site] = m;
+  return `${origin}/wday/cxs/${tenant}/${site}/jobs`;
 }
 
 // ── API parsers ─────────────────────────────────────────────────────
@@ -104,7 +129,59 @@ function parseLever(json, companyName) {
   }));
 }
 
+function parseWorkday(json, companyName, base) {
+  const jobs = json.jobPostings || [];
+  const origin = (base || '').replace(/\/+$/, '');
+  return jobs.map(j => ({
+    title: j.title || '',
+    url: j.externalPath ? origin + j.externalPath : '',
+    company: companyName,
+    location: j.locationsText || '',
+  }));
+}
+
 const PARSERS = { greenhouse: parseGreenhouse, ashby: parseAshby, lever: parseLever };
+
+// Workday's CXS endpoint is a POST search API (unlike the GET boards above).
+// Query it once per positive title term so we pull only relevant postings
+// server-side instead of paging the entire tenant (RTX alone has ~1,100 jobs).
+async function fetchWorkday(apiUrl, searchText = '', limit = 20, offset = 0) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+  try {
+    const res = await fetch(apiUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify({ appliedFacets: {}, limit, offset, searchText }),
+      signal: controller.signal,
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await res.json();
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+async function scanWorkdaySite(apiUrl, base, companyName, searchTerms) {
+  const terms = (searchTerms && searchTerms.length) ? searchTerms : [''];
+  const seen = new Set();
+  const out = [];
+  for (const term of terms) {
+    let json;
+    try {
+      json = await fetchWorkday(apiUrl, term);
+    } catch {
+      continue; // one bad term shouldn't sink the whole site
+    }
+    for (const job of parseWorkday(json, companyName, base)) {
+      if (job.url && !seen.has(job.url)) {
+        seen.add(job.url);
+        out.push(job);
+      }
+    }
+  }
+  return out;
+}
 
 // ── Fetch with timeout ──────────────────────────────────────────────
 
@@ -276,6 +353,8 @@ async function main() {
   const config = parseYaml(readFileSync(PORTALS_PATH, 'utf-8'));
   const companies = config.tracked_companies || [];
   const titleFilter = buildTitleFilter(config.title_filter);
+  // Positive title terms double as Workday server-side search queries.
+  const workdaySearchTerms = config.title_filter?.positive || [];
 
   // 2. Filter to enabled companies with detectable APIs
   const targets = companies
@@ -302,10 +381,11 @@ async function main() {
   const errors = [];
 
   const tasks = targets.map(company => async () => {
-    const { type, url } = company._api;
+    const { type, url, base } = company._api;
     try {
-      const json = await fetchJson(url);
-      const jobs = PARSERS[type](json, company.name);
+      const jobs = type === 'workday'
+        ? await scanWorkdaySite(url, base, company.name, workdaySearchTerms)
+        : PARSERS[type](await fetchJson(url), company.name);
       totalFound += jobs.length;
 
       for (const job of jobs) {
