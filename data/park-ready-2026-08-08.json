@@ -1,0 +1,29 @@
+{
+  "ran_at": "2026-08-08T06:02:05.758Z",
+  "mode": "park-ready",
+  "parked": 0,
+  "skipped": 3,
+  "results": [
+    {
+      "id": "live-2026-08-07-001",
+      "company": "Raytheon / RTX",
+      "status": "skipped",
+      "reason": "89+ (91) requires a CL but none found",
+      "readiness_total": 91
+    },
+    {
+      "id": "live-2026-08-02-001",
+      "company": "Pinterest",
+      "status": "skipped",
+      "reason": "89+ (96) requires a CL but none found",
+      "readiness_total": 96
+    },
+    {
+      "id": "live-2026-08-04-001",
+      "company": "Lyft",
+      "status": "skipped",
+      "reason": "89+ (96) requires a CL but none found",
+      "readiness_total": 96
+    }
+  ]
+}

@@ -223,6 +223,18 @@ async function main() {
   const keywords = loadKeywords(ROOT, yaml);
   console.log(`[worker-grader] keywords: ${keywords.length} (${keywords.slice(0, 3).join(', ')}${keywords.length > 3 ? '…' : ''})`);
 
+  // Grading mode toggle (config/profile.yml grading.mode): "substance" grades on
+  // JD fit vs the value prop; "title" reverts to the keyword-count matcher.
+  let gradeMode = 'title';
+  try {
+    const prof = yaml.load(readFileSync(join(ROOT, 'config', 'profile.yml'), 'utf8'));
+    if (prof?.grading?.mode === 'substance') gradeMode = 'substance';
+  } catch { /* default to title */ }
+  console.log(`[worker-grader] mode: ${gradeMode}`);
+  const { scoreSubstance, fetchJd } = gradeMode === 'substance'
+    ? await import('./substance-grader.mjs')
+    : { scoreSubstance: null, fetchJd: null };
+
   const entries = parseScanHistory(historyPath);
   if (entries.length === 0) {
     console.log('[worker-grader] no scan-history.tsv or empty — skipping (exit 0)');
@@ -238,20 +250,31 @@ async function main() {
     process.exit(0);
   }
 
-  const graded = recent.map((e) => {
-    const { grade, keywords_matched, disqualifiers } = gradeJob(e.title, keywords, e.location);
-    return {
-      company:          e.company,
-      role:             e.title,
-      grade,
-      location:         e.location || '',
-      platform:         normalizePlatform(e.portal),
-      url:              e.url,
-      jd_snippet:       null,
-      keywords_matched,
-      ...(disqualifiers ? { disqualifiers } : {}),
+  const gradeEntry = async (e) => {
+    const base = {
+      company: e.company, role: e.title, location: e.location || '',
+      platform: normalizePlatform(e.portal), url: e.url,
     };
-  });
+    // Geographic hard-disqualifiers apply in both modes.
+    const disqualifiers = [...titleDisqualifiers(e.title), ...locationDisqualifiers(e.location)];
+    if (disqualifiers.length > 0) {
+      return { ...base, grade: 'D', jd_snippet: null, keywords_matched: [], disqualifiers };
+    }
+    if (gradeMode === 'substance') {
+      const jd = await fetchJd(e.url, base.platform).catch(() => '');
+      const { grade, score, matched, penalized } = scoreSubstance(`${e.title}\n${jd}`);
+      return {
+        ...base, grade,
+        jd_snippet: jd ? jd.slice(0, 220) : null,
+        fit_score: score, matched_terms: matched,
+        ...(penalized.length ? { penalized_terms: penalized } : {}),
+        jd_used: Boolean(jd),
+      };
+    }
+    const { grade, keywords_matched } = gradeJob(e.title, keywords, e.location);
+    return { ...base, grade, jd_snippet: null, keywords_matched };
+  };
+  const graded = await Promise.all(recent.map(gradeEntry));
 
   const counts = { A: 0, B: 0, C: 0, D: 0 };
   for (const g of graded) counts[g.grade]++;

@@ -308,5 +308,73 @@
     "hasConnection": false,
     "isWarmReferral": false,
     "connectionName": ""
+  },
+  {
+    "company": "GE Aerospace",
+    "role": "Sr Staff Technical Program Manager",
+    "url": "https://geaerospace.wd5.myworkdayjobs.com/GE_ExternalSite/job/Remote/Sr-Staff-Technical-Program-Manager_R5037874-2",
+    "ats": "workday",
+    "grade": "B",
+    "status": "queued",
+    "queued_at": "2026-08-04T06:03:32.184Z",
+    "source_id": "live-2026-08-04-018",
+    "keywords": [
+      "Program Manager",
+      "Technical Program Manager"
+    ],
+    "hasConnection": false,
+    "isWarmReferral": false,
+    "connectionName": ""
+  },
+  {
+    "company": "GE Vernova",
+    "role": "Systems Technical Program Manager",
+    "url": "https://gevernova.wd5.myworkdayjobs.com/Vernova_ExternalSite/job/Schenectady/Systems-Technical-Program-Manager_R5048887-2",
+    "ats": "workday",
+    "grade": "B",
+    "status": "queued",
+    "queued_at": "2026-08-04T06:03:32.185Z",
+    "source_id": "live-2026-08-04-021",
+    "keywords": [
+      "Program Manager",
+      "Technical Program Manager"
+    ],
+    "hasConnection": false,
+    "isWarmReferral": false,
+    "connectionName": ""
+  },
+  {
+    "company": "Pinterest",
+    "role": "Sr. Staff Technical Program Manager",
+    "url": "https://www.pinterestcareers.com/jobs/?gh_jid=7494648",
+    "ats": "greenhouse",
+    "grade": "B",
+    "status": "queued",
+    "queued_at": "2026-08-05T06:03:28.669Z",
+    "source_id": "live-2026-08-05-002",
+    "keywords": [
+      "Program Manager",
+      "Technical Program Manager"
+    ],
+    "hasConnection": false,
+    "isWarmReferral": false,
+    "connectionName": ""
+  },
+  {
+    "company": "Raytheon / RTX",
+    "role": "Technical Program Manager (Hybrid)",
+    "url": "https://globalhr.wd5.myworkdayjobs.com/REC_RTX_Ext_Gateway/job/US-MA-CAMBRIDGE-BBN02--10--50-Moulton-St--MOULTON-B1/Technical-Program-Manager--Hybrid-_01849336",
+    "ats": "workday",
+    "grade": "B",
+    "status": "queued",
+    "queued_at": "2026-08-07T06:03:27.513Z",
+    "source_id": "live-2026-08-07-001",
+    "keywords": [
+      "Program Manager",
+      "Technical Program Manager"
+    ],
+    "hasConnection": false,
+    "isWarmReferral": false,
+    "connectionName": ""
   }
 ]

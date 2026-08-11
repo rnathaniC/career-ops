@@ -1,14 +1,9 @@
 {
-  "ran_at": "2026-08-04T06:03:35.852Z",
+  "ran_at": "2026-08-07T06:03:30.736Z",
   "mode": "park-ready",
   "parked": 0,
-  "skipped": 5,
+  "skipped": 3,
   "results": [
-    {
-      "id": "live-2026-08-04-002",
-      "status": "skipped",
-      "reason": "no-pat"
-    },
     {
       "id": "live-2026-08-02-001",
       "status": "skipped",
@@ -20,12 +15,7 @@
       "reason": "no-pat"
     },
     {
-      "id": "live-2026-08-04-018",
-      "status": "skipped",
-      "reason": "no-pat"
-    },
-    {
-      "id": "live-2026-08-04-021",
+      "id": "live-2026-08-07-001",
       "status": "skipped",
       "reason": "no-pat"
     }

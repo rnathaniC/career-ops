@@ -655,8 +655,13 @@ if (!laneBranch.ok || freshIds.length === 0) {
   summary.autosubmit.skipped = true;
   summary.notes.push(`AutoSubmit park-ready skipped — ${reason}.`);
 } else {
-  log(`Step 5 — AutoSubmit park-ready (npm run auto-submit:park --card-ids <${freshIds.length} New-Fresh card(s)> → Submit Ready lane)`);
-  const autoSubmit = await npm('auto-submit:park', { capture: true, args: ['--card-ids', freshIds.join(',')], step: 'step-5' });
+  log(`Step 5 — AutoSubmit park-ready (node auto-submit.mjs --park-ready --card-ids <${freshIds.length} New-Fresh card(s)> → Submit Ready lane)`);
+  // Windows-hardened: spawn node directly (not `npm run`) — the npm.cmd wrapper
+  // intermittently aborts with exit 3221226505 (0xC0000409), which hit this step
+  // on 2026-08-09 and cost a -10 health penalty. Same fix as the Airtable steps.
+  const autoSubmit = await nodeScript('scripts/auto-submit.mjs',
+    ['--kanban-json', 'data/board-state.json', '--park-ready', '--card-ids', freshIds.join(',')],
+    { step: 'step-5' });
   summary.autosubmit.exit = autoSubmit.status;
   // Record the TRUE number of cards processed: prefer the park-ready summary line
   // ("<n> card(s) → Submit Ready"), then the --card-ids filter line, then the
@@ -735,6 +740,19 @@ if (!airtablePush.ok) {
   warn(`Airtable push exited ${airtablePush.status} — local changes were not synced back this run`);
   summary.airtable_sync.push.skipped = true;
   summary.notes.push(`Airtable push non-zero exit (${airtablePush.status}).`);
+}
+
+// ─── Step 9.5 — Board snapshot for the 8am emailed report ────────────────────
+// Render the pipeline board PNG here, on the real machine where chromium exists.
+// The 8am report task runs in a browserless sandbox and cannot render it, so it
+// falls back to the newest image on disk — without this step that image is a day
+// (or more) stale (the exact "board dated 08-04 in the 08-05 email" bug). Renders
+// from today's kanban-import (the Step -0.5 pull). Best-effort: render-board-
+// snapshot degrades loudly and exits 0 on skip, so this never fails the run.
+log('Step 9.5 — Board snapshot (render-board-snapshot.mjs)');
+const boardSnap = await nodeScript('scripts/render-board-snapshot.mjs', [], { step: 'step-9.5' });
+if (!boardSnap.ok) {
+  summary.notes.push(`Board snapshot render exited ${boardSnap.status} — the 8am email may attach an older board image.`);
 }
 
 // ─── Final exit code ─────────────────────────────────────────────────────────

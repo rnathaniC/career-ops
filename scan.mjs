@@ -16,6 +16,8 @@
  */
 
 import { readFileSync, writeFileSync, appendFileSync, existsSync, mkdirSync } from 'fs';
+import { fileURLToPath } from 'node:url';
+import { resolve } from 'node:path';
 import yaml from 'js-yaml';
 const parseYaml = yaml.load;
 
@@ -31,6 +33,11 @@ mkdirSync('data', { recursive: true });
 
 const CONCURRENCY = 10;
 const FETCH_TIMEOUT_MS = 10_000;
+// Freshness gate: a posting older than this (by the employer's posted date, not
+// when we found it) is dropped at scan time so the Fresh lane only holds newly
+// posted roles. Override with portals.yml `fresh_max_posting_days`. Postings with
+// no determinable date are kept (never dropped on missing data).
+const DEFAULT_FRESH_MAX_POSTING_DAYS = 3;
 
 // ── API detection ───────────────────────────────────────────────────
 
@@ -106,6 +113,7 @@ function parseGreenhouse(json, companyName) {
     url: j.absolute_url || '',
     company: companyName,
     location: j.location?.name || '',
+    postedAt: j.first_published || j.updated_at || null,
   }));
 }
 
@@ -116,6 +124,7 @@ function parseAshby(json, companyName) {
     url: j.jobUrl || '',
     company: companyName,
     location: j.location || '',
+    postedAt: j.publishedAt || j.publishedDate || j.updatedAt || null,
   }));
 }
 
@@ -126,6 +135,7 @@ function parseLever(json, companyName) {
     url: j.hostedUrl || '',
     company: companyName,
     location: j.categories?.location || '',
+    postedAt: j.createdAt || null,
   }));
 }
 
@@ -137,6 +147,7 @@ function parseWorkday(json, companyName, base) {
     url: j.externalPath ? origin + j.externalPath : '',
     company: companyName,
     location: j.locationsText || '',
+    postedAt: j.postedOn || null, // Workday returns fuzzy text e.g. "Posted 5 Days Ago"
   }));
 }
 
@@ -209,6 +220,41 @@ function buildTitleFilter(titleFilter) {
     const hasNegative = negative.some(k => lower.includes(k));
     return hasPositive && !hasNegative;
   };
+}
+
+// ── Posting freshness ───────────────────────────────────────────────────────
+
+/**
+ * Age of a job posting in days, from the employer's posted date.
+ * Handles ISO strings / epoch ms (Greenhouse/Ashby/Lever) and Workday's fuzzy
+ * text ("Posted Today", "Posted 5 Days Ago", "Posted 30+ Days Ago").
+ * Returns null when no date can be determined — callers KEEP those (no drop on
+ * missing data).
+ * @returns {number|null}
+ */
+export function postingAgeDays(postedAt, now = Date.now()) {
+  if (postedAt == null || postedAt === '') return null;
+  if (typeof postedAt === 'string') {
+    const s = postedAt.trim().toLowerCase();
+    // Workday-style relative text
+    if (/posted\s+(just\s+)?today|^today$/.test(s)) return 0;
+    if (/posted\s+yesterday|^yesterday$/.test(s)) return 1;
+    const rel = s.match(/posted\s+(\d+)\+?\s*days?\s*ago|(\d+)\+?\s*days?\s*ago/);
+    if (rel) return Number(rel[1] ?? rel[2]);
+    if (/30\+?\s*days?/.test(s)) return 30;
+  }
+  // Numeric epoch (ms) or ISO/parseable date string
+  const t = typeof postedAt === 'number'
+    ? postedAt
+    : Date.parse(postedAt);
+  if (!Number.isFinite(t)) return null;
+  return Math.floor((now - t) / 86_400_000);
+}
+
+/** True if the posting is fresh enough for the Fresh lane (age <= max, or unknown age). */
+export function isFreshPosting(postedAt, maxDays, now = Date.now()) {
+  const age = postingAgeDays(postedAt, now);
+  return age === null || age <= maxDays;
 }
 
 // ── Dedup ───────────────────────────────────────────────────────────
@@ -355,6 +401,9 @@ async function main() {
   const titleFilter = buildTitleFilter(config.title_filter);
   // Positive title terms double as Workday server-side search queries.
   const workdaySearchTerms = config.title_filter?.positive || [];
+  const freshMaxDays = Number.isFinite(config.fresh_max_posting_days)
+    ? config.fresh_max_posting_days
+    : DEFAULT_FRESH_MAX_POSTING_DAYS;
 
   // 2. Filter to enabled companies with detectable APIs
   const targets = companies
@@ -376,6 +425,7 @@ async function main() {
   const date = new Date().toISOString().slice(0, 10);
   let totalFound = 0;
   let totalFiltered = 0;
+  let totalStale = 0;
   let totalDupes = 0;
   const newOffers = [];
   const errors = [];
@@ -391,6 +441,12 @@ async function main() {
       for (const job of jobs) {
         if (!titleFilter(job.title)) {
           totalFiltered++;
+          continue;
+        }
+        // Freshness gate: drop postings older than the cutoff so the Fresh lane
+        // only surfaces newly posted roles (unknown-date postings are kept).
+        if (!isFreshPosting(job.postedAt, freshMaxDays)) {
+          totalStale++;
           continue;
         }
         if (seenUrls.has(job.url)) {
@@ -427,6 +483,7 @@ async function main() {
   console.log(`Companies scanned:     ${targets.length}`);
   console.log(`Total jobs found:      ${totalFound}`);
   console.log(`Filtered by title:     ${totalFiltered} removed`);
+  console.log(`Stale (>${freshMaxDays}d posted):   ${totalStale} dropped`);
   console.log(`Duplicates:            ${totalDupes} skipped`);
   console.log(`New offers added:      ${newOffers.length}`);
 
@@ -453,7 +510,12 @@ async function main() {
   console.log('→ Share results and get help: https://discord.gg/8pRpHETxa4');
 }
 
-main().catch(err => {
-  console.error('Fatal:', err.message);
-  process.exit(1);
-});
+// CLI guard — only run the scan when invoked directly (allows importing the
+// exported helpers, e.g. postingAgeDays, in tests without triggering a scan).
+const IS_CLI = process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+if (IS_CLI) {
+  main().catch(err => {
+    console.error('Fatal:', err.message);
+    process.exit(1);
+  });
+}

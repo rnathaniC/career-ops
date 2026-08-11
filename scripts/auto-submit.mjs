@@ -1597,6 +1597,14 @@ async function runLive(cards, pw, allowTier, personal, browserCfg, useExtension,
 // ── Main ──────────────────────────────────────────────────────────────────────
 
 async function main() {
+  // Bootstrap .env — B-27 fix (2026-08-07). Every other Airtable-touching script
+  // (kanban-inject, archive-stale, airtable-sync, bump-hot-cards) calls
+  // dotenv.config(); auto-submit never did. Result: park-ready read an undefined
+  // process.env.AIRTABLE_PAT and skipped 100% of cards with reason `no-pat` on
+  // 08-04/05/06/07 — the Submit Ready lane never received a single card since it
+  // shipped. dotenv is optional-by-design: a missing module must not be fatal.
+  try { (await import('dotenv')).config(); } catch { /* optional */ }
+
   const modeLabel = LIVE ? 'LIVE' : SEMI_AUTO ? 'SEMI-AUTO' : PARK_READY ? 'PARK-READY' : 'DRY-RUN';
   console.log(`[auto-submit] mode=${modeLabel} limit=${LIMIT}`);
 
