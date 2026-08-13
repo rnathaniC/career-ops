@@ -215,14 +215,24 @@ describe('CLI: graded output file', () => {
     assert.equal(sales.grade, 'D');
     assert.equal(sales.platform, 'ashby');
 
+    // Shape is mode-dependent (config/profile.yml grading.mode). The "title"
+    // matcher emits keywords_matched; the substance grader emits matched_terms
+    // + fit_score. Asserting only the title shape made this test fail the moment
+    // substance mode became the default on 2026-08-10 — assert the shared
+    // contract, then the mode-specific half.
     for (const g of graded) {
-      assert.ok('company'          in g);
-      assert.ok('role'             in g);
-      assert.ok('grade'            in g);
-      assert.ok('platform'         in g);
-      assert.ok('url'              in g);
-      assert.ok('jd_snippet'       in g);
-      assert.ok('keywords_matched' in g);
+      assert.ok('company'    in g);
+      assert.ok('role'       in g);
+      assert.ok('grade'      in g);
+      assert.ok('platform'   in g);
+      assert.ok('url'        in g);
+      assert.ok('jd_snippet' in g);
+      const hasTitleShape     = 'keywords_matched' in g;
+      const hasSubstanceShape = 'matched_terms' in g && 'fit_score' in g;
+      assert.ok(
+        hasTitleShape || hasSubstanceShape,
+        `graded entry must carry either keywords_matched (title mode) or matched_terms+fit_score (substance mode); got ${Object.keys(g).join(',')}`,
+      );
     }
   });
 });

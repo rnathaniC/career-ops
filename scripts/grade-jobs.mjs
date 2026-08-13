@@ -1,12 +1,14 @@
 #!/usr/bin/env node
 // grade-jobs.mjs — Kaizen K-2026-06-08-5 (approved 2026-06-11)
 // Post-processes scan output: adds A/B/C grade per Rahil's filter
-// (Dallas/Remote + $130K floor + target titles). Reads JSON array on stdin, writes graded array.
+// (Dallas/Remote + $110K floor + target titles). Reads JSON array on stdin, writes graded array.
+// NOTE: not wired into any npm script (see Bug Triage "Dead grade-jobs.mjs"). Floor kept in
+// sync with config/profile.yml anyway so it can never mislead whoever revives it.
 import { readFileSync } from 'node:fs';
 
 const TITLE = /\b(product manager|program manager|technical program manager|tpm|scrum master|agile coach|project manager)\b/i;
 const LOC = /\b(dallas|remote|united states|us)\b|u\.s\.?(?![a-z])/i; // defect fix 2026-06-12: "U.S." abbreviation was missed by \bus\b
-const FLOOR = 130000;
+const FLOOR = 110000;
 
 function grade(job) {
   const t = TITLE.test(job.title || '');

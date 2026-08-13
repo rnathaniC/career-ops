@@ -1,0 +1,70 @@
+{
+  "version": 1,
+  "entries": {
+    "lyft|": {
+      "company": "Lyft",
+      "title": "Technical Program Manager",
+      "fetched": "2026-08-10",
+      "source": "indeed-mcp",
+      "ceo_approval": 42.5,
+      "recommend_friend": 54.7,
+      "recommend_friend_n": 14653,
+      "salary_satisfaction": 34.9,
+      "salary_avg": 198002,
+      "salary_n": 6,
+      "salary_for": "Technical Program Manager",
+      "url": "https://www.indeed.com/cmp/Lyft-Drivers-4"
+    },
+    "pinterest|": {
+      "company": "Pinterest",
+      "title": "Technical Program Manager",
+      "fetched": "2026-08-10",
+      "source": "indeed-mcp",
+      "ceo_approval": 75.8,
+      "recommend_friend": 64.6,
+      "recommend_friend_n": 96,
+      "salary_satisfaction": 45,
+      "salary_avg": 195507,
+      "salary_n": 47,
+      "salary_for": "Technical Program Manager",
+      "url": "https://www.indeed.com/cmp/Pinterest"
+    },
+    "pwc|": {
+      "company": "PwC",
+      "title": "Technical Program Manager",
+      "fetched": "2026-08-10",
+      "source": "indeed-mcp",
+      "ceo_approval": 56.8,
+      "recommend_friend": 73.3,
+      "recommend_friend_n": 2615,
+      "salary_satisfaction": 61.8,
+      "url": "https://www.indeed.com/cmp/Pwc"
+    },
+    "ge aerospace|": {
+      "company": "GE Aerospace",
+      "title": "Technical Program Manager",
+      "fetched": "2026-08-10",
+      "source": "indeed-mcp",
+      "ceo_approval": 64,
+      "recommend_friend": 66,
+      "recommend_friend_n": 1643,
+      "salary_satisfaction": 67.3,
+      "url": "https://www.indeed.com/cmp/GE-Aerospace-1"
+    },
+    "ge vernova|": {
+      "company": "GE Vernova",
+      "title": "Technical Program Manager",
+      "fetched": "2026-08-10",
+      "source": "indeed-mcp",
+      "rating": 4,
+      "ceo_approval": 63.1,
+      "recommend_friend": 63.5,
+      "recommend_friend_n": 556,
+      "salary_satisfaction": 70.4,
+      "salary_avg": 143581,
+      "salary_n": 8,
+      "salary_for": "Technical Program Manager",
+      "url": "https://www.indeed.com/cmp/GE-Vernova-1"
+    }
+  }
+}

@@ -75,9 +75,12 @@ export function buildBoardHtml(cards, date = DATE_STAMP) {
     const cardsHtml = shown.map((c) => {
       const conn = c.connectionName
         ? `<div class="conn">&#8627; ${esc(c.connectionName)}</div>` : '';
+      const loc = c.location
+        ? `<div class="loc"><i>&#128205;</i> ${esc(String(c.location).slice(0, 42))}</div>` : '';
       return `<div class="card">
         <div class="row"><span class="co">${esc(c.company)}</span><span class="grade" style="background:${gradeColor(c.grade)}">${esc(String(c.grade || '?').toUpperCase())}</span></div>
         <div class="role">${esc(String(c.role || '').slice(0, 60))}</div>
+        ${loc}
         ${conn}
       </div>`;
     }).join('');
@@ -105,6 +108,7 @@ export function buildBoardHtml(cards, date = DATE_STAMP) {
     .co { font-weight: 700; font-size: 12.5px; color: #172b4d; }
     .grade { color: #fff; font-size: 10px; font-weight: 700; border-radius: 4px; padding: 1px 6px; }
     .role { font-size: 11px; color: #42526e; margin-top: 2px; line-height: 1.3; }
+    .loc { font-size: 10.5px; color: #6b7280; margin-top: 3px; }
     .conn { font-size: 10.5px; color: #6554c0; margin-top: 3px; }
     .more { font-size: 11px; color: #6b7280; text-align: center; padding: 4px; }
     .empty { color: #9ca3af; text-align: center; font-size: 12px; padding: 6px; }

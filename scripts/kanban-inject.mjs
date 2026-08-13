@@ -221,6 +221,7 @@ export function buildFields({
   hasConnection = false, isWarmReferral = false,
   connectionName = '', connectionLinkedinUrl = '',
   connectionCount = 0, connectionOptions = '',
+  location = '', hqLocation = '',
 }) {
   const fields = {
     [ACTIVE_FIELD_IDS['Card ID']]:              cardId,
@@ -237,6 +238,8 @@ export function buildFields({
     [ACTIVE_FIELD_IDS['Warm Referral']]:        isWarmReferral,
     [ACTIVE_FIELD_IDS['Connection Name']]:      connectionName,
     [ACTIVE_FIELD_IDS['Connection LinkedIn']]:  connectionLinkedinUrl,
+    [ACTIVE_FIELD_IDS['Location']]:             location   || '',
+    [ACTIVE_FIELD_IDS['HQ Location']]:          hqLocation || '',
   };
   // Only set these when field IDs have been provisioned in Airtable (null = not yet created).
   if (ACTIVE_FIELD_IDS['Connection Count'] != null)
@@ -317,6 +320,25 @@ export async function injectCards({
     _connByCompany = buildConnectionsMap(connPath);
   }
 
+  // HQ-location map (company name → headquarters). Seeded from config/company-hq.yml
+  // (a flat "Company: City, ST" map) and any `hq:` entries in portals.yml. Blank
+  // when unknown — HQ Location goes on the card interior only, never the snapshot.
+  const hqByCompany = {};
+  try {
+    const yaml = (await import('js-yaml')).default;
+    const hqPath = join(ROOT, 'config', 'company-hq.yml');
+    if (existsSync(hqPath)) {
+      const m = yaml.load(readFileSync(hqPath, 'utf8')) || {};
+      for (const [name, hq] of Object.entries(m)) {
+        if (name && hq) hqByCompany[String(name).toLowerCase()] = String(hq);
+      }
+    }
+    const portals = yaml.load(readFileSync(join(ROOT, 'portals.yml'), 'utf8'));
+    for (const c of (portals?.tracked_companies || [])) {
+      if (c?.name && c?.hq) hqByCompany[String(c.name).toLowerCase()] = String(c.hq);
+    }
+  } catch { /* no map — HQ stays blank */ }
+
   let seq = maxCardSeq(dataDir, date);
   const nowIso = new Date().toISOString();
 
@@ -350,6 +372,8 @@ export async function injectCards({
       nowIso,
       ...conn,
       connectionOptions: connectionOptionsJson,
+      location:   job.location || '',
+      hqLocation: hqByCompany[String(job.company).toLowerCase()] || '',
     });
   }
 

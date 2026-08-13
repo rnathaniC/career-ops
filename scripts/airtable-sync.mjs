@@ -79,6 +79,9 @@ export const ACTIVE_FIELD_IDS = {
   //     -d '{"name":"Connection Options","type":"multilineText"}'
   'Connection Count': 'flddqet5ZZSumFns4',    // TODO: replace with field ID after Airtable field creation
   'Connection Options': 'fldJu7vzBJaawmMDD',  // TODO: replace with field ID after Airtable field creation
+  // Location fields (added 2026-08-12): Location = job posting location (card face
+  // + email snapshot); HQ Location = company HQ (card interior, not on snapshot).
+  'Location': 'fldfz5dvrXXLcwaf7', 'HQ Location': 'fldzNtSO7L6K6yIe2',
 };
 export const CARD_ID_FIELD = ACTIVE_FIELD_IDS['Card ID'];
 export const LAST_REFRESHED_FIELD = ACTIVE_FIELD_IDS['Last Refreshed'];
@@ -147,6 +150,8 @@ export function recordToCard(record) {
     createdAt: get('Created At') || '',
     lastRefreshed: get('Last Refreshed') || '',
     notes: get('Notes') || '',
+    location: get('Location') || '',
+    hqLocation: get('HQ Location') || '',
     closedAt: null,
     _airtableRecordId: record.id,
   };
@@ -177,6 +182,8 @@ export function cardToFields(card) {
     [ACTIVE_FIELD_IDS['Warm Referral']]: !!card.isWarmReferral,
     [ACTIVE_FIELD_IDS['Last Refreshed']]: card.lastRefreshed || '',
     [ACTIVE_FIELD_IDS['Notes']]: card.notes || '',
+    [ACTIVE_FIELD_IDS['Location']]: card.location || '',
+    [ACTIVE_FIELD_IDS['HQ Location']]: card.hqLocation || '',
   };
 }
 

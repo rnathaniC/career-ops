@@ -41,6 +41,9 @@ export const POSITIVE = [
   // weak / title-level (weight 1)
   ['scrum master', 1], ['agile', 1], ['project manager', 1], ['sprint', 1],
   ['kanban', 1], ['backlog', 1], ['facilitat', 1],
+  // local priority corridor (2026-08-12): boost corporate roles near home so
+  // Frisco/Plano/Addison and the immediate area rank above equal fits elsewhere.
+  ['frisco', 2], ['plano', 2], ['addison', 2], ['lewisville', 2], ['the colony', 2],
 ];
 
 export const NEGATIVE = [

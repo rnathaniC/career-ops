@@ -23,6 +23,7 @@
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';
 import { join, dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { passesCommuteGate } from './locations.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname  = dirname(__filename);
@@ -255,24 +256,31 @@ async function main() {
       company: e.company, role: e.title, location: e.location || '',
       platform: normalizePlatform(e.portal), url: e.url,
     };
-    // Geographic hard-disqualifiers apply in both modes.
+    // Geographic hard-disqualifiers (foreign locations) apply in both modes.
     const disqualifiers = [...titleDisqualifiers(e.title), ...locationDisqualifiers(e.location)];
     if (disqualifiers.length > 0) {
       return { ...base, grade: 'D', jd_snippet: null, keywords_matched: [], disqualifiers };
     }
+    // JD (substance mode) is also used to detect remote/hybrid wording for the gate.
+    const jd = gradeMode === 'substance' ? await fetchJd(e.url, base.platform).catch(() => '') : '';
+    // Commute gate: keep remote/hybrid and local (~24 mi of 75067); drop onsite
+    // roles outside the local radius. Unknown location is kept (no drop on missing data).
+    const gate = passesCommuteGate(e.location, `${e.title}\n${jd}`);
+    if (!gate.keep) {
+      return { ...base, grade: 'D', jd_snippet: null, keywords_matched: [], disqualifiers: [`commute:${gate.reason}`] };
+    }
     if (gradeMode === 'substance') {
-      const jd = await fetchJd(e.url, base.platform).catch(() => '');
-      const { grade, score, matched, penalized } = scoreSubstance(`${e.title}\n${jd}`);
+      const { grade, score, matched, penalized } = scoreSubstance(`${e.title}\n${jd}\n${e.location}`);
       return {
         ...base, grade,
         jd_snippet: jd ? jd.slice(0, 220) : null,
         fit_score: score, matched_terms: matched,
         ...(penalized.length ? { penalized_terms: penalized } : {}),
-        jd_used: Boolean(jd),
+        jd_used: Boolean(jd), commute: gate.reason,
       };
     }
     const { grade, keywords_matched } = gradeJob(e.title, keywords, e.location);
-    return { ...base, grade, jd_snippet: null, keywords_matched };
+    return { ...base, grade, jd_snippet: null, keywords_matched, commute: gate.reason };
   };
   const graded = await Promise.all(recent.map(gradeEntry));
 

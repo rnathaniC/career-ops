@@ -295,7 +295,10 @@ if (!airtablePull.ok) {
 // pipeline continues — see scripts/archive-stale.mjs for the full contract.
 
 log('Step -0.4 — Archive stale cards (archive-stale.mjs --apply)');
-const archiveStale = await npm('archive:apply', { capture: true, step: 'step-0.4' });
+// Windows-hardened: direct node spawn, not `npm run` (npm.cmd intermittently
+// aborts with 3221226505 / 0xC0000409 — hit this step on 2026-08-12). Same fix
+// as the Airtable and auto-submit steps.
+const archiveStale = await nodeScript('scripts/archive-stale.mjs', ['--apply'], { step: 'step-0.4' });
 summary.archive_stale.exit = archiveStale.status;
 if (!archiveStale.ok) {
   warn(`Archive-stale exited ${archiveStale.status} — continuing without archiving this run`);
@@ -464,6 +467,41 @@ if (!workerGrader.ok) {
   warn(`Worker grader exited ${workerGrader.status} — no graded-jobs file written; kanban-inject will skip`);
   summary.worker_grader.skipped = true;
   summary.notes.push(`Worker grader non-zero exit (${workerGrader.status}) — scan output may be empty or portals.yml missing.`);
+}
+
+// ─── Step 1.55 — Indeed shortlink resolution (K-0810-3) ─────────────────────
+// Indeed's search_jobs hands back click-tracking shortlinks (to.indeed.com/xxxx),
+// not employer URLs. Everything downstream routes off the ATS detected from the
+// URL — detectATS → fillForm → getAtsSubmitSelectors — so an unresolved Indeed
+// card routes as "unknown" and falls to fillGenericForm, the same path that
+// produced the B-16 empty-form click. Resolve BEFORE inject so Indeed-sourced
+// jobs land in the existing lanes with the existing fillers, correctly routed.
+//
+// No-op when the graded set contains no Indeed links (the case until K-0810-2
+// makes Indeed a scan source), and an unresolvable link leaves its card fully
+// untouched rather than mis-routing it.
+log('Step 1.55 — Indeed shortlink resolution (indeed-resolve.mjs)');
+const indeedResolve = await npm('indeed:resolve', { step: 'step-1.55' });
+if (!indeedResolve.ok) {
+  warn(`Indeed resolve exited ${indeedResolve.status} — cards left unrouted; pipeline continues`);
+  summary.notes.push(`Indeed shortlink resolution non-zero exit (${indeedResolve.status}) — URLs unmodified.`);
+}
+
+// ─── Step 1.6 — Indeed employer-signal enrichment (K-0810-1) ─────────────────
+// Folds Indeed's review/rating/salary-band data into the freshly graded cards
+// BEFORE they reach inject + readiness, so a poor-fit employer is downgraded out
+// of auto-submit eligibility instead of being auto-filled and discovered later.
+//
+// Runs OFFLINE against data/indeed-company-cache.json. The cache is populated by
+// the agent in-session (`node scripts/indeed-enrich.mjs --scan` lists what is
+// missing; the agent fetches each via the Indeed MCP get_company_data and merges).
+// A cold or stale cache is NOT an error — every unknown employer keeps its grade,
+// so the nightly pipeline never blocks on the agent having run.
+log('Step 1.6 — Indeed employer signal (indeed-enrich.mjs)');
+const indeedEnrich = await npm('indeed:enrich', { step: 'step-1.6' });
+if (!indeedEnrich.ok) {
+  warn(`Indeed enrich exited ${indeedEnrich.status} — grades left as-is; pipeline continues`);
+  summary.notes.push(`Indeed employer-signal enrichment non-zero exit (${indeedEnrich.status}) — grades unmodified.`);
 }
 
 // ─── Step 0.9 — Ashby scan ───────────────────────────────────────────────────

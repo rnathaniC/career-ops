@@ -10,7 +10,7 @@ defaults:
     - Agile Coach
     - Project Manager
   target_locations: [Dallas, Remote, United States]
-  salary_floor_usd: 130000
+  salary_floor_usd: 110000
 
 greenhouse:   # GET https://boards-api.greenhouse.io/v1/boards/{slug}/jobs  (keyless, free)
   - { slug: stripe,     verified: 2026-06-08, last_count: 482 }

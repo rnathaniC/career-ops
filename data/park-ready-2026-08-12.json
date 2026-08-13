@@ -1,0 +1,43 @@
+{
+  "ran_at": "2026-08-12T06:03:12.153Z",
+  "mode": "park-ready",
+  "parked": 0,
+  "skipped": 5,
+  "results": [
+    {
+      "id": "live-2026-08-11-012",
+      "company": "Twilio",
+      "status": "skipped",
+      "reason": "89+ (96) requires a CL but none found",
+      "readiness_total": 96
+    },
+    {
+      "id": "live-2026-08-11-050",
+      "company": "T-Mobile",
+      "status": "skipped",
+      "reason": "89+ (91) requires a CL but none found",
+      "readiness_total": 91
+    },
+    {
+      "id": "live-2026-08-11-043",
+      "company": "Medtronic",
+      "status": "skipped",
+      "reason": "89+ (96) requires a CL but none found",
+      "readiness_total": 96
+    },
+    {
+      "id": "live-2026-08-11-010",
+      "company": "Mastercard",
+      "status": "skipped",
+      "reason": "89+ (96) requires a CL but none found",
+      "readiness_total": 96
+    },
+    {
+      "id": "live-2026-08-11-040",
+      "company": "Workday",
+      "status": "skipped",
+      "reason": "89+ (96) requires a CL but none found",
+      "readiness_total": 96
+    }
+  ]
+}
