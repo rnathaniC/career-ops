@@ -51,6 +51,24 @@ describe('passesCommuteGate', () => {
   test('keeps roles with unknown location (no drop on missing data)', () => {
     assert.equal(passesCommuteGate('', 'Program Manager').keep, true);
   });
+  test('keeps unresolved Workday multi-location placeholders (B-0817-1)', () => {
+    // "N Locations" / "Multiple Locations" carry no geography — unknown, not
+    // a confirmed non-local address, so KEEP like a blank location.
+    for (const loc of ['3 Locations', '23 Locations', 'Multiple Locations']) {
+      const r = passesCommuteGate(loc, 'Lead Data Product Manager');
+      assert.equal(r.keep, true, `${loc} should be kept`);
+      assert.equal(r.reason, 'location-unresolved', `${loc} reason`);
+    }
+  });
+  test('no regression: real far onsite city still drops', () => {
+    const r = passesCommuteGate('Austin, TX', 'onsite program manager');
+    assert.equal(r.keep, false);
+    assert.equal(r.reason, 'onsite-outside-24mi');
+  });
+  test('no regression: local city and remote still keep', () => {
+    assert.equal(passesCommuteGate('Frisco, TX', 'onsite').keep, true);
+    assert.equal(passesCommuteGate('Austin, TX', 'Remote - US').keep, true);
+  });
 });
 
 describe('isPriorityLocal', () => {
