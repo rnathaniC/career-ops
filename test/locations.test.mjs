@@ -10,7 +10,7 @@
 import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
 
-import { passesCommuteGate, isLocal, isRemoteOrHybrid, isPriorityLocal } from '../scripts/locations.mjs';
+import { passesCommuteGate, isLocal, isRemoteOrHybrid, isPriorityLocal, isOutOfStateRemote } from '../scripts/locations.mjs';
 
 describe('isRemoteOrHybrid', () => {
   test('detects remote/hybrid wording', () => {
@@ -68,6 +68,54 @@ describe('passesCommuteGate', () => {
   test('no regression: local city and remote still keep', () => {
     assert.equal(passesCommuteGate('Frisco, TX', 'onsite').keep, true);
     assert.equal(passesCommuteGate('Austin, TX', 'Remote - US').keep, true);
+  });
+
+  // B-0825-1: state-qualified remote. TX/US/unqualified remote keep; remote
+  // pinned to a specific non-Texas state drops as 'remote-out-of-state'.
+  test('keeps Texas-tied remote', () => {
+    for (const loc of ['TX-Remote', 'TX Remote', 'Remote - TX', 'Texas Remote', 'Remote (TX)', 'Dallas Remote', 'TX - Work from home']) {
+      const r = passesCommuteGate(loc, '');
+      assert.equal(r.keep, true, `${loc} should keep`);
+    }
+  });
+  test('keeps nationwide / US remote and unqualified remote', () => {
+    for (const loc of ['Remote - US', 'US Remote', 'US-Remote', 'Remote, United States', 'United States-Remote', 'Nationwide', 'Remote Nationwide', 'Anywhere', 'Remote (USA)', 'Remote', 'Work from home']) {
+      const r = passesCommuteGate(loc, '');
+      assert.equal(r.keep, true, `${loc} should keep`);
+    }
+  });
+  test('drops remote restricted to a specific non-Texas state', () => {
+    for (const loc of ['FL-Remote', 'CO-Remote', 'Remote - NY', 'California Remote', 'California - Remote', 'Remote (WA)', 'GA Remote', 'US-MA-REMOTE', 'VA - Work from home', 'NJ - Work from home', 'FL - Work from home', 'Remote - DC']) {
+      const r = passesCommuteGate(loc, '');
+      assert.equal(r.keep, false, `${loc} should drop`);
+      assert.equal(r.reason, 'remote-out-of-state', `${loc} reason`);
+    }
+  });
+  test('out-of-state check ignores JD prose (location field only)', () => {
+    // A local location must survive even when the JD mentions other states.
+    const r = passesCommuteGate('Frisco, TX', 'Team supports our NY and CA remote offices');
+    assert.equal(r.keep, true);
+    // A nationwide-remote location with office states listed separately keeps.
+    const m = passesCommuteGate('San Francisco, CA, New York, NY, Portland, OR, or Remote within Canada or United States', '');
+    assert.equal(m.keep, true, 'Mercury-style multi-office + US-wide remote should keep');
+  });
+  test('lowercase conjunctions do not trigger a state match', () => {
+    // "or" (OR), "in" (IN), "me" (ME) as words must not read as postal codes.
+    assert.equal(isOutOfStateRemote('Work in a remote team'), false);
+    assert.equal(isOutOfStateRemote('Remote or hybrid'), false);
+  });
+});
+
+describe('isOutOfStateRemote', () => {
+  test('true only for non-Texas state-restricted remote', () => {
+    assert.equal(isOutOfStateRemote('FL-Remote'), true);
+    assert.equal(isOutOfStateRemote('Remote - NY'), true);
+    assert.equal(isOutOfStateRemote('US-MA-REMOTE'), true);
+    assert.equal(isOutOfStateRemote('California Remote'), true);
+    assert.equal(isOutOfStateRemote('TX-Remote'), false);
+    assert.equal(isOutOfStateRemote('Remote - US'), false);
+    assert.equal(isOutOfStateRemote('Remote'), false);
+    assert.equal(isOutOfStateRemote(''), false);
   });
 });
 
