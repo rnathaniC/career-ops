@@ -23,7 +23,8 @@
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';
 import { join, dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { passesCommuteGate } from './locations.mjs';
+import { passesCommuteGate, isUnresolvedMultiLocation } from './locations.mjs';
+import { loadRegistry, gradeWithReferral } from './referral-registry.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname  = dirname(__filename);
@@ -67,7 +68,7 @@ const US_LOCATION_OK = /\b(us|usa|u\.s|united states|dallas|texas|tx|remote)\b/i
 // RESIDENCY_RE which requires 'based/located in' phrasing. Standalone foreign
 // country/city tokens in a title are a hard geographic disqualifier.
 // 'New Mexico' is stripped first so the US state never trips the 'mexico' token.
-const FOREIGN_TITLE_RE = /\b(brazil|brasil|belo horizonte|sao paulo|são paulo|rio de janeiro|porto alegre|curitiba|campinas|recife|florianopolis|florianópolis|salvador|fortaleza|brasilia|brasília|mexico|argentina|colombia|chile|peru|canada|toronto|vancouver|ireland|dublin|london|england|united kingdom|germany|berlin|munich|france|paris|spain|madrid|barcelona|portugal|lisbon|poland|warsaw|krakow|netherlands|amsterdam|belgium|brussels|italy|milan|rome|india|bangalore|bengaluru|mumbai|delhi|hyderabad|pune|japan|tokyo|china|shanghai|beijing|singapore|australia|sydney|melbourne|philippines|manila|vietnam|indonesia|jakarta|israel|tel aviv|dubai|egypt|cairo|nigeria|lagos|kenya|nairobi|south africa|romania|bucharest|prague|hungary|budapest|ukraine|kyiv|turkey|istanbul|sweden|stockholm|norway|oslo|denmark|copenhagen|finland|helsinki|switzerland|zurich|austria|vienna|greece|athens|costa rica|guatemala|uruguay|montevideo|ecuador|bolivia|paraguay)\b/i;
+const FOREIGN_TITLE_RE = /\b(brazil|brasil|belo horizonte|sao paulo|são paulo|rio de janeiro|porto alegre|curitiba|campinas|recife|florianopolis|florianópolis|salvador|fortaleza|brasilia|brasília|mexico|argentina|colombia|chile|peru|canada|toronto|vancouver|ireland|dublin|london|england|united kingdom|scotland|wales|northern ireland|edinburgh|glasgow|glenrothes|fife|belfast|cardiff|slough|swindon|harlow|milton keynes|nagpur|chennai|kolkata|ahmedabad|noida|gurgaon|gurugram|coimbatore|indore|jaipur|kochi|thiruvananthapuram|trivandrum|mysore|chandigarh|bhubaneswar|vadodara|nashik|gandhinagar|bogota|bogotá|medellin|medellín|guadalajara|monterrey|queretaro|querétaro|heredia|cebu|davao|hanoi|ho chi minh|saigon|bangkok|thailand|kuala lumpur|malaysia|taipei|taiwan|seoul|south korea|hong kong|osaka|kyoto|shenzhen|guangzhou|hangzhou|casablanca|morocco|tunis|tunisia|dhaka|bangladesh|karachi|lahore|islamabad|pakistan|colombo|sri lanka|yokneam|haifa|herzliya|jerusalem|riyadh|saudi arabia|doha|qatar|abu dhabi|germany|berlin|munich|france|paris|spain|madrid|barcelona|portugal|lisbon|poland|warsaw|krakow|netherlands|amsterdam|belgium|brussels|italy|milan|rome|india|bangalore|bengaluru|mumbai|delhi|hyderabad|pune|japan|tokyo|china|shanghai|beijing|singapore|australia|sydney|melbourne|philippines|manila|vietnam|indonesia|jakarta|israel|tel aviv|dubai|egypt|cairo|nigeria|lagos|kenya|nairobi|south africa|romania|bucharest|prague|hungary|budapest|ukraine|kyiv|turkey|istanbul|sweden|stockholm|norway|oslo|denmark|copenhagen|finland|helsinki|switzerland|zurich|austria|vienna|greece|athens|costa rica|guatemala|uruguay|montevideo|ecuador|bolivia|paraguay|estonia|tallinn|latvia|riga|lithuania|vilnius|slovakia|bratislava|slovenia|ljubljana|croatia|zagreb|serbia|belgrade|bulgaria|sofia|luxembourg|iceland|reykjavik|malta|cyprus|new zealand|auckland|wellington|uganda|kampala|ghana|accra|tanzania|ethiopia|addis ababa|armenia|yerevan|georgia \(country\)|tbilisi|kazakhstan|almaty|uzbekistan|tashkent|azerbaijan|baku)\b/i;
 
 // B-17c (2026-07-16): Brazilian city/STATE suffix pattern (e.g. "Belo Horizonte/MG").
 const BR_STATE_SUFFIX_RE = /\/(mg|sp|rj|rs|pr|sc|ba|pe|ce|df|go|es|am|pa)\b/i;
@@ -109,15 +110,138 @@ export function titleDisqualifiers(title) {
  * @param {string} location Raw location string from scan-history.tsv (may be '')
  * @returns {string[]} disqualifiers found (empty = clean or unknown)
  */
+// B-0821-2 (2026-08-21): the "a US option exists" escape hatch tested
+// US_LOCATION_OK, which includes the bare token `remote`. So ANY location
+// containing the word "remote" was accepted as proof of a US option and
+// returned early — never reaching the foreign screen below:
+//
+//   "Remote - Estonia"  → matches /remote/ → return []  → graded A → APPLIED
+//   "Remote - India"    → same short-circuit
+//
+// "Remote" says nothing about WHERE; a remote role in Estonia still requires
+// Estonian work authorisation. The early-return must key on an actual US
+// token. Dropping `remote` from THIS test is safe precisely because the
+// early-return only changes an outcome when a foreign token is also present:
+// a plain "Remote"/"Remote Nationwide" still matches no foreign token and
+// still returns clean. Genuinely dual-sited postings keep the asymmetry —
+// "Remote within Canada or United States" hits `united states` and passes.
+//
+// B-0816-3 (logged 2026-08-16, closed 2026-08-21): the US token set recognised
+// only us/usa/united states/dallas/texas/tx, so a genuinely dual-sited posting
+// like "New York; London" or "Chicago, Illinois; Berlin" matched NO US token,
+// fell through to the foreign screen and was hard-D'd — the exact false
+// negative the asymmetry above exists to prevent. Extended to the 50 states
+// (names + postal codes) and the larger US metros.
+//
+// Deliberately EXCLUDED as ambiguous with foreign places already on the
+// foreign list — adding these would let a foreign posting pass:
+//   georgia (Tbilisi), ohio→none, "la" (too short/ambiguous), "in" (India),
+//   "or" (conjunction), "me" (pronoun), "hi", "ok", "de", "pa" as bare codes.
+// Postal codes are therefore matched only in an upper-case, comma-preceded or
+// hyphen-delimited context via US_STATE_CODE_RE below.
+const US_STATE_NAME_RE = new RegExp('\\b(' + [
+  'alabama','alaska','arizona','arkansas','california','colorado','connecticut',
+  'delaware','florida','idaho','illinois','indiana','iowa','kansas','kentucky',
+  'louisiana','maine','maryland','massachusetts','michigan','minnesota',
+  'mississippi','missouri','montana','nebraska','nevada','new hampshire',
+  'new jersey','new mexico','new york','north carolina','north dakota','ohio',
+  'oklahoma','oregon','pennsylvania','rhode island','south carolina',
+  'south dakota','tennessee','utah','vermont','virginia','washington',
+  'west virginia','wisconsin','wyoming','district of columbia',
+  // major metros that often appear without a state
+  'new york city','nyc','chicago','los angeles','san francisco','seattle',
+  'boston','atlanta','denver','phoenix','houston','austin','san diego',
+  'san jose','philadelphia','charlotte','minneapolis','detroit','tampa',
+  'orlando','miami','portland','pittsburgh','baltimore','st louis',
+  'salt lake city','kansas city','las vegas','nashville','columbus',
+  'indianapolis','milwaukee','sacramento','raleigh','richmond','cincinnati',
+  'cleveland','bellevue','redmond','sunnyvale','santa clara','mountain view',
+  'palo alto','fort worth','plano','frisco','irving','arlington','mckinney',
+].join('|') + ')\\b', 'i');
+
+// Two-letter postal codes only in an unambiguous delimited context:
+// "US-TX-PLANO", "Charlotte, NC", "NJ - Work from home", "CA, US".
+const US_STATE_CODE_RE = /(?:^|[,\-\/(\s])(A[LKZR]|C[AOT]|DE|FL|GA|HI|I[ADLN]|K[SY]|LA|M[ADEINOST]|N[CDEHJMVY]|O[HKR]|PA|RI|S[CD]|T[NX]|UT|V[AT]|W[AIVY]|DC)(?:[,\-\/)\s]|$)/;
+
+const US_OPTION_EXISTS_BASE = /\b(us|usa|u\.s|united states|dallas|texas|tx)\b/i;
+
+/** True when the location names a genuine US option (state, metro, or code). */
+function hasUsOption(loc) {
+  return US_OPTION_EXISTS_BASE.test(loc)
+      || US_STATE_NAME_RE.test(loc)
+      || US_STATE_CODE_RE.test(loc);
+}
+
 export function locationDisqualifiers(location) {
   const loc = String(location || '').trim();
   if (!loc) return []; // pre-B-17d history rows: unknown, never disqualify
-  if (US_LOCATION_OK.test(loc)) return []; // a US/remote option exists
+  if (hasUsOption(loc)) return []; // a genuine US option exists
   const out = [];
   const foreign = loc.replace(/new mexico/ig, '').match(FOREIGN_TITLE_RE);
   if (foreign) out.push(`foreign-location-field:${foreign[1].toLowerCase()}`);
   if (BR_STATE_SUFFIX_RE.test(loc)) out.push('foreign-location-field:br-state-suffix');
   return out;
+}
+
+/**
+ * B-0816-1 (2026-08-16): board cards carry `location: null` — the scan-time
+ * location never survives into Airtable, so locationDisqualifiers() sees '' and
+ * returns "unknown, never disqualify" at every downstream gate. On 2026-08-16
+ * that let a Glenrothes-Fife (Scotland) RTX role reach the Submit Ready lane
+ * graded A.
+ *
+ * Workday/Greenhouse/Lever all embed the posting location in the URL path
+ * (".../job/Glenrothes-Fife/Transformation-...", ".../job/TX---Work-from-home/...").
+ * Recovering it costs zero network calls and zero tokens — pure string work on
+ * data already in hand.
+ *
+ * Conservative by design: returns '' when no location segment is recognised, so
+ * an unparsed URL degrades to today's behaviour (unknown => no disqualifier)
+ * rather than inventing a reason to drop a card.
+ *
+ * @param {string} url ATS posting URL
+ * @returns {string} human-readable location, or '' when undeterminable
+ */
+export function locationFromAtsUrl(url) {
+  const u = String(url || '');
+  if (!u) return '';
+  const m = u.match(/\/job\/([^/?#]+)/i);
+  if (!m) return '';
+  return decodeURIComponent(m[1])
+    .replace(/-{2,}/g, ' ')      // Workday encodes ', ' and ' - ' as '---'
+    .replace(/[-_+]/g, ' ')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
+}
+
+/**
+ * Effective location for gating: the explicit field when present, else recovered
+ * from the URL. Keeps every caller on one definition (B-0816-1).
+ * @param {{location?: string|null, url?: string}} card
+ * @returns {string}
+ */
+// B-0821-1 (2026-08-21): an unresolved Workday aggregate ("2 Locations",
+// "61 Locations", "Multiple Locations") is TRUTHY, so it short-circuited the
+// URL-derivation fallback and was handed to the commute gate verbatim. The gate
+// can't read geography out of it, so it took the deliberate KEEP branch added by
+// B-0817-1 — meaning a placeholder location fared BETTER than a blank one:
+//
+//   location ""            → derive "Basildon Endeavour Drive" from URL → DROP  ✅
+//   location "2 Locations" → gate sees "2 Locations"                   → KEEP  ❌
+//
+// Measured effect: 21 of 34 A-grades in the week of 2026-08-15 rode the
+// `location-unresolved` fail-open, including Fiserv "Payment Relations Manager
+// EMEA Acquiring" in Basildon, UK — graded A and injected into the HOT lane.
+// B-0817-1's own reasoning says the placeholder means *unknown*; unknown must
+// therefore take the same recovery path a blank takes, and only fail open when
+// the URL yields nothing either.
+export function effectiveLocation(card) {
+  const explicit = String(card?.location || '').trim();
+  if (explicit && !isUnresolvedMultiLocation(explicit)) return explicit;
+  // Unknown (blank OR unresolved placeholder): recover from the ATS URL path.
+  // Fall back to the original placeholder so the gate still sees "unknown"
+  // rather than "" — both KEEP, but the reason code stays truthful.
+  return locationFromAtsUrl(card?.url) || explicit;
 }
 
 export function gradeJob(title, keywords, location = '') {
@@ -251,13 +375,43 @@ async function main() {
     process.exit(0);
   }
 
+  // Referral registry (CHANGE 3): a company where Rahil has a live referral path
+  // overlays grade S (above A) on the otherwise-computed grade. Loaded ONCE;
+  // degrades to an empty registry (no S) if the file is missing/broken.
+  const registry = loadRegistry(undefined, yaml);
+  if (registry.entries.length) {
+    console.log(`[worker-grader] referral registry: ${registry.entries.length} entr(y|ies) loaded — S-grade overlay active`);
+  } else if (registry.error) {
+    console.warn(`[worker-grader] referral registry unreadable (${registry.error}) — no S overlay this run`);
+  }
+
+  // Overlay S on a non-D base grade when the company has a referral match. D
+  // (hard-disqualified: foreign location, commute, anti-fit) is never rescued.
+  const overlayS = (result) => {
+    const { grade, referral } = gradeWithReferral(result.grade, result.company, registry);
+    if (grade === 'S') {
+      return { ...result, grade: 'S', referral_via: referral.via, referral_person: referral.entry.person || null };
+    }
+    return result;
+  };
+
   const gradeEntry = async (e) => {
+    // B-0816-1 / K-0816-4 (2026-08-16): scan-history's location column is BLANK
+    // on 70.7% of rows (1,349 of 1,909), so every geo check below has been
+    // running on an empty string for roughly 7 of every 10 postings since the
+    // gate was built — silently taking the "unknown, never disqualify" branch.
+    // Recovering the location from the ATS URL path back-fills 464 of those
+    // rows at zero network and zero token cost. A sweep of history under the
+    // recovered values finds 276 geo-disqualified postings that previously
+    // graded as if their location were unknown.
+    const effLoc = effectiveLocation({ location: e.location, url: e.url });
     const base = {
-      company: e.company, role: e.title, location: e.location || '',
+      company: e.company, role: e.title, location: effLoc,
+      location_source: e.location ? 'scan' : (effLoc ? 'url-derived' : 'none'),
       platform: normalizePlatform(e.portal), url: e.url,
     };
     // Geographic hard-disqualifiers (foreign locations) apply in both modes.
-    const disqualifiers = [...titleDisqualifiers(e.title), ...locationDisqualifiers(e.location)];
+    const disqualifiers = [...titleDisqualifiers(e.title), ...locationDisqualifiers(effLoc)];
     if (disqualifiers.length > 0) {
       return { ...base, grade: 'D', jd_snippet: null, keywords_matched: [], disqualifiers };
     }
@@ -265,29 +419,29 @@ async function main() {
     const jd = gradeMode === 'substance' ? await fetchJd(e.url, base.platform).catch(() => '') : '';
     // Commute gate: keep remote/hybrid and local (~24 mi of 75067); drop onsite
     // roles outside the local radius. Unknown location is kept (no drop on missing data).
-    const gate = passesCommuteGate(e.location, `${e.title}\n${jd}`);
+    const gate = passesCommuteGate(effLoc, `${e.title}\n${jd}`);
     if (!gate.keep) {
       return { ...base, grade: 'D', jd_snippet: null, keywords_matched: [], disqualifiers: [`commute:${gate.reason}`] };
     }
     if (gradeMode === 'substance') {
-      const { grade, score, matched, penalized } = scoreSubstance(`${e.title}\n${jd}\n${e.location}`);
-      return {
+      const { grade, score, matched, penalized } = scoreSubstance(`${e.title}\n${jd}\n${effLoc}`);
+      return overlayS({
         ...base, grade,
         jd_snippet: jd ? jd.slice(0, 220) : null,
         fit_score: score, matched_terms: matched,
         ...(penalized.length ? { penalized_terms: penalized } : {}),
         jd_used: Boolean(jd), commute: gate.reason,
-      };
+      });
     }
-    const { grade, keywords_matched } = gradeJob(e.title, keywords, e.location);
-    return { ...base, grade, jd_snippet: null, keywords_matched, commute: gate.reason };
+    const { grade, keywords_matched } = gradeJob(e.title, keywords, effLoc);
+    return overlayS({ ...base, grade, jd_snippet: null, keywords_matched, commute: gate.reason });
   };
   const graded = await Promise.all(recent.map(gradeEntry));
 
-  const counts = { A: 0, B: 0, C: 0, D: 0 };
-  for (const g of graded) counts[g.grade]++;
+  const counts = { S: 0, A: 0, B: 0, C: 0, D: 0 };
+  for (const g of graded) counts[g.grade] = (counts[g.grade] || 0) + 1;
   const dq = graded.filter((g) => g.disqualifiers).length;
-  console.log(`[worker-grader] graded ${graded.length}: A=${counts.A} B=${counts.B} C=${counts.C} D=${counts.D}${dq ? ` (B-17 disqualified: ${dq})` : ''}`);
+  console.log(`[worker-grader] graded ${graded.length}: S=${counts.S} A=${counts.A} B=${counts.B} C=${counts.C} D=${counts.D}${dq ? ` (B-17 disqualified: ${dq})` : ''}${counts.S ? ' — S = referral (human-hold)' : ''}`);
 
   mkdirSync(DATA, { recursive: true });
   const outPath = outOverride ? resolve(ROOT, outOverride) : join(DATA, `graded-jobs-${date}.json`);

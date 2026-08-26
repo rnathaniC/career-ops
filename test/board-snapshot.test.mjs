@@ -14,8 +14,46 @@ import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
 
-import { buildBoardHtml, findLatestBoardMirror } from '../scripts/render-board-snapshot.mjs';
+import {
+  buildBoardHtml, findLatestBoardMirror, sortLaneCards, laneSortKey, isRefPriority,
+} from '../scripts/render-board-snapshot.mjs';
 import { findLatestBoardImage } from '../scripts/email-report.mjs';
+
+describe('sortLaneCards — S and #REF surface first (CHANGE 1 + 3)', () => {
+  test('grade S sorts above A/B/C/D within a lane', () => {
+    const cards = [
+      { company: 'b', grade: 'B' }, { company: 'a', grade: 'A' },
+      { company: 's', grade: 'S' }, { company: 'c', grade: 'C' },
+    ];
+    assert.deepEqual(sortLaneCards(cards).map((c) => c.company), ['s', 'a', 'b', 'c']);
+  });
+  test('#REF-marked card jumps to the very top, even over an S', () => {
+    const cards = [
+      { company: 's', grade: 'S' },
+      { company: 'ref', grade: 'B', notes: '[#REF]\nping first' },
+      { company: 'a', grade: 'A' },
+    ];
+    assert.deepEqual(sortLaneCards(cards).map((c) => c.company), ['ref', 's', 'a']);
+  });
+  test('isRefPriority detects marker in notes and explicit priority flag', () => {
+    assert.equal(isRefPriority({ notes: '[#REF] do x' }), true);
+    assert.equal(isRefPriority({ priority: 'ref' }), true);
+    assert.equal(isRefPriority({ notes: 'nothing' }), false);
+  });
+  test('stable: equal-priority cards keep original order', () => {
+    const cards = [{ company: 'x', grade: 'A' }, { company: 'y', grade: 'A' }];
+    assert.deepEqual(sortLaneCards(cards).map((c) => c.company), ['x', 'y']);
+    void laneSortKey;
+  });
+});
+
+describe('board renders grade S distinctly (gold/purple)', () => {
+  test('an S card gets the gradient background, not plain green', () => {
+    const html = buildBoardHtml([{ columnId: 'new-hot', company: 'Nvidia', role: 'TPM', grade: 'S' }], '2026-08-25');
+    assert.match(html, /linear-gradient\([^)]*d4af37[^)]*7c3aed/);
+    assert.match(html, />S</);
+  });
+});
 
 const SAMPLE = [
   { id: 'a1', company: 'Databricks', role: 'Staff Program Manager, People M&A', grade: 'C', columnId: 'new-hot', connectionName: 'Denny Lee' },

@@ -85,6 +85,28 @@ export function scoreSubstance(text) {
   return { grade, score, matched, penalized };
 }
 
+// ── grade S overlay (CHANGE 3) ─────────────────────────────────────────────────
+// scoreSubstance is text-only, so it can only ever return A/B/C/D. Grade S (the
+// tier ABOVE A) is a COMPANY-level fact — it fires when Rahil has a live referral
+// path into that company — so it is applied here as an overlay that needs the
+// company name + the referral registry. worker-grader calls the same overlay via
+// referral-registry.gradeWithReferral; this composed helper keeps substance-mode
+// S-aware and independently unit-testable.
+import { gradeWithReferral } from './referral-registry.mjs';
+
+/**
+ * Score fit from text, then overlay S if the company has a referral match.
+ * @param {string} text     title (+ JD) text
+ * @param {string} company  the job's company
+ * @param {{entries:Array}|Array} registry  referral registry (loadRegistry result)
+ * @returns {{ grade:string, score:number, matched:string[], penalized:string[], referral:object|null }}
+ */
+export function scoreSubstanceWithReferral(text, company, registry) {
+  const base = scoreSubstance(text);
+  const { grade, referral } = gradeWithReferral(base.grade, company, registry);
+  return { ...base, grade, referral };
+}
+
 // ── best-effort JD fetch by source ─────────────────────────────────────────────
 
 const FETCH_TIMEOUT_MS = 12_000;

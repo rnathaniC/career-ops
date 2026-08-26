@@ -12,7 +12,10 @@
 import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
 
-import { parseFlag, parseFlags, flagKey, bugTriageRowForHit, summarize } from '../scripts/scan-card-flags.mjs';
+import {
+  parseFlag, parseFlags, flagKey, bugTriageRowForHit, summarize,
+  shouldAutoBlockOff, blockedNoteForOff, withRefMarker, refHitToRegistryEntry, updateRegistryWithRefs,
+} from '../scripts/scan-card-flags.mjs';
 
 describe('parseFlag — primary "#" tokens', () => {
   test('#OFF with no reason', () => {
@@ -101,6 +104,101 @@ describe('parseFlags — edge cases', () => {
       reason: 'STALE',
       text: 'posting is closed',
     });
+  });
+});
+
+describe('parseFlags — #REF (CHANGE 1)', () => {
+  test('#REF with prep free text captured', () => {
+    assert.deepEqual(parseFlag('#REF ping Drew, mention the GTC demo'), {
+      tag: '#REF', reason: null, text: 'ping Drew, mention the GTC demo',
+    });
+  });
+  test('@REF fallback normalizes to #REF', () => {
+    assert.deepEqual(parseFlag('@ref warm intro via Sam'), { tag: '#REF', reason: null, text: 'warm intro via Sam' });
+  });
+  test('#REF never carries an #OFF reason', () => {
+    assert.equal(parseFlag('#REF:LOC whatever').reason, null);
+  });
+  test('does not match inside #REFERRAL', () => {
+    assert.deepEqual(parseFlags('great #REFERRAL program'), []);
+  });
+  test('mixed #REF + #OFF both captured', () => {
+    const hits = parseFlags('#REF call first #OFF:DUPE already applied');
+    assert.equal(hits.length, 2);
+    assert.equal(hits[0].tag, '#REF');
+    assert.equal(hits[1].tag, '#OFF');
+    assert.equal(hits[1].reason, 'DUPE');
+  });
+  test('summarize counts #REF', () => {
+    const s = summarize([{ tag: '#REF', reason: null }, { tag: '#OFF', reason: 'LOC' }]);
+    assert.equal(s.byTag['#REF'], 1);
+    assert.equal(s.byTag['#OFF'], 1);
+  });
+});
+
+describe('shouldAutoBlockOff — #OFF on New-Hot (CHANGE 2)', () => {
+  test('#OFF on New-Hot → true', () => {
+    assert.equal(shouldAutoBlockOff({ tag: '#OFF', lane: 'New-Hot' }), true);
+  });
+  test('#OFF on New-Fresh → false (unchanged behavior)', () => {
+    assert.equal(shouldAutoBlockOff({ tag: '#OFF', lane: 'New-Fresh' }), false);
+  });
+  test('#GOOD / #REF on New-Hot → false', () => {
+    assert.equal(shouldAutoBlockOff({ tag: '#GOOD', lane: 'New-Hot' }), false);
+    assert.equal(shouldAutoBlockOff({ tag: '#REF', lane: 'New-Hot' }), false);
+  });
+  test('blockedNoteForOff is reason-aware', () => {
+    assert.match(blockedNoteForOff('FIT', '2026-08-25'), /#OFF:FIT/);
+    assert.match(blockedNoteForOff('FIT', '2026-08-25'), /removed from Hot lane/);
+    assert.match(blockedNoteForOff(null, '2026-08-25'), /#OFF —/);
+  });
+});
+
+describe('withRefMarker — idempotent top-of-lane marker (CHANGE 1)', () => {
+  test('adds marker to empty notes', () => {
+    assert.equal(withRefMarker(''), '[#REF]');
+  });
+  test('prepends marker as its own line', () => {
+    assert.equal(withRefMarker('existing note'), '[#REF]\nexisting note');
+  });
+  test('idempotent — does not double-add', () => {
+    assert.equal(withRefMarker('[#REF]\nexisting note'), '[#REF]\nexisting note');
+  });
+});
+
+describe('refHitToRegistryEntry — #REF feeds the registry (CHANGE 1/3)', () => {
+  test('maps company + prep text into a confirmed ref-tag entry', () => {
+    const e = refHitToRegistryEntry({ company: 'Databricks', role: 'Staff PM', text: 'ask Jane', commentedAt: '2026-08-25T00:00:00Z' });
+    assert.equal(e.referred_company, 'Databricks');
+    assert.equal(e.source, 'ref-tag');
+    assert.equal(e.unconfirmed, false);
+    assert.match(e.notes, /ask Jane/);
+  });
+});
+
+describe('updateRegistryWithRefs — idempotent merge (fake fs)', () => {
+  const yaml = { load: (t) => JSON.parse(t), dump: (o) => JSON.stringify(o) };
+  const makeFs = (initial) => {
+    const store = { 'reg.yml': initial };
+    return {
+      existsSync: (p) => p in store,
+      readFileSync: (p) => store[p],
+      writeFileSync: (p, d) => { store[p] = d; },
+      _store: store,
+    };
+  };
+  test('adds a new #REF company once; second run adds nothing', () => {
+    const fs = makeFs(JSON.stringify({ entries: [] }));
+    const refHits = [{ company: 'Snowflake', text: 'intro via Lee' }];
+    const r1 = updateRegistryWithRefs(refHits, { path: 'reg.yml', yaml, fs });
+    assert.equal(r1.added, 1);
+    const r2 = updateRegistryWithRefs(refHits, { path: 'reg.yml', yaml, fs });
+    assert.equal(r2.added, 0); // idempotent
+    const parsed = JSON.parse(fs._store['reg.yml']);
+    assert.equal(parsed.entries.filter((e) => e.referred_company === 'Snowflake').length, 1);
+  });
+  test('no yaml/fs injected → no-op (safe on import)', () => {
+    assert.deepEqual(updateRegistryWithRefs([{ company: 'X' }], {}), { added: 0 });
   });
 });
 

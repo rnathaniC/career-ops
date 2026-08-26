@@ -71,6 +71,7 @@ import { ensureDebugBrowser } from './ensure-debug-browser.mjs';
 import { getValidSessionPath as getValidWorkdaySessionPath } from './workday-login.mjs';
 import { fillForm, formatUploadDetails } from './form-fill.mjs';
 import { VALID_IDS as CANONICAL_STATE_IDS } from '../gen/states.js';
+import { effectiveLocation, locationDisqualifiers } from './worker-grader.mjs';
 import { scoreCard, saveReadinessScore } from './readiness-scorer.mjs';
 import {
   BASE_ID, ACTIVE_TABLE_ID, ACTIVE_FIELD_IDS, CARD_ID_FIELD, LAST_REFRESHED_FIELD,
@@ -203,6 +204,11 @@ export const SUBMIT_READY_STATES = parseReadyStates(READY_STATES_ARG);
 /**
  * Single source of truth for card eligibility.
  * Used by both extractEligibleCards (HTML path) and extractEligibleCardsFromJson (JSON path).
+ *
+ * CHANGE 3 (2026-08-25): grade **S** (referral) is HUMAN-HOLD — deliberately
+ * EXCLUDED from silent auto-submit, exactly like warm referrals. The `grade === 'A'
+ * || grade === 'B'` gate already excludes S structurally; this is asserted + tested
+ * so a future "add S to the top" refactor can't accidentally auto-fire a referral.
  * @param {{ columnId: string, grade: string|null, isWarmReferral: boolean }} card
  * @returns {boolean}
  */
@@ -210,6 +216,7 @@ export function isEligible(card) {
   return (
     SUBMIT_READY_STATES.has(card.columnId) &&
     (card.grade === 'A' || card.grade === 'B') &&
+    card.grade !== 'S' &&        // referral tier is human-hold (belt-and-suspenders)
     !card.isWarmReferral
   );
 }
@@ -1225,12 +1232,47 @@ export async function parkCardsToSubmitReady(cards, {
 
   const toPatch = [];
   for (const card of cards) {
-    // Readiness gate — identical band rule to live (>=60 or CL-gated). No CL here
-    // (staging only), so the readinessGate CL branch never attaches one.
+    // Readiness gate — identical band rule to live (>=60 or CL-gated).
+    //
+    // B-27 (2026-08-14) — INVERTED-QUALITY DEFECT. This used to pass a hardcoded
+    // `false` for hasCl, with the rationale "staging only, so the CL branch never
+    // attaches one". But hasCl=false does not mean "don't attach" — readinessGate
+    // treats !hasCl at 89+ as a HARD SKIP. Meanwhile scoreImpl/scoreCard resolves
+    // the cover letter itself when clText is null, so the 89+ total was computed
+    // WITH a CL that the gate was then told did not exist. Net effect was exactly
+    // backwards: the best cards (96/96/91/91/91 on 2026-08-14) were skipped as
+    // "no CL found" while cards with no CL at all hit score_skipped, bypassed the
+    // gate entirely, and parked. Zero cards ever reached Submit Ready.
+    //
+    // hasCl is now derived from the score result itself, so it can never drift
+    // from the number being gated on: scoreCard only emits `cover_letter` when it
+    // actually resolved and scored a real (non-corrupt) cover letter.
+    // B-0816-1 (2026-08-16) — LOCATION-BLIND STAGING GATE. Grade is frozen at
+    // inject time, and board cards carry location:null, so locationDisqualifiers()
+    // was never able to fire again downstream. On 2026-08-16 that put an RTX
+    // "Transformation Delivery Manager (12 Month FTC)" in Glenrothes-Fife,
+    // SCOTLAND into the Submit Ready lane graded A — one human click away from a
+    // wasted application to a role Rahil cannot take.
+    //
+    // Re-checking here (not just at grade time) is the point: staging is the LAST
+    // gate before a human is asked to click Submit, so it re-derives location from
+    // the URL rather than trusting a field that is structurally empty.
+    // Conservative: an unparseable URL yields '' -> no disqualifier -> prior behaviour.
+    {
+      const loc  = effectiveLocation(card);
+      const geoDq = locationDisqualifiers(loc);
+      if (geoDq.length > 0) {
+        console.log(`[park-ready] SKIP ${card.company} — geo disqualifier (${loc}): ${geoDq.join(', ')}`);
+        results.push({ id: card.id, company: card.company, role: card.role, status: 'skipped', reason: `geo:${geoDq.join(',')}`, location: loc });
+        continue;
+      }
+    }
+
     const readiness = await scoreImpl(card, { resumeText: cvText, clText: null });
     if (!readiness.score_skipped) {
       saveReadinessScore(card.id, readiness.total, readiness.grade);
-      const gate = gateImpl(readiness.total, false);
+      const hasCl = Boolean(readiness.cover_letter);
+      const gate = gateImpl(readiness.total, hasCl);
       if (gate.action === 'skip') {
         console.log(`[park-ready] SKIP ${card.company} — ${readiness.total}/100 (${gate.reason})`);
         results.push({ id: card.id, company: card.company, status: 'skipped', reason: gate.reason, readiness_total: readiness.total });

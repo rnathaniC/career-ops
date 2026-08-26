@@ -60,6 +60,10 @@
     "commute:sweep": "node scripts/commute-sweep.mjs",
     "commute:sweep:apply": "node scripts/commute-sweep.mjs --lanes \"Submit Ready\" --apply",
     "flags:scan": "node scripts/scan-card-flags.mjs",
+    "referral:seed": "node scripts/seed-referral-registry.mjs",
+    "referral:seed:write": "node scripts/seed-referral-registry.mjs --write --merge",
+    "hot-lane:lifecycle": "node scripts/hot-lane-lifecycle.mjs",
+    "hot-lane:lifecycle:apply": "node scripts/hot-lane-lifecycle.mjs --apply",
     "pulse:scripts:save": "node scripts/restore-pulse-scripts.mjs --save",
     "pulse:scripts:restore": "node scripts/restore-pulse-scripts.mjs --restore"
   },

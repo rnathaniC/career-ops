@@ -23,6 +23,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { gradeRank } from './referral-registry.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -58,7 +59,38 @@ const esc = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').
 
 function gradeColor(grade) {
   const g = String(grade || '').toUpperCase()[0];
+  // Grade S (referral, above A) gets a DISTINCT gold→purple gradient so it never
+  // reads as "just a green A" on the board. (CSS gradient is valid as background.)
+  if (g === 'S') return 'linear-gradient(135deg,#d4af37 0%,#7c3aed 100%)';
   return { A: '#16a34a', B: '#65a30d', C: '#d97706', D: '#dc2626', E: '#dc2626', F: '#dc2626' }[g] || '#6b7280';
+}
+
+// ── card ordering within a lane (CHANGE 1 + CHANGE 3) ───────────────────────────
+// #REF-flagged cards jump to the TOP of their lane (Rahil named a referral path
+// worth acting on first), then grade order puts S above A above B… Everything is
+// a STABLE sort, so cards that tie keep their original board order.
+
+/** A card is #REF-priority when scan-card-flags marked it (priority:'ref') or its Notes carry the [#REF] marker. */
+export function isRefPriority(card) {
+  if (!card) return false;
+  if (card.priority === 'ref' || card.refPriority === true) return true;
+  return /\[#REF\b/i.test(String(card.notes || ''));
+}
+
+/** Sort key honored by BOTH the board and the daily report: #REF first, then S>A>B>C>D. Lower sorts higher. */
+export function laneSortKey(card) {
+  return [isRefPriority(card) ? 0 : 1, gradeRank(card && card.grade)];
+}
+
+/** Stable sort of a lane's cards by laneSortKey (does not mutate the input). */
+export function sortLaneCards(cards) {
+  return cards
+    .map((c, i) => ({ c, i }))
+    .sort((a, b) => {
+      const ka = laneSortKey(a.c), kb = laneSortKey(b.c);
+      return (ka[0] - kb[0]) || (ka[1] - kb[1]) || (a.i - b.i);
+    })
+    .map((x) => x.c);
 }
 
 /** Pure: build the board HTML from a card array. Exported for testing (no browser). */
@@ -70,7 +102,8 @@ export function buildBoardHtml(cards, date = DATE_STAMP) {
   }
 
   const columns = LANES.map((lane) => {
-    const list = byLane.get(lane.id) || [];
+    // Sort every lane so #REF-flagged cards and grade-S referrals surface first.
+    const list = sortLaneCards(byLane.get(lane.id) || []);
     const shown = list.slice(0, MAX_CARDS_PER_LANE);
     const cardsHtml = shown.map((c) => {
       const conn = c.connectionName

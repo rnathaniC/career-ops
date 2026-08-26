@@ -1,0 +1,15 @@
+# hot-lane-lifecycle.yml — controls scripts/hot-lane-lifecycle.mjs (CHANGE 4).
+#
+# Hot-lane aging policy: a New-Hot card with no activity (no lane change, no
+# status update, no new comment) for `stale_days` days is expired.
+#   • grade S/A → archived to the "Hot Lane History" Airtable table (full history)
+#   • grade <A  → SOFT-removed from the Hot lane (moved to Blocked + expired flag)
+#
+# hard_delete — DANGER TOGGLE, DEFAULT OFF.
+#   When false (default), <A stale cards are SOFT-removed only (never destroyed).
+#   Setting this true would enable TRUE HARD DELETION of records. Do NOT enable
+#   without Rahil's explicit confirmation. The daily report flags the state.
+hard_delete: false
+
+# Days of inactivity before a Hot card is considered stale (default 3).
+stale_days: 3

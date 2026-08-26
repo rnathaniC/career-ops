@@ -346,6 +346,19 @@ if (!archiveStale.ok) {
   // stdout already flushed to console + log by npm(capture:true) above
 }
 
+// ─── Step -0.35 — Hot Lane lifecycle (CHANGE 4) ──────────────────────────────
+// Ages out Hot-lane cards idle ≥3 days: S/A → Hot Lane History table, <A →
+// soft-removed to Blocked. Runs right after archive-stale so it sees the freshly
+// pulled board. DRY-RUN for now (computes + writes the counts the daily report
+// reads, but makes NO board mutations) — Rahil flips this to '--apply' once he's
+// reviewed the first few dry-run summaries. Windows-hardened direct node spawn.
+log('Step -0.35 — Hot Lane lifecycle (hot-lane-lifecycle.mjs, DRY-RUN)');
+const hotLifecycle = await nodeScript('scripts/hot-lane-lifecycle.mjs', [], { step: 'step-0.35' });
+if (!hotLifecycle.ok) {
+  warn(`Hot-lane-lifecycle exited ${hotLifecycle.status} — continuing (best-effort step)`);
+  summary.notes.push(`Hot-lane-lifecycle non-zero exit (${hotLifecycle.status}).`);
+}
+
 // ─── Step -1.1 — Self-healing browser preflight (Kaizen K-0626-1) ─────────────
 // Every cold sandbox boots WITHOUT a launchable Chromium and (on Linux) missing
 // libXdamage.so.1 — which red-lights doctor and fatal-halts the whole run. This

@@ -66,6 +66,18 @@ export function newestCardFlags(dataDir) {
   }
 }
 
+/** Newest data/hot-lane-lifecycle-YYYY-MM-DD.json (CHANGE 4), or null. TZ-robust (see caller). */
+export function newestHotLifecycle(dataDir) {
+  try {
+    const files = readdirSync(dataDir)
+      .filter((f) => /^hot-lane-lifecycle-\d{4}-\d{2}-\d{2}\.json$/.test(f))
+      .sort();
+    return files.length ? path.join(dataDir, files[files.length - 1]) : null;
+  } catch {
+    return null;
+  }
+}
+
 export function chicagoDate(d = new Date()) {
   // en-CA formats as YYYY-MM-DD; pin to Central so the report date matches the run.
   return new Intl.DateTimeFormat('en-CA', {
@@ -469,7 +481,7 @@ function line(v) {
 }
 
 export function buildReport(ctx) {
-  const { date, now, refresh, cadence, referral, submitQueue, ingest, dispatch, sourceStatus, parkReady, cardFlags } = ctx;
+  const { date, now, refresh, cadence, referral, submitQueue, ingest, dispatch, sourceStatus, parkReady, cardFlags, hotLifecycle } = ctx;
   const health = computeHealthScore(refresh, cadence, referral, now);
   const flags = collectFlags(refresh, dispatch, cadence, referral);
   const out = [];
@@ -577,18 +589,54 @@ export function buildReport(ctx) {
   }
   out.push('');
 
+  // 3.5 Hot Lane lifecycle (CHANGE 4) — aging/expiry counts.
+  out.push('## Hot Lane lifecycle');
+  out.push('');
+  if (hotLifecycle) {
+    const arch = Array.isArray(hotLifecycle.archived_to_history) ? hotLifecycle.archived_to_history.length : 0;
+    const soft = Array.isArray(hotLifecycle.soft_removed) ? hotLifecycle.soft_removed.length : 0;
+    const mode = hotLifecycle.dry_run ? 'DRY-RUN (no writes)' : 'APPLIED';
+    out.push(`- ${mode} · stale after ${line(hotLifecycle.stale_days)}d · ${line(hotLifecycle.hot_total)} Hot card(s): `
+      + `**${arch}** S/A archived → Hot Lane History, **${soft}** <A soft-removed, ${line(hotLifecycle.kept)} kept.`);
+    if (hotLifecycle.hard_delete_enabled) {
+      out.push('- 🚨 `hard_delete` is ENABLED in config/hot-lane-lifecycle.yml — <A cards can be permanently destroyed. Confirm this is intended.');
+    } else {
+      out.push('- `hard_delete`: OFF (soft-remove only) — safe.');
+    }
+  } else {
+    out.push('- No Hot Lane lifecycle run recorded today (job did not run, or nothing stale).');
+  }
+  out.push('');
+
   // 3a. Card flags — Rahil's #OFF / #GOOD comment codes on Active Pipeline cards.
   out.push('## Card flags — Rahil');
   out.push('');
   if (Array.isArray(cardFlags)) {
     const off = cardFlags.filter((h) => h && h.tag === '#OFF');
     const good = cardFlags.filter((h) => h && h.tag === '#GOOD');
-    out.push(`- Rahil flagged: ${cardFlags.length} card(s) (#OFF: ${off.length}, #GOOD: ${good.length})`);
+    const ref = cardFlags.filter((h) => h && h.tag === '#REF');
+    out.push(`- Rahil flagged: ${cardFlags.length} card(s) (#OFF: ${off.length}, #GOOD: ${good.length}, #REF: ${ref.length})`);
     for (const h of cardFlags.slice(0, 10)) {
       const reason = h.tag === '#OFF' && h.reason ? `:${h.reason}` : '';
       out.push(`  - ${h.tag}${reason} — ${line(h.company)} — ${String(h.role || '').slice(0, 60)}`);
     }
     if (cardFlags.length > 10) out.push(`  - …and ${cardFlags.length - 10} more`);
+    out.push('');
+
+    // CHANGE 1 — #REF free text is a PREP ACTION ITEM: the concrete prep Rahil
+    // wants done before working that warm referral. Surface them as their own
+    // checklist so they don't scroll away inside the flag list.
+    out.push('### Prep action items (#REF)');
+    const refWithText = ref.filter((h) => String(h.text || '').trim());
+    if (refWithText.length) {
+      for (const h of refWithText) {
+        out.push(`- [ ] ${line(h.company)}${h.role ? ` — ${String(h.role).slice(0, 50)}` : ''}: ${String(h.text).trim()}`);
+      }
+    } else if (ref.length) {
+      out.push(`- ${ref.length} #REF card(s) flagged (top-of-Hot priority) — no prep text attached.`);
+    } else {
+      out.push('- No #REF prep items today.');
+    }
   } else {
     out.push('- No card-flags file found for today (0 flags, or the scan has not run yet).');
   }
@@ -660,6 +708,15 @@ export function generate(opts = {}) {
   const cardFlagsPath = newestCardFlags(dataDir);
   const cardFlags = cardFlagsPath ? readJsonSafe(cardFlagsPath).data : null;
 
+  // Hot Lane lifecycle summary (CHANGE 4) — OPTIONAL source (no file on a day the
+  // job didn't run is normal, not degraded). Read the NEWEST lifecycle file rather
+  // than keying on the Chicago report date: the lifecycle job stamps its summary
+  // with a UTC date, which diverges from chicagoDate() across the midnight-UTC
+  // boundary. Newest-file lookup (same pattern as card-flags / referral-queue)
+  // sidesteps that TZ mismatch entirely.
+  const hotLifecyclePath = newestHotLifecycle(dataDir);
+  const hotLifecycle = hotLifecyclePath ? readJsonSafe(hotLifecyclePath).data : null;
+
   const autoSubmit = computeAutoSubmitScorecard(dataDir, date);
 
   const markdown = buildReport({
@@ -675,6 +732,7 @@ export function generate(opts = {}) {
     autoSubmit,
     parkReady,
     cardFlags,
+    hotLifecycle,
   });
 
   if (!existsSync(outDir)) mkdirSync(outDir, { recursive: true });

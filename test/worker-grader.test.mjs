@@ -17,7 +17,9 @@ import { tmpdir } from 'node:os';
 
 import {
   gradeJob, normalizePlatform, parseScanHistory, latestScanDate, loadKeywords,
+  effectiveLocation, locationDisqualifiers,
 } from '../scripts/worker-grader.mjs';
+import { passesCommuteGate } from '../scripts/locations.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT      = path.resolve(__dirname, '..');
@@ -190,9 +192,14 @@ describe('CLI: graded output file', () => {
     const outPath  = path.join(TMP, 'graded-output.json');
     const today    = new Date().toISOString().slice(0, 10);
 
+    // Use a company that is NOT in the referral registry so this test measures
+    // BASE grading only. (CHANGE 3: a company with a live referral overlays grade
+    // S — verified separately in referral-registry.test.mjs — which would
+    // legitimately turn "Program Manager @ Stripe" into an S and mask the base
+    // A/B/C check this test exists for.)
     fs.writeFileSync(histPath, [
       'url\tfirst_seen\tportal\ttitle\tcompany\tstatus',
-      `https://example.com/j1\t${today}\tgreenhouse-api\tProgram Manager\tStripe\tadded`,
+      `https://example.com/j1\t${today}\tgreenhouse-api\tProgram Manager\tZeta Fictional Labs\tadded`,
       `https://example.com/j2\t${today}\tashby-api\tSales Rep\tAcme\tadded`,
     ].join('\n') + '\n');
 
@@ -233,6 +240,102 @@ describe('CLI: graded output file', () => {
         hasTitleShape || hasSubstanceShape,
         `graded entry must carry either keywords_matched (title mode) or matched_terms+fit_score (substance mode); got ${Object.keys(g).join(',')}`,
       );
+    }
+  });
+});
+
+// B-0821-1 regression: an unresolved Workday aggregate ("2 Locations") is
+// truthy and used to short-circuit URL-derivation, so a placeholder location
+// fared BETTER than a blank one and fell through the commute gate's fail-open.
+// Real leak: Fiserv "Payment Relations Manager EMEA Acquiring" (Basildon, UK)
+// graded A and landed in the HOT lane on 2026-08-18.
+describe('effectiveLocation — unresolved multi-location (B-0821-1)', () => {
+  const FISERV_UK = 'https://fiserv.wd5.myworkdayjobs.com/EXT/job/Basildon-Endeavour-Drive/Payment-Relations-Manager-EMEA-Acquiring_R-10386690-1';
+
+  test('recovers a real city from the URL when location is "N Locations"', () => {
+    assert.equal(
+      effectiveLocation({ location: '2 Locations', url: FISERV_UK }),
+      'Basildon Endeavour Drive',
+    );
+  });
+
+  test('placeholder + foreign URL is DROPPED by the commute gate', () => {
+    const eff = effectiveLocation({ location: '2 Locations', url: FISERV_UK });
+    assert.equal(passesCommuteGate(eff, 'Regional Product Manager').keep, false);
+  });
+
+  test('"Multiple Locations" takes the same recovery path', () => {
+    assert.equal(
+      effectiveLocation({ location: 'Multiple Locations', url: FISERV_UK }),
+      'Basildon Endeavour Drive',
+    );
+  });
+
+  test('a real location field is never overridden by the URL', () => {
+    assert.equal(
+      effectiveLocation({ location: 'Frisco, TX', url: FISERV_UK }),
+      'Frisco, TX',
+    );
+  });
+
+  test('local placeholder + local URL still KEEPS', () => {
+    const eff = effectiveLocation({
+      location: '4 Locations',
+      url: 'https://x.wd1.myworkdayjobs.com/y/job/Frisco-TX/Product-Manager_R2',
+    });
+    assert.equal(passesCommuteGate(eff, 'Product Manager').keep, true);
+  });
+
+  test('genuinely unknown (placeholder, no usable URL) still fails OPEN', () => {
+    const eff = effectiveLocation({ location: '61 Locations', url: '' });
+    assert.equal(eff, '61 Locations');
+    assert.equal(passesCommuteGate(eff, 'Product Manager').keep, true);
+  });
+});
+
+// B-0821-2 regression: bare "remote" was in the "a US option exists" token set,
+// so any location containing the word short-circuited the foreign screen.
+// Real leak: Twilio "Product Manager — Remote - Estonia" graded A and APPLIED.
+describe('locationDisqualifiers — remote is not a US token (B-0821-2)', () => {
+  const drops = ['Remote - Estonia', 'Remote - India', 'Remote, Tallinn'];
+  for (const loc of drops) {
+    test(`"${loc}" is disqualified`, () => {
+      assert.ok(locationDisqualifiers(loc).length > 0, `${loc} should disqualify`);
+    });
+  }
+
+  const keeps = ['Remote', 'Remote Nationwide', 'US-Remote', 'TX - Work from home'];
+  for (const loc of keeps) {
+    test(`"${loc}" still passes clean`, () => {
+      assert.deepEqual(locationDisqualifiers(loc), []);
+    });
+  }
+
+  test('dual-sited US+foreign keeps the documented asymmetry', () => {
+    assert.deepEqual(locationDisqualifiers('Remote within Canada or United States'), []);
+    assert.deepEqual(locationDisqualifiers('San Francisco, CA, US; Remote, CA, US'), []);
+  });
+});
+
+// B-0816-3 regression (closed 2026-08-21): the US token set knew only
+// us/usa/united states/dallas/texas/tx, so "New York; London" matched no US
+// token, fell through to the foreign screen and was hard-D'd — a false
+// negative that silently shrank the funnel.
+describe('locationDisqualifiers — US states and metros (B-0816-3)', () => {
+  const keeps = [
+    'New York; London', 'Chicago, Illinois; Berlin', 'Charlotte, NC',
+    'NJ - Work from home', 'US-TX-PLANO-465', 'Bellevue Washington', 'New Mexico',
+  ];
+  for (const loc of keeps) {
+    test(`"${loc}" is recognised as a US option`, () => {
+      assert.deepEqual(locationDisqualifiers(loc), [], `${loc} should be clean`);
+    });
+  }
+
+  test('foreign-only locations are still disqualified', () => {
+    for (const loc of ['Bogota, Colombia', 'Glenrothes, Fife', 'Sao Paulo Brazil',
+                       'Madrid Madrid Spain', 'Besiktas Istanbul Turkey', 'Pune']) {
+      assert.ok(locationDisqualifiers(loc).length > 0, `${loc} should disqualify`);
     }
   });
 });
