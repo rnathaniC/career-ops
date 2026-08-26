@@ -4,12 +4,14 @@
   "description": "AI-powered job search pipeline — works with any AI coding CLI (Claude Code, OpenCode, Gemini, Codex, Qwen)",
   "private": true,
   "scripts": {
+    "test": "node test-all.mjs",
     "doctor": "node doctor.mjs",
+    "pdf": "node generate-pdf.mjs",
+    "test:unit": "node --test \"test/*.test.mjs\"",
     "verify": "node verify-pipeline.mjs",
     "normalize": "node normalize-statuses.mjs",
     "dedup": "node dedup-tracker.mjs",
     "merge": "node merge-tracker.mjs",
-    "pdf": "node generate-pdf.mjs",
     "sync-check": "node cv-sync-check.mjs",
     "update:check": "node update-system.mjs check",
     "update:test": "node updater-migration-tests.mjs",
@@ -52,7 +54,14 @@
     "cadence:mark": "node scripts/cadence-mark.mjs",
     "workday:login": "node scripts/workday-login.mjs",
     "workday:sessions": "node scripts/workday-login.mjs --list",
-    "linkedin:list": "node scripts/linkedin-dm.mjs --list"
+    "linkedin:list": "node scripts/linkedin-dm.mjs --list",
+    "submit-ready": "node scripts/open-submit-ready.mjs",
+    "submit-ready:open": "node scripts/open-submit-ready.mjs --open",
+    "commute:sweep": "node scripts/commute-sweep.mjs",
+    "commute:sweep:apply": "node scripts/commute-sweep.mjs --lanes \"Submit Ready\" --apply",
+    "flags:scan": "node scripts/scan-card-flags.mjs",
+    "pulse:scripts:save": "node scripts/restore-pulse-scripts.mjs --save",
+    "pulse:scripts:restore": "node scripts/restore-pulse-scripts.mjs --restore"
   },
   "keywords": [
     "ai",

@@ -285,6 +285,38 @@ if (!airtablePull.ok) {
   summary.notes.push(`Airtable pull non-zero exit (${airtablePull.status}) — see AIRTABLE_PAT setup in .env.example if this is new.`);
 }
 
+// ─── Step -0.45 — Scan card flags (#OFF / #GOOD comment codes) ───────────────
+// Runs right AFTER the Airtable pull (-0.5) so it scans the freshest mirror of
+// the Active Pipeline. Reads every card's Airtable COMMENTS, parses Rahil's
+// #OFF / #GOOD code words into data/card-flags-{date}.json (tuning signal), and
+// files each NEW #OFF onto the Bug Triage board (deduped). Best-effort: a missing
+// AIRTABLE_PAT prints SKIPPED and exits 0, and any error degrades loudly without
+// crashing the run. Windows-hardened: direct node spawn, not `npm run` (npm.cmd
+// intermittently aborts with 3221226505 / 0xC0000409 — same fix as the other
+// Airtable steps).
+log('Step -0.45 — Scan card flags (scan-card-flags.mjs)');
+const cardFlags = await nodeScript('scripts/scan-card-flags.mjs', [], { step: 'step-0.45' });
+summary.card_flags = { exit: cardFlags.status };
+{
+  const m = (cardFlags.stdout || '').match(/(\d+)\s+flag\(s\):\s*#OFF\s+(\d+).*?#GOOD\s+(\d+)/i);
+  if (m) {
+    summary.card_flags.total = Number(m[1]);
+    summary.card_flags.off = Number(m[2]);
+    summary.card_flags.good = Number(m[3]);
+    if (summary.card_flags.total > 0) {
+      summary.notes.push(`Card flags: Rahil flagged ${summary.card_flags.total} card(s) (#OFF ${summary.card_flags.off}, #GOOD ${summary.card_flags.good}).`);
+    }
+  }
+  const filed = (cardFlags.stdout || '').match(/filed (\d+) new #OFF flag\(s\) to Bug Triage/i);
+  if (filed && Number(filed[1]) > 0) {
+    summary.notes.push(`Card flags: filed ${filed[1]} new #OFF flag(s) to Bug Triage.`);
+  }
+}
+if (!cardFlags.ok) {
+  warn(`Scan card flags exited ${cardFlags.status} — continuing (best-effort)`);
+  summary.notes.push(`Scan card flags non-zero exit (${cardFlags.status}).`);
+}
+
 // ─── Step -0.4 — Archive stale Active Pipeline cards ────────────────────────
 // Runs right after the Airtable pull (-0.5) so today's freshest kanban-import
 // snapshot is on disk for flow-transition diffing, and right before doctor
@@ -504,19 +536,26 @@ if (!indeedEnrich.ok) {
   summary.notes.push(`Indeed employer-signal enrichment non-zero exit (${indeedEnrich.status}) — grades unmodified.`);
 }
 
-// ─── Step 0.9 — Ashby scan ───────────────────────────────────────────────────
-// scan.mjs auto-detects Ashby via jobs.ashbyhq.com in careers_url and calls the
-// public posting-api (no auth required). scan-history.tsv deduplication makes a
-// second call safe when Step 0.75 already ran earlier in the pipeline.
-
-log('Step 0.9 — Ashby scan (scan.mjs)');
-const ashbyScan = await npm('scan', { step: 'step-0.9' });
-summary.ashby_scan.exit = ashbyScan.status;
-if (!ashbyScan.ok) {
-  warn(`Ashby scan exited ${ashbyScan.status} — pipeline continues`);
-  summary.ashby_scan.skipped = true;
-  summary.notes.push(`Ashby scan non-zero exit (${ashbyScan.status}).`);
-}
+// ─── Step 0.9 — Ashby scan — RETIRED 2026-08-16 (K-0816-2, approved by Rahil) ─
+// This step called `npm run scan` with NO arguments — byte-identical to the
+// Step 0.75 invocation above. scan.mjs already auto-detects Ashby via
+// jobs.ashbyhq.com in careers_url during that first pass, so the second call
+// re-hit all 66 companies (~90s), re-fetched ~8,400 postings, and yielded
+// exactly 0 net-new every time because scan-history.tsv deduplicates.
+//
+// It was not free: 90s of pure duplicate work is what pushed the monolith past
+// the host's process time budget on 2026-08-16, forcing the rest of the run to
+// be executed step-wise. Removing it is the whole fix — Ashby coverage is
+// unchanged because it never depended on this call.
+//
+// If Ashby ever needs a genuinely separate pass, give it a real filter
+// (e.g. `npm run scan -- --platform ashby`) rather than restoring a bare
+// duplicate.
+log('Step 0.9 — Ashby scan: RETIRED (K-0816-2) — Step 0.75 already covers Ashby; duplicate pass removed');
+summary.ashby_scan.exit = 0;
+summary.ashby_scan.skipped = true;
+summary.ashby_scan.retired = true;
+summary.notes.push('Ashby scan step retired 2026-08-16 (K-0816-2): it duplicated Step 0.75 exactly and returned 0 net-new. Ashby coverage unchanged.');
 
 // ─── Steps 1–1.5 — WebSearch secondary scan + URL verification ───────────────
 // TODO(WebSearch-Secondary): Issue 6 high-precision queries for Scrum Master /
@@ -721,6 +760,35 @@ if (!laneBranch.ok || freshIds.length === 0) {
       summary.notes.push(`${summary.autosubmit.attempted} card(s) staged to Submit Ready — awaiting Rahil's final Submit click.`);
     }
   }
+}
+
+// ─── Step 5.5 — Commute sweep (K-0816-3, approved by Rahil 2026-08-16) ───────
+// Runs AFTER park-ready so it gates what actually reached the human queue.
+//
+// SCOPED TO "Submit Ready" ON PURPOSE. A full sweep of all three active lanes
+// moves 8 of 18 cards, four of them New-Hot warm referrals — a far wider blast
+// radius than the Submit Ready table Rahil approved. Warm referrals spend a real
+// relationship exactly once, so they stay a human decision and are NOT swept
+// here. To widen this later, change --lanes; do not remove the flag.
+//
+// Non-destructive: onsite roles outside ~24mi of 75067 move to the Blocked lane,
+// which is a holding bin, not a delete. Remote/hybrid and unknown locations are
+// always kept (see scripts/locations.mjs).
+log('Step 5.5 — Commute sweep (commute-sweep.mjs --lanes "Submit Ready" --apply)');
+const commute = await nodeScript('scripts/commute-sweep.mjs',
+  ['--lanes', 'Submit Ready', '--apply'], { step: 'step-5.5' });
+summary.commute_sweep = { exit: commute.status };
+{
+  const m = (commute.stdout || '').match(/moved (\d+) card\(s\) to Blocked/i);
+  const moved = m ? Number(m[1]) : 0;
+  summary.commute_sweep.moved = moved;
+  if (moved > 0) {
+    summary.notes.push(`Commute sweep moved ${moved} onsite card(s) out of Submit Ready to Blocked (K-0816-3).`);
+  }
+}
+if (!commute.ok) {
+  warn(`Commute sweep exited ${commute.status} — pipeline continues`);
+  summary.notes.push(`Commute sweep non-zero exit (${commute.status}).`);
 }
 
 // ─── Steps 6–8 — Kanban column update + SEED_VERSION bump ────────────────────

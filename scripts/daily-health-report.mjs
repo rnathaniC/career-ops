@@ -55,6 +55,17 @@ export function newestReferralQueue(dataDir) {
   }
 }
 
+export function newestCardFlags(dataDir) {
+  try {
+    const files = readdirSync(dataDir)
+      .filter((f) => /^card-flags-\d{4}-\d{2}-\d{2}\.json$/.test(f))
+      .sort();
+    return files.length ? path.join(dataDir, files[files.length - 1]) : null;
+  } catch {
+    return null;
+  }
+}
+
 export function chicagoDate(d = new Date()) {
   // en-CA formats as YYYY-MM-DD; pin to Central so the report date matches the run.
   return new Intl.DateTimeFormat('en-CA', {
@@ -458,7 +469,7 @@ function line(v) {
 }
 
 export function buildReport(ctx) {
-  const { date, now, refresh, cadence, referral, submitQueue, ingest, dispatch, sourceStatus } = ctx;
+  const { date, now, refresh, cadence, referral, submitQueue, ingest, dispatch, sourceStatus, parkReady, cardFlags } = ctx;
   const health = computeHealthScore(refresh, cadence, referral, now);
   const flags = collectFlags(refresh, dispatch, cadence, referral);
   const out = [];
@@ -519,6 +530,30 @@ export function buildReport(ctx) {
   if (!refresh && !ingest && !Array.isArray(submitQueue)) out.push('- ⚠️ No submission telemetry available.');
   out.push('');
 
+  // 2a. Submit Ready — the HUMAN queue (K-0816-1).
+  {
+    const staged = Number(parkReady?.parked ?? 0);
+    const rows = Array.isArray(parkReady?.results)
+      ? parkReady.results.filter((r) => r && r.status === 'submit-ready') : [];
+    out.push('## Submit Ready — waiting on you');
+    out.push('');
+    if (staged > 0 || rows.length > 0) {
+      out.push(`- **${rows.length || staged} card(s) staged today** — each needs your final Submit click.`);
+      for (const r of rows.slice(0, 10)) {
+        out.push(`  - ${r.company} — ${String(r.role || '').slice(0, 60)}`);
+      }
+      out.push('');
+      out.push('- Drain the whole lane in one sitting: `npm run submit-ready:open`');
+      out.push('- List without opening tabs: `npm run submit-ready`');
+      out.push('');
+      out.push('> Confirmed submit rate is 0.0% until these are clicked. Staging is not applying.');
+    } else {
+      out.push('- Nothing staged today.');
+      out.push('- Check for carry-over from previous runs: `npm run submit-ready`');
+    }
+    out.push('');
+  }
+
   // 2b. Auto-Submit Scorecard — per-card outcome tally (today vs since inception).
   const autoSubmit = ctx.autoSubmit || summarizeLiveRuns([], date);
   for (const l of renderAutoSubmitScorecard(autoSubmit)) out.push(l);
@@ -539,6 +574,23 @@ export function buildReport(ctx) {
     }
   } else {
     out.push('- ⚠️ No referral-queue file found for today.');
+  }
+  out.push('');
+
+  // 3a. Card flags — Rahil's #OFF / #GOOD comment codes on Active Pipeline cards.
+  out.push('## Card flags — Rahil');
+  out.push('');
+  if (Array.isArray(cardFlags)) {
+    const off = cardFlags.filter((h) => h && h.tag === '#OFF');
+    const good = cardFlags.filter((h) => h && h.tag === '#GOOD');
+    out.push(`- Rahil flagged: ${cardFlags.length} card(s) (#OFF: ${off.length}, #GOOD: ${good.length})`);
+    for (const h of cardFlags.slice(0, 10)) {
+      const reason = h.tag === '#OFF' && h.reason ? `:${h.reason}` : '';
+      out.push(`  - ${h.tag}${reason} — ${line(h.company)} — ${String(h.role || '').slice(0, 60)}`);
+    }
+    if (cardFlags.length > 10) out.push(`  - …and ${cardFlags.length - 10} more`);
+  } else {
+    out.push('- No card-flags file found for today (0 flags, or the scan has not run yet).');
   }
   out.push('');
 
@@ -590,8 +642,23 @@ export function generate(opts = {}) {
   const submitQueue = load('submit-queue.json', path.join(dataDir, 'submit-queue.json'));
   const dispatch = load('dispatch-manifest.json', path.join(dataDir, 'dispatch-manifest.json'));
 
+  // K-0816-1: how many cards are parked awaiting Rahil's human Submit click.
+  // The lane backed up to 8 on 2026-08-16 while every upstream metric read
+  // green — the report has to surface the human bottleneck, not just machine
+  // health, or the queue silently becomes the whole problem again.
+  // OPTIONAL source — deliberately NOT registered in sourceStatus. A day with
+  // nothing staged writes no park-ready file, and that is normal, not degraded;
+  // routing it through load() made every quiet day render a DEGRADED banner.
+  const parkReady = readJsonSafe(path.join(dataDir, `park-ready-${date}.json`)).data;
+
   const refPath = newestReferralQueue(dataDir);
   const referral = load(refPath ? path.basename(refPath) : 'referral-queue-*.json', refPath);
+
+  // Card flags (#OFF / #GOOD) — OPTIONAL source, deliberately NOT registered in
+  // sourceStatus. A day with no flags file (scan wrote nothing or ran on a board
+  // with zero flagged comments) is normal, not a degraded report.
+  const cardFlagsPath = newestCardFlags(dataDir);
+  const cardFlags = cardFlagsPath ? readJsonSafe(cardFlagsPath).data : null;
 
   const autoSubmit = computeAutoSubmitScorecard(dataDir, date);
 
@@ -606,6 +673,8 @@ export function generate(opts = {}) {
     dispatch,
     sourceStatus,
     autoSubmit,
+    parkReady,
+    cardFlags,
   });
 
   if (!existsSync(outDir)) mkdirSync(outDir, { recursive: true });
