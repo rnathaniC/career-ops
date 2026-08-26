@@ -143,3 +143,6 @@ modes/_zztest/
 data/.preflight-libs/
 .agents/scratch/
 .fuse_hidden*
+config/referral-relationships.yml
+config/linkedin-connections.backup-*.json
+data/Connections.csv
